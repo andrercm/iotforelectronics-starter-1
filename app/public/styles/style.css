@@ -1,0 +1,602 @@
+/* style.css
+ * This file provides css styles.
+ */
+
+body, html {
+	background-color: #FFF;
+	width: 100%;
+	height: 100%;
+	margin: 0 auto;
+	font-family: "HelvBoldIBM","HelveticaNeue-Bold","Helvetica Neue Bold",
+	"HelveticaNeue","Helvetica Neue",Helvetica,Arial,Roboto,sans-serif;
+	/*"HelveticaNeue-Light", "Helvetica Neue Light",
+		"Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;*/
+	color: #0F0F0F;
+}
+body > div {
+  padding: 50px 0px;
+  box-sizing: border-box;
+}
+h1, h2, h3, h4{
+	padding: 0px;
+}
+hr{
+	border: 3px solid #D8E4E4;
+}
+button{
+  transition: right .4s,background-color .15s;
+  will-change: transform;
+}
+button, a{
+	outline: 0 !important;
+}
+.bluemix-bar, .container:first-child h2, .selection-box:first-child p,
+.content div.explain p, .content div.explain a, .washer-list,
+.install-info h3, .footer-links .link, .problem-machine p,
+.washer-details .washer-content .washer-text p, .washer-app-info p,
+.washer-details .washer-content .text-list li{
+	font-family:"HelvRomanIBM","HelveticaNeue-Roman","Helvetica Neue Roman",
+	"HelveticaNeue","Helvetica Neue",Helvetica, Arial, "Lucida Grande", sans-serif;
+}
+
+.selection-box:first-child h3, .selection-code h3{
+	color: #262626;
+	font-size:21px;
+	margin-bottom: 20px;
+}
+.selection-box:first-child p, .selection-code p{
+	font-size: 16px;
+
+}
+
+.main-section {
+  position: relative;
+  padding: 60px 0px;
+
+}
+.container{
+	text-align: center;
+}
+.content{
+  margin: auto;
+	float: none;
+}
+.gray-background{
+	background-color: #E7ECEF;
+}
+.bluemix-bar{
+	margin: 0px;
+	padding: 20px 40px;
+	background-color: #20343E;
+	color: #FFF;
+	font-size:21px;
+}
+.bluemix-bar-header{
+	margin: 0px;
+	padding: 20px 40px;
+	background-color: #152935;
+	color: #4A97F8;
+	font-size: 12px;
+	font-family:"HelvRomanIBM","HelveticaNeue-Roman","Helvetica Neue Roman",
+	"HelveticaNeue","Helvetica Neue",Helvetica, Arial, "Lucida Grande", sans-serif;
+}
+.bluemix-bar-header-text:before{
+	content: "";
+	background-image: url("../images/GoDashboard_Arrow.svg");
+	background-repeat: no-repeat;
+	background-size: 100%;
+	position: absolute;
+	height: 12px;
+	width: 13px;
+	left: 2px;
+	top: 2px;
+
+}
+.bluemix-bar-header-text{
+	position: relative;
+	padding-left: 30px;
+}
+.container:first-child h2{
+	font-size: 28px;
+	margin-bottom: 40px;
+}
+
+.explore-info{
+	margin-bottom: 3px;
+}
+.selection-box{
+	padding: 0px 30px;
+}
+.explore-info:first-child .selection-box{
+  float: right;
+  margin-right: 10%;
+}
+.explore-info:last-child .selection-box{
+  float: left;
+  margin-left: 10%;
+}
+.explore-info .selection-box{
+	position: relative;
+	border: 2px solid transparent;
+	width:302px;
+	height: 360px;
+	cursor: pointer;
+}
+.explore-info .selection-box.active, .explore-info .selection-box:hover{
+	border-color: #4A97F8;
+}
+.explore-info .selection-box img{
+	margin-top: 40px;
+	margin-bottom: 20px;
+	width: 89px;
+	height: 120px;
+}
+.explore-info .selection-box img.mobile-img{
+	width: 128px;
+	height: 128px;
+}
+.content:first-child p{
+	font-size: 16px;
+	margin-bottom: 20px;
+}
+.content div.explain p{
+	font-size: 21px;
+	text-align: left;
+	width: 90%;
+}
+.content div.explain a{
+	margin-top: 40px;
+	font-size: 21px;
+	color: #4581E0;
+	float: left;
+}
+.gray-background .content div>img{
+	margin-bottom: 70px;
+	width: 220px;
+	height: 140px;
+}
+.gray-background .content .image-box-2>img{
+	margin-top: 60px;
+	margin-bottom: 80px;
+}
+.gray-background .content div.explain img{
+	width: 32px;
+	height: 32px;
+	vertical-align: top;
+}
+.info-description{
+  width: 70%;
+  margin: auto;
+	text-align: left;
+}
+.gray-background .content div >.mobile-image,.content div >.mobile-image{
+	height: 120px;
+	width: 120px;
+	border: none;
+}
+.gray-background .arrow-section .content{
+	margin-bottom: 50px;
+}
+.hidden{
+	display: none;
+}
+
+/*Arrow*/
+.arrow-section:before, .arrow-section:after,
+.explore-info .selection-box.active:before, .explore-info .selection-box.active:after{
+	top: 100%;
+	left: 50%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+}
+.arrow-section:before,
+.explore-info .selection-box.active:before{
+  left: calc(50% - 25px);
+  border-left: 23px solid transparent;
+  border-right: 23px solid transparent;
+  border-top: 50px solid #4A97F8;
+}
+.arrow-section:after,
+.explore-info .selection-box.active:after{
+  top: calc(100% - 4px);
+  left: calc(50% - 25px);
+  border-left: 23px solid transparent;
+  border-right: 23px solid transparent;
+  border-top: 50px solid #FFF;
+}
+.main-section.gray-background{
+	padding-bottom: 40px;
+}
+.main-section.arrow-section:before{
+	border-top-color: #FFF;
+	left: 36%;
+	z-index: 1;
+}
+.main-section.gray-background.arrow-section:before{
+	border-top-color: #E7ECEF;
+}
+.main-section.gray-background.arrow-section:after{
+	display: none;
+}
+/*Washer*/
+.washer-list{
+	text-align: left;
+}
+.washer-list .selection-text strong{
+	font-size: 21px;
+}
+.washer-list .selection-text span{
+	margin-left: 15px;
+	font-size: 16px;
+}
+.list-group{
+	width: 100%;
+	box-shadow: none;
+  display: table;
+}
+.list-group .list-item{
+	display: inline-block;
+	float: left;
+	width: 20%;
+	height: 250px;
+	border: 2px solid transparent;
+	background-image: url("../images/Washer.svg");
+	background-repeat: no-repeat;
+	background-position: center;
+	background-color: #FFF;
+	position: relative;
+	outline: 0 !important;
+}
+.list-group .list-item span{
+  position: relative;
+  display: inline-block;
+  margin-top: 200px;
+  /*margin-left: -20px;*/
+  color: #0F0F0F;
+  text-align: center;
+}
+/*.list-group .list-item span:after {
+  content: "";
+  position: relative;
+  display: block;
+  background: #7CCD10;
+  left: calc(100% + 10px);
+  top: -17px;
+  height: 15px;
+  width: 15px;
+  border-radius: 50%;
+}*/
+.list-group .list-item.active,
+.list-group .list-item:hover{
+	border: 2px solid #4A97F8;
+	color: #0f0f0f;
+	outline:
+}
+.washer-list .no-washers-message{
+	font-size: 21px;
+}
+.add-button{
+  width: 64px;
+  height: 64px;
+  border-radius: 50px;
+  font-size: 30px;
+  background: #FFF;
+  border: 2px solid #000;
+  line-height: 0px;
+  outline: 0;
+}
+.add-button:hover{
+	background-color: #B4E0FF;
+}
+#addNewDeviceButton:disabled{
+	color: #AEAEAE;
+	border-color: #AEAEAE;
+	background-color: #FFF;
+}
+
+.max-washer-message span{
+  position: relative;
+  padding-left: 30px;
+}
+.max-washer-message span:before{
+	content: "";
+	background-image: url("../images/advise-icon.svg");
+	background-repeat: no-repeat;
+	background-size: 100%;
+	position: absolute;
+	height: 20px;
+	width: 20px;
+	left: 0px;
+	top: 1px;
+}
+/*Install Mobile*/
+.installation-section{
+	padding: 0px;
+}
+.installation-section .container:first-child h2{
+	margin-bottom: 60px;
+}
+
+.installation-section .container .instructions-section{
+	margin-top: -20px;
+}
+
+.install-info{
+	float: left;
+	margin: auto;
+	text-align: left;
+}
+.install-info h3{
+  font-size: 21px;
+}
+.gray-background .content div.install-info>img{
+	border: none;
+	height: 49px;
+	width: 49px;
+	display: inline-block;
+}
+.install-info a{
+	margin-left: 60px;
+	line-height: 7px;
+	font-size:16px;
+	color: #4A97F8;
+}
+.selection-code img{
+	width:128px;
+	height:128px;
+	margin-bottom: 60px;
+}
+.selection-code img.preview{
+	width: 180px;
+	height: 140px;
+	margin-bottom: 50px;
+}
+.alert-messages {
+	position: fixed;
+	width: 50%;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	margin: auto;
+	z-index: 7000;
+}
+/*Footer*/
+footer{
+  padding: 20px 0px;
+}
+footer.main-section{
+	z-index: 2;
+}
+.footer-links{
+	width: 60%;
+	float: right;
+	list-style: none;
+	text-align: left;
+}
+.footer-links p{
+	font-size: 16px;
+	font-family:  "HelvBoldIBM","HelveticaNeue-Bold","Helvetica Neue Bold",
+	"HelveticaNeue","Helvetica Neue",Helvetica,Arial,Roboto,sans-serif;
+}
+.footer-links .link{
+	font-size: 28px;
+	color: #0F0F0F;
+}
+.footer-links h4{
+	margin-bottom: 20px;
+}
+
+/* Washer Single Page*/
+.washer-content{
+	padding: 10px 0px;
+}
+.washer-text p, .washer-text h3{
+	margin-bottom: 20px;
+}
+.washer-title span {
+	position: relative;
+}
+.washer-details{
+	display: flex;
+  	width: 100%;
+  	margin: 10px 0px 40px;
+}
+.washer-details .washer-content{
+	position: relative;
+	padding-top: 15px;
+  flex: 1;
+}
+.washer-details .washer-content .washer-text{
+  display: inline-block;
+  margin-top: -25px;
+	text-align: left;
+	width: 100%;
+}
+.washer-details .washer-content .washer-text p span{
+	margin-left: 50px;
+}
+.washer-details .washer-content .washer-text p strong{
+	float: right;
+}
+.washer-details .washer-content .washer-machine{
+  width: calc(100% - 100px);
+}
+.washer-details .washer-content .text-list{
+	list-style: none;
+  padding: 0px;
+  width: 100%;
+}
+.washer-details .washer-content .text-list li{
+	display: inline-block;
+	width: 50%;
+	text-align: left;
+}
+.washer-details .washer-content .text-list li strong{
+	position: relative;
+	display: inline-block;
+  width: calc(100% - 65px);
+}
+
+.washer-app-info{
+  display: flex;
+	font-size:20px;
+}
+.washer-app-info .qr-code-message{
+	text-align: left;
+}
+.washer-app-info > div{
+  padding-left: 50px;
+}
+.washer-app-info img{
+	height: 100px;
+	width: 100px;
+}
+.washer-app-info > div > img {
+    margin-left: 10px;
+}
+.problem-machine{
+	text-align: left;
+	padding: 0px 25px;
+}
+.problem-machine-icons img{
+	width: 40px;
+	height: 40px;
+}
+.problem-machine .problem-machine-icons button{
+	border: none;
+	display: inline-block;
+  text-align: left;
+  background: none;
+  margin-left: 20px;
+	outline: 0 !important;
+}
+/*.problem-machine-icons{
+	margin: 20px;
+}*/
+/*.problem-machine-icons p {
+	margin-top: 20px;
+}*/
+
+.problem-machine-icons p:hover{
+	position: relative;
+	border: 2px solid transparent;
+	cursor: pointer;
+	border-color: #4A97F8;
+}
+
+.problem-machine-icons p{
+	opacity: 0.5;
+}
+
+.problem-machine-icons p.enabled, p.active{
+	opacity: 1;
+}
+
+.problem-machine-icons p button.active{
+	position: relative;
+	border-bottom: 5px solid transparent;
+	border-color: #aa75f5;
+	padding-bottom: 6px;
+}
+
+.problem-machine:first-child h3{
+	margin-bottom: 20px;
+}
+.problem-machine .problem-machine-buttons button{
+	display: block;
+	background: #FFF;
+	margin: 7px 0px;
+  padding: 8px;
+  width: 120px;
+  height: 40px;
+	border: 1px solid #000;
+	outline: 0 !important;
+}
+.problem-machine .problem-machine-buttons button:hover{
+	background-color: #B4E0FF;
+}
+
+.problem-machine .problem-machine-buttons button:disabled{
+	background: #FFF;
+	opacity: 0.5;
+}
+
+
+.problem-machine .problem-machine-icons p{
+	border: 2px solid transparent;
+	padding: 10px;
+
+}
+.problem-machine .problem-machine-icons p.enabled:hover{
+	border-color: #4A97F8;
+	opacity: 1;
+}
+@media only screen and (max-width: 768px){
+  .explore-info .selection-box:before,
+	.explore-info .selection-box:after{
+    display: none;
+  }
+	.content .explore-info .selection-box{
+		float: none;
+		margin-left: auto;
+		margin-right: auto;
+	}
+	.list-group .list-item{
+		width: 50%;
+	}
+	.washer-details .washer-content{
+    text-align: left;
+	}
+	.washer-app-info > div{
+  	padding-left: 0px;
+	}
+}
+/*IBM TOP LINK*/
+a.ibm-top-link {
+	position: fixed;
+  background: #ececec;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  font-size: 0;
+	right: 1.5rem;
+  bottom: 60px;
+  height: 40px;
+  width: 40px;
+  z-index: 10;
+  overflow: hidden;
+}
+a.ibm-top-link:before,
+a.ibm-top-link:after{
+  top: 9px;
+  left: 8px;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+a.ibm-top-link:before{
+  border-left: 11px solid transparent;
+  border-right: 11px solid transparent;
+  border-bottom: 12px solid #000;
+}
+a.ibm-top-link:after{
+	top: 12px;
+  border-left: 11px solid transparent;
+  border-right: 11px solid transparent;
+  border-bottom: 12px solid #ececec;
+}
+a.ibm-top-link:hover {
+	background: #000
+}
+a.ibm-top-link:hover:before {
+	border-bottom-color: #FFF;
+}
+a.ibm-top-link:hover:after {
+	border-bottom-color: #000;
+}

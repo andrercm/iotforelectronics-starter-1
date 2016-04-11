@@ -1,0 +1,3 @@
+# IoT for Electronics Nodejs Starter Application
+
+  Powered by IBM analytics capabilities, Internet of Things for Electronics generates data-driven insight that transforms businesses and customers' experiences across the entire value chain. With this transformation, organizations can capitalize on the increasing demand for intelligent connected devices and experiences brought about by the Internet of Things.

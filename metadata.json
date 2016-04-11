@@ -1,0 +1,46 @@
+{
+    "name": "IoT for Electronics Starter",
+    "services": [
+        {
+            "name": "ibm-iot-for-electronics",
+            "plan": "ibmiotforelectronicsplan"
+        },
+        {
+            "name": "iotf-service",
+            "plan": "iotf-service-free"
+        },
+        {
+            "name": "IoT Real-Time Insight",
+            "plan": "Lite"
+        },
+        {
+            "name": "AdvancedMobileAccess",
+            "plan": "Gold"
+        }
+    ],
+    "defaultMemory": 512,
+    "startCommand": "node app.js",
+    "description": "IoT for Electronics is an integrated end-to-end solution (made of multiple services and apps) that enables your apps to communicate with, control, analyze, and update connected electronics.",
+    "type": "web",
+    "version": "1.0",
+    "smallIcon": "iotforelectronics-24.png",
+    "icon": "iotforelectronics-32.png",
+    "largeIcon": "iotforelectronics-50.png",
+    "featuredIcon": "iotforelectronics-64.png",
+    "marqueeIcon": "260x100.png",
+    "headingIcon": "500x190.png",
+    "system_tags": ["ibm_created", "ibm_experimental"],
+    "source" : {
+  		"scmType" : "git",
+        "url" : "https://github.com/alexisrs/iotforelectronics-starter.git",
+  		"appPath" : "app"
+  	},
+    "docURL": "https://new-console.stage1.ng.bluemix.net/docs/starters/IotElectronics/iotelectronics_overview.html",
+    "runtime_id": "763dcb4a-8642-4676-ae17-ca5bd032ad9e",
+    "runtime_template_id": "nodejsHelloWorld",
+    "runtime": {
+        "name": "SDK for Node.js™",
+        "description": "Quickly get started with SDK for Node.js™."
+    },
+    "categories": ["boilerplate"]
+}

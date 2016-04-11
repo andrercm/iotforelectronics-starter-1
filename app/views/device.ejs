@@ -1,0 +1,212 @@
+<html>
+  <head>
+    <title>Single Device Simulator - Application powered by IoT for Electronics</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap-theme.min.css"/>
+    <link rel="stylesheet" href="/styles/style.css"/>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/javascripts/iotAppMonitorClient.js"></script>
+    <script src="/jquery/jquery.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <h4 class="bluemix-bar">Simulated washer experience</h4>
+    <div class="main-section">
+      <div class="container">
+        <h2 >Command and control your simulated washer</h2>
+        <section class="col-xs-12 col-md-10 content washer-content">
+          <div class="col-xs-12 col-sm-4 problem-machine">
+            <h3>Select a problem</h3>
+            <p>Watch your washer 's status change. When you try the consumer app, a status change message will automatically be sent to your iOS phone</p>
+            <div class="problem-machine-icons">
+              <p class="enabled"><img src="/images/Board_failure_en.svg"><button>Board failure</button></p>
+              <p class="enabled"><img src="/images/Vibration_en.svg"/><button>Strong vibration</button></p>
+              <p class="enabled"><img src="/images/waterdrop.svg"/><button>Water leak</button></p>
+            </div>
+            <div class="problem-machine-buttons">
+              <button id="resetMachines" disabled>Fix machine</button>
+              <button>Delete washer</button>
+            </div>
+          </div>
+          <div class="col-xs-12 col-sm-8 machine-info">
+            <div class="washer-details">
+              <div class="washer-content">
+                <img src="/images/Washer.svg" class="washer-machine"/>
+              </div>
+              <div class="washer-content">
+                <div class="washer-text">
+                  <h3 class="washer-title"><span><%= deviceId %></span></h3>
+                  <ul class="text-list"><li>Device ID </li><li><%= deviceId %></li></ul>
+                  <ul class="text-list"><li>Serial Number </li><li><%= serialNumber %></li></ul>
+                  <ul class="text-list"><li>Make, Model </li><li><%= make %> <%= model %></li></ul>
+                  <h3 class="washer-title">Washer Status</h3>
+                  <ul class="text-list"><li>Overall status  </li><li><strong><%= deviceStatus %></strong><img src="../images/Checkmark.svg"></li></ul>
+                  <ul class="text-list"><li>Vibration </li><li><strong><%= vibration %> mps</strong><img src="../images/Checkmark.svg"></li></ul>
+                  <ul class="text-list"><li>Water pressure </li><li><strong><%= waterPressure %> psi</strong><img src="../images/Checkmark.svg"></li></ul>
+                </div>
+              </div>
+            </div>
+            <div class="washer-app-info">
+              <div>
+                <img src="/qr/<%= deviceId %>"/>
+              </div>
+              <div>
+                <p class="qr-code-message">When you try the consumer app, you can scan the QR code to see this washer's status and other events on your phone.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+    <script type="text/javascript">
+      $(document).ready(function(){
+
+        // Send Failure Event
+        $('.problem-machine-icons p').click(function(e) {
+          e.preventDefault();
+          if($('#resetMachines').prop('disabled')) {
+            $('#resetMachines').prop('disabled', false);
+            $('.problem-machine-icons button').removeClass('active');
+            $('.problem-machine-icons p').removeClass('enabled');
+            $('.problem-machine-icons p').removeClass('active');
+            $(this).eq(0).addClass('active');
+            $(this).children('button').eq(0).addClass('active');
+
+            var failureType = $(this).find('button').text();
+            var obj = {};
+            var index = 0;
+            var text = '';
+            obj['status'] = 'Failure';
+            obj['failureType'] = failureType;
+            switch(failureType){
+              case 'Strong vibration':
+              index = 1;
+              text = "150";
+              obj['vibration'] = text;
+              break;
+              case 'Water leak':
+              index = 2;
+              text = "70";
+              obj['waterPressure'] = text;
+              break;
+            }
+            var data = JSON.parse(JSON.stringify(obj));
+            $.ajax({
+              url: '/washingMachine/<%= deviceId %>/setAttributes',
+              type: 'PUT',
+              data: data,
+              success: function() {
+                $('.washer-content .washer-text p strong').eq(0).text('Failure');
+                if(index > 0){
+                  $('.washer-content .washer-text p strong').eq(index).text(text);
+                }
+              }
+            });
+          }
+        });
+
+        // Reset Machine
+        $('.problem-machine-buttons #resetMachines').click(function(e) {
+          e.preventDefault();
+          $('#resetMachines').prop('disabled', true);
+          $('.problem-machine-icons button').removeClass('active');
+          $('.problem-machine-icons p').addClass('enabled');
+
+          $.ajax({
+            url: '/washingMachine/<%= deviceId %>/setAttributes',
+            type: 'PUT',
+            data: {
+              status: "Ready",
+              failureType: "",
+              vibration: "80",
+              waterPressure: "30"
+
+            }
+          });
+        });
+
+        // Delete Washer
+        $('.problem-machine-buttons button').eq(1).on('click', function(e){
+          e.preventDefault();
+          $('#confirmDelete').modal('show');
+        });
+
+        // Delete Washer - Modal
+        $("#confirmDelete").on('show.bs.modal', function() {
+          $("#btnConfirm").on("click", function(e) {
+            
+            $.ajax({
+              url: '/washingMachine/<%= deviceId %>',
+              type: 'DELETE',
+              success: function(){
+                window.opener.removeDevice('<%= deviceId %>');
+                window.close();
+              }
+            });
+
+            $("#confirmDelete").modal('hide');
+          });
+          $("#btnCancel").on("click", function(e) {
+            $("#confirmDelete").modal('hide');
+          });
+        });
+
+        $("#confirmDelete").on('hide.bs.modal', function() {
+          $("#btnConfirm").off("click");
+          $("#btnCancel").off("click");
+        });
+
+      });
+
+      // Status Report
+      iotAppMonitorClient.mqtt = function(id, message) {
+        var length = 0;
+        var device = JSON.parse(message).d;
+        for(var k in device) if(device.hasOwnProperty(k)) length++;
+
+        if (id === "<%= deviceId %>" && length > 1) {
+          if(device.status && device.status == 'Failure'){
+            $('.washer-content .washer-text ul li strong').eq(0).text(device.status);
+            $('.washer-content .washer-text ul li img').eq(0).attr('src', '/images/advise-icon.svg');
+            if(device.failureType && device.failureType == 'Board failure'){
+              $('.washer-content .washer-text ul li strong').eq(1).text('No data');
+              $('.washer-content .washer-text ul li strong').eq(2).text('No data');
+              $('.washer-content .washer-text ul li img').eq(1).attr('src', '/images/advise-icon.svg');
+              $('.washer-content .washer-text ul li img').eq(2).attr('src', '/images/advise-icon.svg');
+            } else if(device.failureType && device.failureType == 'Strong vibration'){
+              $('.washer-content .washer-text ul li strong').eq(1).text(device.vibration + ' mps');
+              $('.washer-content .washer-text ul li img').eq(1).attr('src', '/images/advise-icon.svg');
+            } else if(device.failureType && device.failureType == 'Water leak'){
+              $('.washer-content .washer-text ul li strong').eq(2).text(device.waterPressure + ' psi');
+              $('.washer-content .washer-text ul li img').eq(2).attr('src', '/images/advise-icon.svg');
+            }
+          } else {
+            $('.washer-content .washer-text ul li strong').eq(0).text(device.status);
+            $('.washer-content .washer-text ul li strong').eq(1).text(device.vibration + ' mps');
+            $('.washer-content .washer-text ul li strong').eq(2).text(device.waterPressure + ' psi');
+            $('.washer-content .washer-text ul li img').attr('src', '/images/Checkmark.svg');
+          }          
+        }
+      };
+    </script>
+
+    <div id="confirmDelete" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <!-- dialog body -->
+          <div class="modal-body">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            This action cannot be undone. Are you sure?
+          </div>
+          <!-- dialog buttons -->
+          <div class="modal-footer">
+            <button id="btnCancel" type="button" class="btn btn-default">Cancel</button>
+            <button id="btnConfirm" type="button" class="btn btn-danger">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>
