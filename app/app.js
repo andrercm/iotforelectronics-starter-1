@@ -98,8 +98,10 @@ app.use(function (req, res, next) {
 // SETUP CLOUDANT
 //Key whichispermandencellansp
 //Password a8ba75e7534498a85a9f0c11adbe11e09ae03177 //
-var id = 'ca15409e-9847-4b9e-9d8c-ec26c4cf01ae-bluemix';
-var pword = 'f1ad812df21ef96a09dbfbaff6de261e3085b0a5da0518bede7ab69a1caff3f7';
+var id = 'ee7cb196-a1aa-4871-97e9-3e46813d9a4f-bluemix';
+var pword = 'f99a631bb23d340e741a3dd0ccd391dd1536ee1ca076f15812c4f005859b2a39';
+var host  = 'ee7cb196-a1aa-4871-97e9-3e46813d9a4f-bluemix.cloudant.com';
+
 var host  = 'ca15409e-9847-4b9e-9d8c-ec26c4cf01ae-bluemix.cloudant.com';
 var CLOUDANT_URL='https://' + id + ':' + pword + '@' + host;
 var dbname   = 'iot_for_electronics_registration';
