@@ -49,7 +49,7 @@
         },
         {
           "name": "waterPressure",
-          "defaultValue": "30"
+          "defaultValue": "70"
         },
         {
           "name": "serialNumber"
