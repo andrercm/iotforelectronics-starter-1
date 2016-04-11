@@ -19,7 +19,7 @@ function simulationClient(config) {
 	EventEmitter.call(this);
 	config = (config) ? config :{};
 	this.simulationConfig = {
-			"sessionid": (config.sessionid) ? config.sessionid : appEnv.url + process.cwd(),
+			"sessionID": (config.sessionID) ? config.sessionID : appEnv.app.application_id,
 					"devicesSchemas": (config.devicesSchemas) ? config.devicesSchemas : [],
 							"devices": (config.devices) ? config.devices : []
 	};
