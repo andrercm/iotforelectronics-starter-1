@@ -13,7 +13,6 @@ router.get('/', function(req, res) {
 	var platformDashboard = 'https://' + iotf_url + '/dashboard';
 
 	res.render('index', {
-		title: 'Single Device Simulator',
 		platformDashboard: platformDashboard
 	});
 });
