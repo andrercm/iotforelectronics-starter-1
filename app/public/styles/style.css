@@ -153,7 +153,8 @@ button, a{
 .gray-background .content div>img{
 	margin-bottom: 70px;
 	width: 220px;
-	height: 140px;
+	height: 138px;
+	margin-top: 6px;
 }
 .gray-background .content .image-box-2>img{
 	margin-top: 60px;
@@ -366,7 +367,7 @@ button, a{
 }
 /*Footer*/
 footer{
-  padding: 20px 0px;
+	padding: 20px 0px;
 }
 footer.main-section{
 	z-index: 2;
@@ -408,11 +409,11 @@ footer.main-section{
 .washer-details .washer-content{
 	position: relative;
 	padding-top: 15px;
-  flex: 1;
+	flex: 1;
 }
 .washer-details .washer-content .washer-text{
-  display: inline-block;
-  margin-top: -25px;
+	display: inline-block;
+	margin-top: -25px;
 	text-align: left;
 	width: 100%;
 }
@@ -427,8 +428,8 @@ footer.main-section{
 }
 .washer-details .washer-content .text-list{
 	list-style: none;
-  padding: 0px;
-  width: 100%;
+	padding: 0px;
+	width: 100%;
 }
 .washer-details .washer-content .text-list li{
 	display: inline-block;
@@ -438,18 +439,20 @@ footer.main-section{
 .washer-details .washer-content .text-list li strong{
 	position: relative;
 	display: inline-block;
-  width: calc(100% - 65px);
+	width: calc(100% - 65px);
 }
 
 .washer-app-info{
-  display: flex;
-	font-size:20px;
+	display: flex;
+	font-size: 20px;
+	margin-top: 50px;
 }
 .washer-app-info .qr-code-message{
 	text-align: left;
+	margin: 6px 0px;
 }
 .washer-app-info > div{
-  padding-left: 50px;
+	padding-left: 50px;
 }
 .washer-app-info img{
 	height: 100px;
