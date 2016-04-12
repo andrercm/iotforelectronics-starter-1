@@ -12,7 +12,7 @@ var cfenv = require('cfenv');
 var log4js = require('log4js');
 
 var app = express();
-//set the app object to export so it can be required 
+//set the app object to export so it can be required
 module.exports = app;
 
 var path            = require('path'),
@@ -37,7 +37,7 @@ var jsonParser = bodyParser.json();
 
 dumpError = function(msg, err) {
 	if (typeof err === 'object') {
-		msg = (msg) ? msg : "";		
+		msg = (msg) ? msg : "";
 		var message = "***********ERROR: " + msg + " *************\n";
 		if (err.message) {
 			message += '\nMessage: ' + err.message;
@@ -45,8 +45,8 @@ dumpError = function(msg, err) {
 		if (err.stack) {
 			message += '\nStacktrace:\n';
 			message += '====================\n';
-			message += err.stack;				
-			message += '====================\n';			
+			message += err.stack;
+			message += '====================\n';
 		}
 		console.error(message);
 	} else {
@@ -75,20 +75,24 @@ app.use('/', device);
 app.use('/', simulator);
 app.use('/api', apiRouter);
 
-//Add a handler to inspect the req.secure flag (see 
-//http://expressjs.com/api#req.secure). This allows us 
+//Add a handler to inspect the req.secure flag (see
+//http://expressjs.com/api#req.secure). This allows us
 //to know whether the request was via http or https.
-app.use(function (req, res, next) {	
+app.use(function (req, res, next) {
 	res.set({
 		'Cache-Control': 'no-store',
 		'Pragma': 'no-cache'
 	});
 	//force https
-	if(!appEnv.isLocal && req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] == 'http')					
+	if(!appEnv.isLocal && req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] == 'http')
 		res.redirect('https://' + req.headers.host + req.url);
 	else
-		next();		
+		next();
 });
+
+if(!VCAP_SERVICES || !VCAP_SERVICES["iotf-service"])
+	throw "Cannot get IoT-Foundation credentials"
+var iotfCredentials = VCAP_SERVICES["iotf-service"][0]["credentials"];
 
 /***************************************************************/
 //STEPHANIES'S CODE *************
@@ -101,8 +105,6 @@ app.use(function (req, res, next) {
 var id = 'ee7cb196-a1aa-4871-97e9-3e46813d9a4f-bluemix';
 var pword = 'f99a631bb23d340e741a3dd0ccd391dd1536ee1ca076f15812c4f005859b2a39';
 var host  = 'ee7cb196-a1aa-4871-97e9-3e46813d9a4f-bluemix.cloudant.com';
-
-var host  = 'ca15409e-9847-4b9e-9d8c-ec26c4cf01ae-bluemix.cloudant.com';
 var CLOUDANT_URL='https://' + id + ':' + pword + '@' + host;
 var dbname   = 'iot_for_electronics_registration';
 
@@ -151,25 +153,25 @@ app.get('/users/internal/:userID', function(req, res)
 {
 	console.log('GET /users  ==> Begin');
     console.log('GET /users  ==> Incoming userID = '+ req.params.userID);
-    
+
     //find a user doc by using the userID index, given query string with userID
-    db.find({selector:{userID:req.params.userID}}, function(er, result) 
+    db.find({selector:{userID:req.params.userID}}, function(er, result)
     {
-    	if (er) 
+    	if (er)
     	{
     		res.sendStatus(er.statusCode);
     		throw er;
     	}
-    	
+
     	if (result.docs.length==0)
     	{
     		res.sendStatus(404)
     	}
     	else
     		res.sendStatus(200);
-    	 
+
     	console.log('Found %d documents with userID', result.docs.length);
-    	for (var i = 0; i < result.docs.length; i++) 
+    	for (var i = 0; i < result.docs.length; i++)
     	{
     		console.log('  Doc id: %s', result.docs[i]._id);
     	}
@@ -199,14 +201,14 @@ app.post("/users/internal", function (req, res)
 	console.log("POST /users  ==> Begin");
 
    var doc = {userID: req.body.userID, name:req.body.name, telephone:req.body.telephone, address:req.body.address};
-   db.find({selector:{userID:req.body.userID}}, function(er, result) 
+   db.find({selector:{userID:req.body.userID}}, function(er, result)
    {
-	   if (er) 
+	   if (er)
 	   {
 		   res.sendStatus(er.statusCode);
 		   return;
 	   }
-	   //if user already exists, send error code	
+	   //if user already exists, send error code
 	   if (result.docs.length!=0)
 	   {
 			console.log("User already exists.");
@@ -214,7 +216,7 @@ app.post("/users/internal", function (req, res)
 	   }
 	   else
 	   {
-		   db.insert(doc, function(err, data) 
+		   db.insert(doc, function(err, data)
 		   {
 			   if(err)
 			   {
@@ -230,9 +232,9 @@ app.post("/users/internal", function (req, res)
 			   }
 		   });
 	   }
-	   
+
    });
-  
+
 
 });
 
@@ -244,11 +246,11 @@ app.post("/users/internal", function (req, res)
 /*             address, and telephone			               */
 /***************************************************************/
 // passport.authenticate('mca-backend-strategy', {session: false }),
-app.post("/users", passport.authenticate('mca-backend-strategy', {session: false }),  function (req, res) 
+app.post("/users", passport.authenticate('mca-backend-strategy', {session: false }),  function (req, res)
 {
 	var formData = req.body;
 	formData.userID = req.user.id;
-	
+
 	request.post({url: 'https://' + application.application_uris[0] + '/users/internal', formData: formData}, function optionalCallback(err, httpResponse, body) {
 	if (err) {
     return console.error('upload failed:', err);
@@ -270,41 +272,46 @@ app.post('/appliances/internal', function (req, res)
    console.log("POST /applianecs  ==> Inserting device document in Cloudant");
    console.log(req.body.userID);
    console.log(req.body.applianceID);
+	 //console.log("API KEY: " +  services.iotf-service.apiKey)
+	// console.log("API TOKEN: " + services.iotf-service.apiToken)
    var doc = {userID: req.body.userID, applianceID: req.body.applianceID, serialNumber: req.body.serialNumber, manufacturer: req.body.manufacturer, name: req.body.name, dateOfPurchase: req.body.dateOfPurchase, model: req.body.model, registrationCreatedOnPlatform: false};
-   
+
 	var https = require('https');
 
-	// //API keys from IoTF
-	// var auth_key = "a-1jw61a-yxv230waqu";
-	// var auth_token = "*kr*4(mkdC3e7BQJQC";
-
-	// var options = 
-	// {
-	// 		host: '1jw61a.internetofthings.ibmcloud.com',
-	// 		path: '/api/v0002/device/types/washingMachine/devices/'+ req.body.applianceID,
-	// 		auth: auth_key + ':' + auth_token
-	// };
-
     //API keys from IoTF
-    var auth_key = services.iotf-service.apiKey;
-    var auth_token = servicse.iotf-service.apiToken;
-
-    var options =
+		var auth_key = iotfCredentials["apiKey"];
+ 		var auth_token = iotfCredentials["apiToken"];
+		console.log("KEY AND TOKEN: " + auth_key + "  " + auth_token)
+    //var auth_key = services.iotf-service.apiKey;
+    //var auth_token = services.iotf-service.apiToken;
+		var httpHost = iotfCredentials["http_host"]
+		console.log("HTTP HOST: " + httpHost)
+		var options =
     {
-            host: services.iotf-service.base_uri,
-            path: '/device/types/washingMachine/devices/'+ req.body.applianceID,
+            host: httpHost,
+            path: '/api/v0002/device/types/washingMachine/devices/'+ req.body.applianceID,
             auth: auth_key + ':' + auth_token
-    };	
+    };
 
+  console.log("LINE BEFORE HTTPS.GET")
 	https.get(options, function(platformRes)
 	{
+		console.log("INSIDE OF THE HTTPS.GET BLOCK..." + options)
 		var response = '';
-		platformRes.on('data', function(data) 
+		platformRes.on('error', function(platformErr)
+		{
+			console.log("*******IN PLATFORM ERR*********")
+			console.log(platformErr.message)
+			console.log("*******IN PLATFORM ERR*********")
+		});
+		platformRes.on('data', function(data)
 		{
 			response += data;
+					console.log("INSIDE OF THE platformRES.ON BLOCK..." + response)
 		});
 		platformRes.on('end', function()
 		{
+								console.log("INSIDE OF THE platformRES.ON END BLOCK..." + response)
 			if (response == '')
 			{
 				console.log(req.body.applianceID + " does not exist.");
@@ -313,7 +320,7 @@ app.post('/appliances/internal', function (req, res)
 			}
 			else
 			{
-				   db.insert(doc, function(err, data) 
+				   db.insert(doc, function(err, data)
 				   {
 					   if (err)
 					   {
@@ -339,6 +346,27 @@ app.post('/appliances/internal', function (req, res)
 	});
 });
 
+//TEMPORARY EXTERNAL ROUTE FOR POST TO /appliances
+//FOR STEPHANIE TO TEST
+app.post('/stephAppliances', function (req, res)
+{
+	var bodyIn = req.body;
+
+	request.post({url: 'https://' + application.application_uris[0] + '/appliances/internal',
+								body: JSON.stringify(bodyIn),
+								headers: { "content-type": "application/json"}
+								},
+								function optionalCallback(err, httpResponse, body) {
+
+	 if (!err && httpResponse.statusCode == 201) {
+						 res.sendStatus(httpResponse.statusCode);
+						 console.log("SUCCESS: " + bodyIn);
+			 } else {
+				 console.log("Error in POST /appliances" + httpResponse.statusCode);
+				 res.sendStatus(httpResponse.statusCode);
+			 }
+	});
+});
 
 /***************************************************************/
 /* Route to add 1 appliance document to registration Cloudant.(3) */
@@ -346,33 +374,24 @@ app.post('/appliances/internal', function (req, res)
 /* Input: JSON structure that contains the userID, applianceID,*/
 /*             serial number, manufacturer, and model          */
 /***************************************************************/
-//TODO: check if we already have registered this appliance?
-// app.post('/appliances', passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)  
-// {
-// 	console.log('JSON log: ', req.body);
-// 	var formData = req.body;
-// 	formData.userID = req.user.id;
-	
-// 	request.post({url: 'https://' + application.application_uris[0] + '/appliances/internal', formData: formData}, function optionalCallback(err, httpResponse, body) {
-// 	if (err) {
-//     return console.error('upload failed:', err);
-// 	}
-// 	});
-// });
-app.post('/appliances', passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)  
+app.post('/appliances', passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)
 {
    var bodyIn = req.body;
    bodyIn.userID = req.user.id;
-   
-   request.post({url: 'https://' + application.application_uris[0] + '/appliances/internal', 
-                 body: JSON.stringify(bodyIn), 
+
+   request.post({url: 'https://' + application.application_uris[0] + '/appliances/internal',
+                 body: JSON.stringify(bodyIn),
                  headers: { "content-type": "application/json"}
                  },
                  function optionalCallback(err, httpResponse, body) {
 
-		if (!error && response.statusCode == 200) {
-              console.log(bodyIn)
-        }
+		if (!err && httpResponse.statusCode == 201) {
+							res.sendStatus(httpResponse.statusCode);
+              console.log("SUCCESS: " + bodyIn);
+        } else {
+					console.log("Error in POST /appliances" + httpResponse.statusCode);
+					res.sendStatus(httpResponse.statusCode);
+				}
    });
 });
 
@@ -389,18 +408,18 @@ app.get("/index", function(req, res)
 	     }
 	     console.log('Index creation result: %s', response.result);
 	   });
-	   
+
 	/*//create an index to find appliance doc for given userID and applianceID
 	var index = {name:'applianceByUser', type:'json', index:{fields:['userID', 'applianceID']}};
-	db.index(index, function(er, response) 
+	db.index(index, function(er, response)
 	{
-		if (er) 
+		if (er)
 		{
 			console.log(er);
 			//throw er;
-		}     
+		}
 		console.log('Index creation result: %s', response.result);
-	})*/		
+	})*/
 });
 
 
@@ -410,11 +429,11 @@ app.get("/index", function(req, res)
 /*   Internal API											   */
 /* Takes a userID in the url params                            */
 /***************************************************************/
-app.get("/user/internal/:userID", function(req, res)
+app.get('/user/internal/:userID', function(req, res)
 {
    console.log('GET /user  ==> Begin');
     console.log('GET /users  ==> Incoming userID = '+ req.params.userID);
-	
+
    var responseDoc = {docs:[]};
 
    db.find({selector:{userID:req.params.userID}}, function(err, result)
@@ -425,7 +444,7 @@ app.get("/user/internal/:userID", function(req, res)
        console.log(err);
        return;
      }
-    
+
      if (result.docs.length==0)
      {
         console.log("GET /user ==> user:" + req.params.userID + " not in database");
@@ -460,7 +479,16 @@ app.get("/user/internal/:userID", function(req, res)
 /***************************************************************/
 app.get('/user/:userID', passport.authenticate('mca-backend-strategy', {session: false }), function(req, res)
 {
-	res.redirect('user/internal/' + req.user.id);
+	res.redirect('user/internal/' + req.user.id, function (reqest, response){
+		if (response.statusCode == 201) {
+							res.sendStatus(httpResponse.statusCode);
+							console.log("SUCCESS: " + bodyIn);
+				} else {
+					console.log("Error in POST /appliances" + response.statusCode);
+					res.sendStatus(httpResponse.statusCode);
+				}
+	});
+
 });
 
 
@@ -469,16 +497,16 @@ app.get('/user/:userID', passport.authenticate('mca-backend-strategy', {session:
 /*   Internal API            								   */
 /* Input: Query string with userID and optional applianceID    */
 /***************************************************************/
-app.get('appliances/internal/:userID', function (req, res)
+app.get('/appliances/internal/:userID', function (req, res)
 {
 	// create empty array responseDoc, to hold just the appliance docs (will filter out user docs) to return
 	var responseDoc = {docs:[]};
 	//find a device doc given query string with userID and optional applianceID
 	//first query by user, then by applianceID
-	
-	db.find({selector:{userID:req.params.userID}}, function(err, result) 
+  console.log(req.params.userID);
+	db.find({selector:{userID:req.params.userID}}, function(err, result)
     {
-    	if (err) 
+    	if (err)
     	{
 			console.log("app.get ==> Error condition");
 			console.log(err);
@@ -490,8 +518,8 @@ app.get('appliances/internal/:userID', function (req, res)
        console.log("app.get /appliance ==> Cannot find document");
        res.sendStatus(404);
        return;
-     }	 
-    	 
+     }
+
     	var i=0;
     while (i < result.docs.length)
     {
@@ -507,18 +535,30 @@ app.get('appliances/internal/:userID', function (req, res)
        }
        i++;
     }
-	
+
 	//we found something and didn't hit an error, send 200 and the result
     res.status(200).json(responseDoc);
 	});
 
 });
+
 /***************************************************************/
 /* Route to list all appliance documents for given user   (4)  */
 /*       													   */
 /* Input: Query string with userID and optional applianceID    */
 /***************************************************************/
-app.get("/appliances/:userID", passport.authenticate('mca-backend-strategy', {session: false }), function (req, res) 
+app.get('/appliancesSteph/:userID', function (req, res)
+{
+	res.redirect('/appliances/internal/' + req.params.userID);
+
+});
+
+/***************************************************************/
+/* Route to list all appliance documents for given user   (4)  */
+/*       													   */
+/* Input: Query string with userID and optional applianceID    */
+/***************************************************************/
+app.get('/appliances/:userID', passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)
 {
 	res.redirect('/appliances/internal/' + req.user.id);
 });
@@ -536,10 +576,10 @@ app.get('/appliances/internal2/:userID/:applianceID', function (req, res)
 	var responseDoc = {docs:[]};
 	//find a device doc given query string with userID and optional applianceID
 	//first query by user, then by applianceID
-	
-	db.find({selector:{userID:req.params.userID, applianceID:req.params.applianceID}}, function(err, result) 
+
+	db.find({selector:{userID:req.params.userID, applianceID:req.params.applianceID}}, function(err, result)
     {
-    	if (err) 
+    	if (err)
     	{
 			console.log("app.get ==> Error condition");
 			console.log(err);
@@ -551,8 +591,8 @@ app.get('/appliances/internal2/:userID/:applianceID', function (req, res)
        console.log("app.get /appliance ==> Cannot find document");
        res.sendStatus(404);
        return;
-     }	 
-    	 
+     }
+
          responseDoc.docs.push({userID: result.docs[0].userID,
                                        applianceID: result.docs[0].applianceID,
                                        serialNumber: result.docs[0].serialNumber,
@@ -560,8 +600,8 @@ app.get('/appliances/internal2/:userID/:applianceID', function (req, res)
 									   name: result.docs[0].name,
 									   dateOfPurchase: result.docs[0].dateOfPurchase,
                                        model: result.docs[0].model});
-									   
-									   
+
+
     //we found something and didn't hit an error, send 200 and the result
     res.status(200).json(responseDoc);
 
@@ -575,7 +615,7 @@ app.get('/appliances/internal2/:userID/:applianceID', function (req, res)
 /*       													   				*/
 /* Input: Query string with userID and optional applianceID    				*/
 /****************************************************************************/
-app.get("/appliances/:userID/:applianceID", passport.authenticate('mca-backend-strategy', {session: false }), function (req, res) 
+app.get("/appliances/:userID/:applianceID", passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)
 {
 	res.redirect('/appliances/internal2/' + req.user.id + '/' + req.params.applianceID);
 });
@@ -585,7 +625,7 @@ app.get("/appliances/:userID/:applianceID", passport.authenticate('mca-backend-s
 /***************************************************************/
 /* Route to delete appliance records                           */
 /***************************************************************/
-app.del('/appliances/internal/:userID/:applianceID', function(req, res) 
+app.del('/appliances/internal/:userID/:applianceID', function(req, res)
 {
 	//first check that userID AND applianceID were given
    if (req.params.userID == null || req.params.applianceID == null)
@@ -611,7 +651,7 @@ app.del('/appliances/internal/:userID/:applianceID', function(req, res)
        res.status(404);
        return;
      }
-	 
+
 	if (result.docs[0].registrationCreatedOnPlatform == true)
     {
        /*******************************************************************/
@@ -763,9 +803,7 @@ app.delete("/user/:userID", passport.authenticate('mca-backend-strategy', {sessi
 });
 
 //get IoT-Foundation credentials
-if(!VCAP_SERVICES || !VCAP_SERVICES["iotf-service"])
-	throw "Cannot get IoT-Foundation credentials"
-var iotfCredentials = VCAP_SERVICES["iotf-service"][0]["credentials"];
+
 /********************************************************************** **/
 /*End of Registration Integrator Code                                               */
 /********************************************************************** **/
@@ -902,15 +940,15 @@ var iotfCredentials = VCAP_SERVICES["iotf-service"][0]["credentials"];
 /********************************************************************** **/
 
 
-//global IoT-Foundation connectors 
-washingMachineIoTFClient = require('./mqtt/washingMachineIoTFClient'); 
+//global IoT-Foundation connectors
+washingMachineIoTFClient = require('./mqtt/washingMachineIoTFClient');
 washingMachineIoTFClient.connectToBroker(iotfCredentials);
-	
+
 //var app = express();
 
 //Enable reverse proxy support in Express. This causes the
 //the "X-Forwarded-Proto" header field to be trusted so its
-//value can be used to determine the protocol. See 
+//value can be used to determine the protocol. See
 //http://expressjs.com/api#app-settings for more details.
 app.enable('trust proxy');
 
@@ -957,16 +995,16 @@ app.use(function(err, req, res, next) {
 var port = normalizePort(appEnv.port || '3000');
 app.set('port', port);
 
-//require user extensions  
+//require user extensions
 try {
-		require("./_app.js");			
+		require("./_app.js");
 	} catch (e) {
 		console.log("Failed to load extention file _app.js: " + e.message);
 	};
 
 //Start server
-server.listen(app.get('port'), function() {	
-	console.log('Server listening on port ' + server.address().port);	
+server.listen(app.get('port'), function() {
+	console.log('Server listening on port ' + server.address().port);
 });
 server.on('error', onError);
 server.on('listening', onListening);
@@ -1032,14 +1070,14 @@ function onListening() {
 		? 'pipe ' + addr
 				: 'port ' + addr.port;
 	debug('Listening on ' + bind);
-	
+
 	var devicesManager = require("./devicesManager");
 //	web socket for index page
 	var wss = new WebSocketServer({ server: app.server, path :  '/serverStatus'});
 	wss.on('connection', function(ws) {
 		var id = setInterval(function() {
 			var stats = devicesManager.getStats();
-			_.extend(stats, process.memoryUsage());			
+			_.extend(stats, process.memoryUsage());
 			ws.send(JSON.stringify(stats), function() { /* ignore errors */ });
 		}, 5000);
 		console.log('started server status client interval');
