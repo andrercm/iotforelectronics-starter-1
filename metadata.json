@@ -35,7 +35,7 @@
         "url" : "https://github.com/alexisrs/iotforelectronics-starter.git",
   		"appPath" : "app"
   	},
-    "docURL": "https://new-console.stage1.ng.bluemix.net/docs/starters/IotElectronics/iotelectronics_overview.html",
+    "docURL": "https://new-console.ng.bluemix.net/docs/starters/IotElectronics/iotelectronics_overview.html",
     "runtime_id": "763dcb4a-8642-4676-ae17-ca5bd032ad9e",
     "runtime_template_id": "nodejsHelloWorld",
     "runtime": {
