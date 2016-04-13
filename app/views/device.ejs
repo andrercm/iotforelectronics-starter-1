@@ -120,7 +120,7 @@
               status: "Ready",
               failureType: "",
               vibration: "80",
-              waterPressure: "30"
+              waterPressure: "70"
 
             }
           });
@@ -182,7 +182,11 @@
               $('.washer-content .washer-text ul li img').eq(2).attr('src', '/images/advise-icon.svg');
             }
           } else {
-            $('.washer-content .washer-text ul li strong').eq(0).text(device.status);
+            if(device.status === 'Working'){
+              $('.washer-content .washer-text ul li strong').eq(0).text(device.currentCycle);
+            } else {
+              $('.washer-content .washer-text ul li strong').eq(0).text(device.status);
+            }
             $('.washer-content .washer-text ul li strong').eq(1).text(device.vibration + ' mps');
             $('.washer-content .washer-text ul li strong').eq(2).text(device.waterPressure + ' psi');
             $('.washer-content .washer-text ul li img').attr('src', '/images/Checkmark.svg');
