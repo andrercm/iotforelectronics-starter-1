@@ -114,7 +114,7 @@ var Cloudant   = require('cloudant');
 
 var services = JSON.parse(process.env.VCAP_SERVICES)
 var application = JSON.parse(process.env.VCAP_APPLICATION)
-//var cloudantCreds = services.cloudantNoSQLDB[0].credentials;
+var currentOrgID = iotfCredentials["org"];
 
 var cloudant = Cloudant(CLOUDANT_URL, function(err,cloudant){
 	db = cloudant.db.use(dbname);
@@ -145,30 +145,32 @@ app.use(passport.initialize());
 
 /***************************************************************/
 /* Route to get 1 user document from Cloudant (1)              */
-/*   Internal API       									   */
-/* Input: url params that contains the userID 			       */
+/*   Internal API       									                     */
+/* Input: url params that contains the userID 			           */
 /* Returns: 200 for found user, 404 for user not found         */
+/* Usecase: Does this user exist? Yes/No											 */
+/* * to return the user doc in the body of the response,       */
+/* * use app.get('/user/'...) API below                        */
 /***************************************************************/
 app.get('/users/internal/:userID', function(req, res)
 {
 	console.log('GET /users  ==> Begin');
-    console.log('GET /users  ==> Incoming userID = '+ req.params.userID);
+  console.log('GET /users  ==> Incoming userID = '+ req.params.userID);
 
-    //find a user doc by using the userID index, given query string with userID
-    db.find({selector:{userID:req.params.userID}}, function(er, result)
-    {
-    	if (er)
-    	{
-    		res.sendStatus(er.statusCode);
-    		throw er;
-    	}
-
-    	if (result.docs.length==0)
-    	{
-    		res.sendStatus(404)
-    	}
-    	else
-    		res.sendStatus(200);
+	//find a user doc by using the userID index, given query string with userID
+  db.find({selector:{orgID: currentOrgID, userID:req.params.userID}}, function(er, result)
+  {
+  	if (er)
+  	{
+  		res.sendStatus(er.statusCode);
+  		throw er;
+  	}
+  	if (result.docs.length==0)
+  	{
+  		res.sendStatus(404)
+  	}
+  	else
+  		res.sendStatus(200);
 
     	console.log('Found %d documents with userID', result.docs.length);
     	for (var i = 0; i < result.docs.length; i++)
@@ -200,8 +202,8 @@ app.post("/users/internal", function (req, res)
 {
 	console.log("POST /users  ==> Begin");
 
-   var doc = {userID: req.body.userID, name:req.body.name, telephone:req.body.telephone, address:req.body.address};
-   db.find({selector:{userID:req.body.userID}}, function(er, result)
+   var doc = {userID: req.body.userID, name:req.body.name, telephone:req.body.telephone, address:req.body.address, orgID:currentOrgID};
+   db.find({selector:{orgID: currentOrgID, userID:req.body.userID}}, function(er, result)
    {
 	   if (er)
 	   {
@@ -211,7 +213,7 @@ app.post("/users/internal", function (req, res)
 	   //if user already exists, send error code
 	   if (result.docs.length!=0)
 	   {
-			console.log("User already exists.");
+			console.log("User already exists at this orgID.");
 		   res.sendStatus(409)
 	   }
 	   else
@@ -269,12 +271,12 @@ app.post("/users", passport.authenticate('mca-backend-strategy', {session: false
 app.post('/appliances/internal', function (req, res)
 {
     console.log("POST /appliances  ==> Begin");
-   console.log("POST /applianecs  ==> Inserting device document in Cloudant");
+   console.log("POST /appliances  ==> Inserting device document in Cloudant");
    console.log(req.body.userID);
    console.log(req.body.applianceID);
 	 //console.log("API KEY: " +  services.iotf-service.apiKey)
 	// console.log("API TOKEN: " + services.iotf-service.apiToken)
-   var doc = {userID: req.body.userID, applianceID: req.body.applianceID, serialNumber: req.body.serialNumber, manufacturer: req.body.manufacturer, name: req.body.name, dateOfPurchase: req.body.dateOfPurchase, model: req.body.model, registrationCreatedOnPlatform: false};
+   var doc = {userID: req.body.userID, applianceID: req.body.applianceID, serialNumber: req.body.serialNumber, manufacturer: req.body.manufacturer, name: req.body.name, dateOfPurchase: req.body.dateOfPurchase, model: req.body.model, orgID: currentOrgID, registrationCreatedOnPlatform: false};
 
 	var https = require('https');
 
@@ -320,25 +322,42 @@ app.post('/appliances/internal', function (req, res)
 			}
 			else
 			{
-				   db.insert(doc, function(err, data)
-				   {
-					   if (err)
-					   {
-						   console.log('POST /appliances  ==> Error:', err);
-					       res.sendStatus(err.statusCode);
-					       return;
-					   }
-					   else
-					   {
-						   var output = JSON.parse(response);
-						   console.log(JSON.stringify(output, null, 2));
-						   console.log('POST /appliances  ==> id       = ', data.id);
-					       console.log('POST /appliances  ==> revision = ', data.rev);
-					       res.sendStatus(201);
-					       return;
-					   }
-					 });
-
+				//make sure the ApplianceID doesn't exist already for this user at this org
+				db.find({selector:{orgID: currentOrgID, userID:req.body.userID, applianceID: req.body.applianceID}}, function(er, result)
+				{
+					if (er)
+					{
+						res.sendStatus(er.statusCode);
+						return;
+					}
+					//if user already exists, send error code
+					if (result.docs.length!=0)
+					{
+					 console.log("ApplianceID already exists for this userID at this orgID.");
+						res.sendStatus(409)
+					}
+					else
+					{
+						db.insert(doc, function(err, data)
+ 				    {
+ 					   if (err)
+ 					   {
+ 						     console.log('POST /appliances  ==> Error:', err);
+ 					       res.sendStatus(err.statusCode);
+ 					       return;
+ 					   }
+ 					   else
+ 					   {
+ 						   var output = JSON.parse(response);
+ 						   console.log(JSON.stringify(output, null, 2));
+ 						   console.log('POST /appliances  ==> id       = ', data.id);
+ 					       console.log('POST /appliances  ==> revision = ', data.rev);
+ 					       res.sendStatus(201);
+ 					       return;
+ 					   }
+ 					 });
+					}
+				});
 			}
 
 		});
@@ -397,7 +416,7 @@ app.post('/appliances', passport.authenticate('mca-backend-strategy', {session: 
 
 app.get("/index", function(req, res)
 {
-	var index = {name:'userId', type:'json', index:{fields:['userID']}};
+	var index = {name:'userId', type:'json', index:{fields:['currentOrgID','userID']}};
 
 	   db.index(index, function(err, response)
 	   {
@@ -409,8 +428,8 @@ app.get("/index", function(req, res)
 	     console.log('Index creation result: %s', response.result);
 	   });
 
-	/*//create an index to find appliance doc for given userID and applianceID
-	var index = {name:'applianceByUser', type:'json', index:{fields:['userID', 'applianceID']}};
+	//create an index to find appliance doc for given userID and applianceID
+	var index = {name:'applianceByUser', type:'json', index:{fields:['currentOrgID', 'userID', 'applianceID']}};
 	db.index(index, function(er, response)
 	{
 		if (er)
@@ -419,7 +438,7 @@ app.get("/index", function(req, res)
 			//throw er;
 		}
 		console.log('Index creation result: %s', response.result);
-	})*/
+	})
 });
 
 
@@ -436,7 +455,7 @@ app.get('/user/internal/:userID', function(req, res)
 
    var responseDoc = {docs:[]};
 
-   db.find({selector:{userID:req.params.userID}}, function(err, result)
+   db.find({selector:{orgID: currentOrgID, userID:req.params.userID}}, function(err, result)
    {
      if (err)
      {
@@ -504,7 +523,7 @@ app.get('/appliances/internal/:userID', function (req, res)
 	//find a device doc given query string with userID and optional applianceID
 	//first query by user, then by applianceID
   console.log(req.params.userID);
-	db.find({selector:{userID:req.params.userID}}, function(err, result)
+	db.find({selector:{orgID: currentOrgID, userID:req.params.userID}}, function(err, result)
     {
     	if (err)
     	{
@@ -526,12 +545,12 @@ app.get('/appliances/internal/:userID', function (req, res)
        if ('applianceID' in result.docs[i])
        {
          responseDoc.docs.push({userID: result.docs[i].userID,
-                                       applianceID: result.docs[i].applianceID,
-                                       serialNumber: result.docs[i].serialNumber,
-									   manufacturer: result.docs[i].manufacturer,
-									   name: result.docs[i].name,
-									   dateOfPurchase: result.docs[i].dateOfPurchase,
-                                       model: result.docs[i].model});
+                                applianceID: result.docs[i].applianceID,
+                                serialNumber: result.docs[i].serialNumber,
+									   						manufacturer: result.docs[i].manufacturer,
+									   						name: result.docs[i].name,
+									   						dateOfPurchase: result.docs[i].dateOfPurchase,
+                                model: result.docs[i].model});
        }
        i++;
     }
@@ -577,7 +596,7 @@ app.get('/appliances/internal2/:userID/:applianceID', function (req, res)
 	//find a device doc given query string with userID and optional applianceID
 	//first query by user, then by applianceID
 
-	db.find({selector:{userID:req.params.userID, applianceID:req.params.applianceID}}, function(err, result)
+	db.find({selector:{orgID: currentOrgID, userID:req.params.userID, applianceID:req.params.applianceID}}, function(err, result)
     {
     	if (err)
     	{
@@ -594,12 +613,12 @@ app.get('/appliances/internal2/:userID/:applianceID', function (req, res)
      }
 
          responseDoc.docs.push({userID: result.docs[0].userID,
-                                       applianceID: result.docs[0].applianceID,
-                                       serialNumber: result.docs[0].serialNumber,
-									   manufacturer: result.docs[0].manufacturer,
-									   name: result.docs[0].name,
-									   dateOfPurchase: result.docs[0].dateOfPurchase,
-                                       model: result.docs[0].model});
+                                applianceID: result.docs[0].applianceID,
+                                serialNumber: result.docs[0].serialNumber,
+									   						manufacturer: result.docs[0].manufacturer,
+									   						name: result.docs[0].name,
+									   						dateOfPurchase: result.docs[0].dateOfPurchase,
+                                model: result.docs[0].model});
 
 
     //we found something and didn't hit an error, send 200 and the result
@@ -635,7 +654,7 @@ app.del('/appliances/internal/:userID/:applianceID', function(req, res)
       return;
    }
 
-   db.find({selector:{userID:req.params.userID, applianceID:req.params.applianceID}}, function(err, result)
+   db.find({selector:{orgID:currentOrgID, userID:req.params.userID, applianceID:req.params.applianceID}}, function(err, result)
    {
      if (err)
      {
@@ -708,7 +727,7 @@ app.delete('/user/internal/:userID', function (req, res)
       return;
    }
 
-   db.find({selector:{userID:req.params.userID}}, function(err, result)
+   db.find({selector:{orgID:currentOrgID, userID:req.params.userID}}, function(err, result)
    {
      if (err)
      {
