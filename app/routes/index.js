@@ -5,12 +5,7 @@ var appEnv = require("cfenv").getAppEnv();
 /* GET home page. */
 router.get('/', function(req, res) {
 
-	var VCAP_SERVICES = {};
-	if(process.env.VCAP_SERVICES)
-		VCAP_SERVICES = JSON.parse(process.env.VCAP_SERVICES);
-
-	var iotf_url = VCAP_SERVICES['iotf-service'][0]['credentials'].http_host;
-	var platformDashboard = 'https://' + iotf_url + '/dashboard';
+	var platformDashboard = 'https://new-console.ng.bluemix.net/apps/' + appEnv['app'].application_id + '?paneId=connected-objects';
 
 	res.render('index', {
 		platformDashboard: platformDashboard
