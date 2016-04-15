@@ -1023,6 +1023,7 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   	"name": "Electronics",
   	"format": "JSON",
   	"items": []});
+  console.log('`RTI Schema: ' + rtiSchema); // 200
 /********************************************************************** **/
 /*End of Solution Integrator Code                                        */
 /********************************************************************** **/
