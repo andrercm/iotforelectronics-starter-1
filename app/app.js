@@ -1023,6 +1023,14 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   	"name": "Electronics",
   	"format": "JSON",
   	"items": []});
+	
+// //RTI route creation call
+  var rtiRoute = rtiPost('/message/route',{
+  	"sourceId": name,
+  	"deviceType": "washingMachine",
+  	"eventType": "+",
+  	"schemaId": "Electronics"});
+	
   console.log('`RTI Schema: ' + rtiSchema); // 200
 /********************************************************************** **/
 /*End of Solution Integrator Code                                        */
