@@ -961,6 +961,8 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
      })
      .on('response', function(response) {
         console.log('IoTP status: ' + response.statusCode);
+		console.log('IoTP error path: ' + path);
+		
     });
      return defer.promise;
   };
@@ -991,7 +993,8 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
         defer.resolve(json);
      })
      .on('response', function(response) {
-        console.log('`RTI status: ' + response.statusCode); // 200
+        console.log(' RTI status: ' + response.statusCode); // 200
+		console.log(' RTI error path: ' + path);
     });
      return defer.promise;
    };
