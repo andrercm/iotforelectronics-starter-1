@@ -1004,7 +1004,7 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
      return defer.promise;
    };
 
-   function generateMacAddress(){
+ function generateMacAddress(){
 	var mac = Math.floor(Math.random() * 16).toString(16) +
 	Math.floor(Math.random() * 16).toString(16) +
 	Math.floor(Math.random() * 16).toString(16) +
@@ -1029,10 +1029,10 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   	"classId": "Device"
  });
 
-// //IoT Platform device creation call
-  var iotpDeviceType = iotpPost('/device/types/washingMachine/devices',{
-    "deviceId": generateMacAddress()
-  });
+//IoT Platform device creation call
+//  var iotpDeviceType = iotpPost('/device/types/washingMachine/devices',{
+//    "deviceId": generateMacAddress()
+//  });
 
   //RTI data source creation call
   var rtiSource = rtiPost('/message/source',{
@@ -1049,11 +1049,11 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   	"items": []});
 	
  //RTI route creation call
-  var rtiRoute = rtiPost('/message/route',{
-  	"sourceId": name,
-  	"deviceType": "washingMachine",
-  	"eventType": "+",
-  	"schemaId": "Electronics"});
+//  var rtiRoute = rtiPost('/message/route',{
+//  	"sourceId": name,
+//  	"deviceType": "washingMachine",
+//  	"eventType": "+",
+//  	"schemaId": "Electronics"});
 	
   console.log('`RTI Schema: ' + rtiSchema); // 200
 /********************************************************************** **/
