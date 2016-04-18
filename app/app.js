@@ -1004,10 +1004,8 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
  });
 
 // //IoT Platform device creation call
-// //var iotpDeviceType = iotpPost('/device/types/washingMachine/devices',{
-// //  //"id": "d:abc123:myType:myDevice",
-// //  "typeId": "washingMachine",
-// //  "deviceId": "washingMachineElec"
+  var iotpDeviceType = iotpPost('/device/types/washingMachine/devices',{
+    "deviceId": "123456ARS"
 // //});
 
   //RTI data source creation call
@@ -1025,11 +1023,11 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   	"items": []});
 	
  //RTI route creation call
-//  var rtiRoute = rtiPost('/message/route',{
-//  	"sourceId": name,
-//  	"deviceType": "washingMachine",
-//  	"eventType": "+",
-//  	"schemaId": "Electronics"});
+  var rtiRoute = rtiPost('/message/route',{
+  	"sourceId": name,
+  	"deviceType": "washingMachine",
+  	"eventType": "+",
+  	"schemaId": "Electronics"});
 	
   console.log('`RTI Schema: ' + rtiSchema); // 200
 /********************************************************************** **/
