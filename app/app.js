@@ -1003,6 +1003,24 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
      return defer.promise;
    };
 
+   function generateMacAddress(){
+	var mac = Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16);		
+	var macStr = mac[0].toUpperCase() + mac[1].toUpperCase() + mac[2].toUpperCase() + mac[3].toUpperCase() + 
+	mac[4].toUpperCase() + mac[5].toUpperCase() + mac[6].toUpperCase() + mac[7].toUpperCase() + 
+	mac[8].toUpperCase() + mac[9].toUpperCase() + mac[10].toUpperCase() + mac[11].toUpperCase();
+	return macStr;
+};
  //IoT Platform device type creation call
   var iotpDeviceType = iotpPost('/device/types',{
   	"id": "washingMachine",
@@ -1012,7 +1030,7 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
 
 // //IoT Platform device creation call
   var iotpDeviceType = iotpPost('/device/types/washingMachine/devices',{
-    "deviceId": "123456ARS"
+    "deviceId": generateMacAddress
   });
 
   //RTI data source creation call
