@@ -938,9 +938,9 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
 
 // //IoT Platform Config Creation Method.
   var iotpPost = function iotpPost (path, json) {
-  console.log('calling api to POST: ' + baseURI);
-  console.log('IoTP API URI: ' + apiURI);
-  console.log('calling api on json: ' + JSON.stringify(json));
+    //console.log('calling api to POST: ' + baseURI);
+    //console.log('IoTP API URI: ' + apiURI);
+    //console.log('calling api on json: ' + JSON.stringify(json));
 
     var url = apiURI + path;
     var defer = q.defer();
@@ -963,20 +963,17 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
         console.log('IoTP status: ' + response.statusCode);
 		console.log('IoTP error path: ' + path);
 		
-    })
-	.on('error',function onError (error) {
-			console.error('IoTP error: ' + path + error);
-	});
+    });
      return defer.promise;
   };
 
  // //RTI Config Creation Method.
   var rtiPost = function rtiPost (path, json) {
-    console.log('calling api to baseURL: ' + rtiBaseUrl);
-    console.log('calling api to Path ' + path);
-    console.log('Rti Api: ' + rtiApiKey);
-    console.log('Rti Token: ' + rtiAuthToken);
-    console.log('calling api on json: ' + JSON.stringify(json));
+    //console.log('calling api to baseURL: ' + rtiBaseUrl);
+    //console.log('calling api to Path ' + path);
+    //console.log('Rti Api: ' + rtiApiKey);
+    //console.log('Rti Token: ' + rtiAuthToken);
+    //console.log('calling api on json: ' + JSON.stringify(json));
 
     var url = rtiBaseUrl + path;
     var defer = q.defer();
@@ -998,10 +995,11 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
      .on('response', function(response) {
         console.log(' RTI status: ' + response.statusCode); // 200
 		console.log(' RTI error path: ' + path);
-    })
-	.on('error',function onError (error) {
-			console.error('RTI error: ' + path + error);
-	});
+		if (path == '/message/route')
+		{
+			console.log(' RTI status: ' + response.id)			
+		}
+    });
      return defer.promise;
    };
 
