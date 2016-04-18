@@ -997,7 +997,7 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
 		console.log(' RTI error path: ' + path);
 		if (path == '/message/route')
 		{
-			console.log(' RTI status: ' + response)			
+			console.log(' RTI status: ' + JSON.stringify(response))			
 		}
     });
      return defer.promise;
