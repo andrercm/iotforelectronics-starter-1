@@ -1030,7 +1030,7 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
 
 // //IoT Platform device creation call
   var iotpDeviceType = iotpPost('/device/types/washingMachine/devices',{
-    "deviceId": generateMacAddress
+    "deviceId": generateMacAddress()
   });
 
   //RTI data source creation call
