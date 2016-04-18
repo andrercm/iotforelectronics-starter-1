@@ -1024,12 +1024,12 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   	"format": "JSON",
   	"items": []});
 	
-// //RTI route creation call
-//  var rtiRoute = rtiPost('/message/route',{
-//  	"sourceId": name,
-//  	"deviceType": "washingMachine",
-//  	"eventType": "+",
-//  	"schemaId": "Electronics"});
+ //RTI route creation call
+  var rtiRoute = rtiPost('/message/route',{
+  	"sourceId": name,
+  	"deviceType": "washingMachine",
+  	"eventType": "+",
+  	"schemaId": "Electronics"});
 	
   console.log('`RTI Schema: ' + rtiSchema); // 200
 /********************************************************************** **/
