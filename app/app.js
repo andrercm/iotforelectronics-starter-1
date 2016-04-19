@@ -971,6 +971,7 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
     var defer = q.defer();
     var body = '';
 	var responseBody = '';
+	var responseBodyParse = '';
 
     request
      .post({
@@ -990,21 +991,21 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
 			responseBody += data;
 		})
 		response.on('end', function(){
-			var responseBodyParse = JSON.parse(responseBody);
+			responseBodyParse = JSON.parse(responseBody);
 			console.log("Response body: " + responseBodyParse);
+			//Gets source and schema ID based on the call.
+			if (path == '/message/source')
+			{
+				sourceId = responseBodyParse.id;
+				console.log("Source ID: " + sourceId);
+			}
+			if (path == '/message/schema')
+			{
+				schemaId = responseBodyParse.id;
+				console.log("Schema ID: " + schemaId);
+			}	
 		}) 
     });
-	//Gets source and schema ID based on the call.
-	if (path == '/message/source')
-	{
-		sourceId = responseBodyParse.id;
-		console.log("Source ID: " + sourceId);
-	}
-	if (path == '/message/schema')
-	{
-		schemaId = responseBodyParse.id;
-		console.log("Schema ID: " + schemaId);
-	}	
      return defer.promise;
    };
 
