@@ -960,9 +960,9 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   };
 
  // //RTI Config Creation Method.
-  var rtiPost = function rtiPost (path, json) {
+  var rtiPost = function rtiPost (path, json, sourceId, schemaId) {
     //console.log('calling api to baseURL: ' + rtiBaseUrl);
-    console.log('calling RTI api to Path ' + path);
+    //console.log('calling RTI api to Path ' + path);
     //console.log('Rti Api: ' + rtiApiKey);
     //console.log('Rti Token: ' + rtiAuthToken);
     //console.log('calling api on json: ' + JSON.stringify(json));
@@ -993,9 +993,9 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
 		response.on('end', function(){
 			if (path == '/message/route')
 			{
-				//console.log(' RTI status: ' + response.statusCode); // 200
-				//console.log(' RTI error path: ' + path);
-				//console.log(' RTI response: ' + JSON.stringify(json));
+				console.log(' RTI status: ' + response.statusCode); // 200
+				console.log(' RTI error path: ' + path);
+				console.log(' RTI response: ' + JSON.stringify(json));
 			}			
 			responseBodyParse = JSON.parse(responseBody);
 			//Gets source and schema ID based on the call.
@@ -1050,20 +1050,20 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   	"orgId": orgId,
   	"apiKey": apiKey,
   	"authToken": authToken,
-  	"disabled": disabled});
+  	"disabled": disabled},sourceId,schemaId);
 
  // //RTI schema creation call
   var rtiSchema = rtiSource.then(rtiPost('/message/schema',{
   	"name": "Electronics",
   	"format": "JSON",
-  	"items": []}));
+  	"items": []},sourceId,schemaId));
 	
  //RTI route creation call
   var rtiRoute = rtiSchema.then(rtiPost('/message/route',{
   	"sourceId": sourceId,
   	"deviceType": "washingMachine",
   	"eventType": "+",
-  	"schemaId": schemaId}));
+  	"schemaId": schemaId},sourceId,schemaId));
 	
 /********************************************************************** **/
 /*End of Solution Integrator Code                                        */
