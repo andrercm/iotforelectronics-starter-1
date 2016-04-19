@@ -985,6 +985,7 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
       .on('end', function() {
         var json = JSON.parse(body);
         defer.resolve(json);
+		console.log('Response :' + JSON.stringify(json))
      });
      return defer.promise;
    };
