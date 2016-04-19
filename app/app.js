@@ -986,31 +986,6 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
         var json = JSON.parse(body);
         defer.resolve(json);
      });
-//     .on('response', function(response) {
-//		response.on('data', function(data){
-//			responseBody += data;
-//		})
-//		response.on('end', function(){
-//			if (path == '/message/route')
-//			{
-//				console.log(' RTI status: ' + response.statusCode); // 200
-//				console.log(' RTI error path: ' + path);
-//				console.log(' RTI response: ' + JSON.stringify(json));
-//			}			
-//			responseBodyParse = JSON.parse(responseBody);
-//			//Gets source and schema ID based on the call.
-//			if (path == '/message/source')
-//			{
-//				sourceId = responseBodyParse.id;
-//				console.log("Source ID: " + sourceId);
-//			}
-//			if (path == '/message/schema')
-//			{
-//				schemaId = responseBodyParse.id;
-//				console.log("Schema ID: " + schemaId);
-//			}	
-//		}) 
-//    });
      return defer.promise;
    };
 
@@ -1052,7 +1027,7 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   	"authToken": authToken,
   	"disabled": disabled})
 	.then(function(json) {
-		console.log(' RTI Source response: ' + JSON.stringify(json));
+
 		//defer.resolve(json);
 	});
 
@@ -1062,16 +1037,16 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   	"format": "JSON",
   	"items": []})
 	.then(function(json) {
-		console.log(' RTI Schema response: ' + JSON.stringify(json));
+		 //RTI route creation call
+		  var schema = JSON.parse(json);
+		  var rtiRoute = rtiPost('/message/route',{
+			"sourceId": sourceId,
+			"deviceType": "washingMachine",
+			"eventType": "+",
+			"schemaId": schema.id});		
+		//console.log(' RTI Schema response: ' + JSON.stringify(json));
 		//defer.resolve(json);
 	});
-	
- //RTI route creation call
-  var rtiRoute = rtiPost('/message/route',{
-  	"sourceId": sourceId,
-  	"deviceType": "washingMachine",
-  	"eventType": "+",
-  	"schemaId": schemaId});
 	
 /********************************************************************** **/
 /*End of Solution Integrator Code                                        */
