@@ -962,10 +962,10 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
  // //RTI Config Creation Method.
   var rtiPost = function rtiPost (path, json) {
     //console.log('calling api to baseURL: ' + rtiBaseUrl);
-    console.log('calling RTI api to Path ' + path);
+    //console.log('calling RTI api to Path ' + path);
     //console.log('Rti Api: ' + rtiApiKey);
     //console.log('Rti Token: ' + rtiAuthToken);
-    console.log('calling api on json: ' + JSON.stringify(json));
+    //console.log('calling api on json: ' + JSON.stringify(json));
 
     var url = rtiBaseUrl + path;
     var defer = q.defer();
@@ -1027,7 +1027,9 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   	"authToken": authToken,
   	"disabled": disabled})
 	.then(function(json) {
-
+		var source = JSON.parse(json);
+		sourceId = source.id;
+		console.log(' RTI Source ID: ' + sourceId);
 		//defer.resolve(json);
 	});
 
@@ -1037,17 +1039,22 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   	"format": "JSON",
   	"items": []})
 	.then(function(json) {
-		 //RTI route creation call
-		  var schema = JSON.parse(json);
-		  var rtiRoute = rtiPost('/message/route',{
-			"sourceId": sourceId,
-			"deviceType": "washingMachine",
-			"eventType": "+",
-			"schemaId": schema.id});		
-		//console.log(' RTI Schema response: ' + JSON.stringify(json));
-		//defer.resolve(json);
+		var schema = JSON.parse(json);
+		schemaId = schema.id;
+		console.log(' RTI Source ID: ' + schemaId);
+		
 	});
 	
+ //RTI route creation call
+  var rtiRoute = rtiPost('/message/route',{
+  	"sourceId": sourceId,
+  	"deviceType": "washingMachine",
+  	"eventType": "+",
+  	"schemaId": schemaId});
+
+	var createAll = function() {
+		
+	}
 /********************************************************************** **/
 /*End of Solution Integrator Code                                        */
 /********************************************************************** **/
