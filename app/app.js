@@ -996,12 +996,12 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
 	//Gets source and schema ID based on the call.
 	if (path == '/message/source')
 	{
-		sourceId = responseBody.id;
+		sourceId = JSON.parse(responseBody).id;
 		console.log("Source ID: " + sourceId);
 	}
 	if (path == '/message/schema')
 	{
-		schemaId = responseBody.id;
+		schemaId = JSON.parse(responseBody).id;
 		console.log("Schema ID: " + schemaId);
 	}	
      return defer.promise;
