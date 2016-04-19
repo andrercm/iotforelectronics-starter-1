@@ -924,19 +924,11 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   var rtiBaseUrl = rtiCredentials["baseUrl"];
   var disabled = false;
 
-// //IoT for Electronics Credentials
-// //var ioteUser = ioteCredentials["userid"];
-// //var iotePass = ioteCredentials["password"];
-
-// //IoT Platform Device Types
-// //var	iotpDevId = "washingMachine";
-// //var	iotpDescription = "IoT4E Washing Machine";
-// //var	iotpClassId = "Device"
-
-// //RTI Message Schema Info
-// //var	rtiSchemaName = "Electronics";
-
-// //IoT Platform Config Creation Method.
+ //RTI IDs
+ var sourceId = '';
+ var schemaId = '';
+ 
+ //IoT Platform Config Creation Method.
   var iotpPost = function iotpPost (path, json) {
     //console.log('calling api to POST: ' + baseURI);
     //console.log('IoTP API URI: ' + apiURI);
@@ -1001,6 +993,17 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
 			console.log("Response body: " + responseBody);
 		}) 
     });
+	//Gets source and schema ID based on the call.
+	if (path == '/message/source')
+	{
+		sourceId = responseBody.id;
+		console.log("Source ID: " + sourceId);
+	}
+	if (path == '/message/schema')
+	{
+		schemaId = responseBody.id;
+		console.log("Schema ID: " + schemaId);
+	}	
      return defer.promise;
    };
 
