@@ -990,18 +990,19 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
 			responseBody += data;
 		})
 		response.on('end', function(){
-			console.log("Response body: " + responseBody);
+			var responseBodyParse = JSON.parse(responseBody);
+			console.log("Response body: " + responseBodyParse);
 		}) 
     });
 	//Gets source and schema ID based on the call.
 	if (path == '/message/source')
 	{
-		sourceId = JSON.parse(responseBody).id;
+		sourceId = responseBodyParse.id;
 		console.log("Source ID: " + sourceId);
 	}
 	if (path == '/message/schema')
 	{
-		schemaId = JSON.parse(responseBody).id;
+		schemaId = responseBodyParse.id;
 		console.log("Schema ID: " + schemaId);
 	}	
      return defer.promise;
