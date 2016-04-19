@@ -995,10 +995,10 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
      .on('response', function(response) {
         console.log(' RTI status: ' + response.statusCode); // 200
 		console.log(' RTI error path: ' + path);
-		if (path == '/message/route')
+		if (path == '/message/schema')
 		{
 			console.log(' RTI status: ' + JSON.stringify(response))			
-			console.log(' RTI json: ' + JSON.stringify(json))			
+			console.log(' RTI defer: ' + JSON.stringify(defer))			
 		}
     });
      return defer.promise;
