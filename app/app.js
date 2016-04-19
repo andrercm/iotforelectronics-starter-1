@@ -1050,22 +1050,30 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   	"orgId": orgId,
   	"apiKey": apiKey,
   	"authToken": authToken,
-  	"disabled": disabled});
-
- // //RTI schema creation call
-  var rtiSchema = rtiPost('/message/schema',{
+  	"disabled": disabled}).then(
+	rtiPost('/message/schema',{
   	"name": "Electronics",
   	"format": "JSON",
-  	"items": []});
-	
- //RTI route creation call
-  var rtiRoute = rtiPost('/message/route',{
+  	"items": []})).then(
+	rtiPost('/message/route',{
   	"sourceId": sourceId,
   	"deviceType": "washingMachine",
   	"eventType": "+",
-  	"schemaId": schemaId});
+  	"schemaId": schemaId}));
+
+ // //RTI schema creation call
+//  var rtiSchema = rtiPost('/message/schema',{
+//  	"name": "Electronics",
+//  	"format": "JSON",
+//  	"items": []});
 	
-  console.log('`RTI Schema: ' + rtiSchema); // 200
+ //RTI route creation call
+ // var rtiRoute = rtiPost('/message/route',{
+ // 	"sourceId": sourceId,
+ // 	"deviceType": "washingMachine",
+ // 	"eventType": "+",
+ // 	"schemaId": schemaId});
+	
 /********************************************************************** **/
 /*End of Solution Integrator Code                                        */
 /********************************************************************** **/
