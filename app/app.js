@@ -960,7 +960,7 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   };
 
  // //RTI Config Creation Method.
-  var rtiPost = function rtiPost (path, json, sourceId, schemaId) {
+  var rtiPost = function rtiPost (path, json) {
     //console.log('calling api to baseURL: ' + rtiBaseUrl);
     //console.log('calling RTI api to Path ' + path);
     //console.log('Rti Api: ' + rtiApiKey);
@@ -1050,20 +1050,20 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   	"orgId": orgId,
   	"apiKey": apiKey,
   	"authToken": authToken,
-  	"disabled": disabled},sourceId,schemaId);
+  	"disabled": disabled});
 
  // //RTI schema creation call
   var rtiSchema = rtiSource.then(rtiPost('/message/schema',{
   	"name": "Electronics",
   	"format": "JSON",
-  	"items": []},sourceId,schemaId));
+  	"items": []}));
 	
  //RTI route creation call
   var rtiRoute = rtiSchema.then(rtiPost('/message/route',{
   	"sourceId": sourceId,
   	"deviceType": "washingMachine",
   	"eventType": "+",
-  	"schemaId": schemaId},sourceId,schemaId));
+  	"schemaId": schemaId}));
 	
 /********************************************************************** **/
 /*End of Solution Integrator Code                                        */
