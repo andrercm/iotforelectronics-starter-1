@@ -992,7 +992,7 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
 		})
 		response.on('end', function(){
 			responseBodyParse = JSON.parse(responseBody);
-			if (path == '/message/source')
+			if (path == '/message/route')
 			{
 				console.log(' RTI status: ' + response.statusCode); // 200
 				console.log(' RTI error path: ' + path);
