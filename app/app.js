@@ -962,7 +962,7 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
  // //RTI Config Creation Method.
   var rtiPost = function rtiPost (path, json) {
     //console.log('calling api to baseURL: ' + rtiBaseUrl);
-    //console.log('calling api to Path ' + path);
+    console.log('calling RTI api to Path ' + path);
     //console.log('Rti Api: ' + rtiApiKey);
     //console.log('Rti Token: ' + rtiAuthToken);
     //console.log('calling api on json: ' + JSON.stringify(json));
@@ -991,13 +991,13 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
 			responseBody += data;
 		})
 		response.on('end', function(){
-			responseBodyParse = JSON.parse(responseBody);
 			if (path == '/message/route')
 			{
-				console.log(' RTI status: ' + response.statusCode); // 200
-				console.log(' RTI error path: ' + path);
-				console.log(' RTI response: ' + JSON.stringify(json));
+				//console.log(' RTI status: ' + response.statusCode); // 200
+				//console.log(' RTI error path: ' + path);
+				//console.log(' RTI response: ' + JSON.stringify(json));
 			}			
+			responseBodyParse = JSON.parse(responseBody);
 			//Gets source and schema ID based on the call.
 			if (path == '/message/source')
 			{
