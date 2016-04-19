@@ -1060,14 +1060,18 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   var rtiSchema = rtiPost('/message/schema',{
   	"name": "Electronics",
   	"format": "JSON",
-  	"items": []});
+  	"items": []})
+	.then(function(json) {
+		console.log(' RTI Schema response: ' + JSON.stringify(json));
+		//defer.resolve(json);
+	});
 	
  //RTI route creation call
-  var rtiRoute = rtiSchema.then(rtiPost('/message/route',{
+  var rtiRoute = rtiPost('/message/route',{
   	"sourceId": sourceId,
   	"deviceType": "washingMachine",
   	"eventType": "+",
-  	"schemaId": schemaId}));
+  	"schemaId": schemaId});
 	
 /********************************************************************** **/
 /*End of Solution Integrator Code                                        */
