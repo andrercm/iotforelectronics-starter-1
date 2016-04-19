@@ -985,32 +985,32 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
       .on('end', function() {
         var json = JSON.parse(body);
         defer.resolve(json);
-     })
-     .on('response', function(response) {
-		response.on('data', function(data){
-			responseBody += data;
-		})
-		response.on('end', function(){
-			if (path == '/message/route')
-			{
-				console.log(' RTI status: ' + response.statusCode); // 200
-				console.log(' RTI error path: ' + path);
-				console.log(' RTI response: ' + JSON.stringify(json));
-			}			
-			responseBodyParse = JSON.parse(responseBody);
-			//Gets source and schema ID based on the call.
-			if (path == '/message/source')
-			{
-				sourceId = responseBodyParse.id;
-				console.log("Source ID: " + sourceId);
-			}
-			if (path == '/message/schema')
-			{
-				schemaId = responseBodyParse.id;
-				console.log("Schema ID: " + schemaId);
-			}	
-		}) 
-    });
+     });
+//     .on('response', function(response) {
+//		response.on('data', function(data){
+//			responseBody += data;
+//		})
+//		response.on('end', function(){
+//			if (path == '/message/route')
+//			{
+//				console.log(' RTI status: ' + response.statusCode); // 200
+//				console.log(' RTI error path: ' + path);
+//				console.log(' RTI response: ' + JSON.stringify(json));
+//			}			
+//			responseBodyParse = JSON.parse(responseBody);
+//			//Gets source and schema ID based on the call.
+//			if (path == '/message/source')
+//			{
+//				sourceId = responseBodyParse.id;
+//				console.log("Source ID: " + sourceId);
+//			}
+//			if (path == '/message/schema')
+//			{
+//				schemaId = responseBodyParse.id;
+//				console.log("Schema ID: " + schemaId);
+//			}	
+//		}) 
+//    });
      return defer.promise;
    };
 
@@ -1050,13 +1050,17 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   	"orgId": orgId,
   	"apiKey": apiKey,
   	"authToken": authToken,
-  	"disabled": disabled});
+  	"disabled": disabled})
+	.then(function(json) {
+		console.log(' RTI Source response: ' + JSON.stringify(json));
+		//defer.resolve(json);
+	});
 
  // //RTI schema creation call
-  var rtiSchema = rtiSource.then(rtiPost('/message/schema',{
+  var rtiSchema = rtiPost('/message/schema',{
   	"name": "Electronics",
   	"format": "JSON",
-  	"items": []}));
+  	"items": []});
 	
  //RTI route creation call
   var rtiRoute = rtiSchema.then(rtiPost('/message/route',{
