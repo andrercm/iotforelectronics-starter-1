@@ -962,10 +962,10 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
  // //RTI Config Creation Method.
   var rtiPost = function rtiPost (path, json) {
     //console.log('calling api to baseURL: ' + rtiBaseUrl);
-    //console.log('calling RTI api to Path ' + path);
+    console.log('calling RTI api to Path ' + path);
     //console.log('Rti Api: ' + rtiApiKey);
     //console.log('Rti Token: ' + rtiAuthToken);
-    //console.log('calling api on json: ' + JSON.stringify(json));
+    console.log('calling api on json: ' + JSON.stringify(json));
 
     var url = rtiBaseUrl + path;
     var defer = q.defer();
