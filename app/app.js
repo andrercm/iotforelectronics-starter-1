@@ -978,6 +978,7 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
     var url = rtiBaseUrl + path;
     var defer = q.defer();
     var body = '';
+	var responseBody = '';
 
     request
      .post({
@@ -993,13 +994,12 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
         defer.resolve(json);
      })
      .on('response', function(response) {
-        console.log(' RTI status: ' + response.statusCode); // 200
-		console.log(' RTI error path: ' + path);
-		if (path == '/message/schema')
-		{
-			console.log(' RTI status: ' + JSON.stringify(response))			
-			console.log(' RTI defer: ' + JSON.stringify(defer))			
-		}
+		response.on('data', function(data){
+			responseBody += data;
+		})
+		response.on('end', function(){
+			console.log("Response body: " + responseBody);
+		}) 
     });
      return defer.promise;
    };
