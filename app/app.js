@@ -1025,24 +1025,24 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   	"orgId": orgId,
   	"apiKey": apiKey,
   	"authToken": authToken,
-  "disabled": disabled});
-//	.then(function(json) {
-//		var source = JSON.parse(json);
-//		sourceId = source.id;
-//		console.log(' RTI Source ID: ' + sourceId);
-//		//defer.resolve(json);
-//  })};
+  "disabled": disabled})
+	.then(function(json) {
+		var source = JSON.parse(json);
+		sourceId = source.id;
+		console.log(' RTI Source ID: ' + sourceId);
+		//defer.resolve(json);
+  });
 
  // //RTI schema creation call
   var rtiSchema = rtiPost('/message/schema',{
   	"name": "Electronics",
   	"format": "JSON",
-  "items": []});
-//	.then(function(json) {
-//		var schema = JSON.parse(json);
-//		schemaId = schema.id;
-//		console.log(' RTI Schema ID: ' + schemaId);
-//  });
+  "items": []})
+	.then(function(json) {
+		var schema = JSON.parse(json);
+		schemaId = schema.id;
+		console.log(' RTI Schema ID: ' + schemaId);
+  });
 	
  //RTI route creation call
   var rtiRoute = rtiPost('/message/route',{
