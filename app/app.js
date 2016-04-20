@@ -1020,12 +1020,12 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
 //  });
 
   //RTI data source creation call
-  var rtiSource = function createRTISource() { rtiPost('/message/source',{
+  var rtiSource = rtiPost('/message/source',{
   	"name": name,
   	"orgId": orgId,
   	"apiKey": apiKey,
   	"authToken": authToken,
-  "disabled": disabled})};
+  "disabled": disabled});
 //	.then(function(json) {
 //		var source = JSON.parse(json);
 //		sourceId = source.id;
@@ -1034,10 +1034,10 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
 //  })};
 
  // //RTI schema creation call
-  var rtiSchema = function createRTISchema() {rtiPost('/message/schema',{
+  var rtiSchema = rtiPost('/message/schema',{
   	"name": "Electronics",
   	"format": "JSON",
-  "items": []})};
+  "items": []});
 //	.then(function(json) {
 //		var schema = JSON.parse(json);
 //		schemaId = schema.id;
@@ -1045,19 +1045,11 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
 //  });
 	
  //RTI route creation call
-  var rtiRoute = function createRTIRoute() { rtiPost('/message/route',{
+  var rtiRoute = rtiPost('/message/route',{
   	"sourceId": sourceId,
   	"deviceType": "washingMachine",
   	"eventType": "+",
-  "schemaId": schemaId})};
-	
-var createAll = function() {
-		var defer = q.defer();
-		createRISource()
-			.then(createRTISchema())
-			.then(createRTIRoutes())
-		return defer.promise;
-	};	
+  "schemaId": schemaId});	
 /********************************************************************** **/
 /*End of Solution Integrator Code                                        */
 /********************************************************************** **/
