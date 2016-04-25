@@ -32,6 +32,11 @@ deviceRouter.param('deviceID', function(req, res, next, id){
 deviceRouter.get('/qr/getPlatformCredentials', device.QRcreds);
 
 /**
+ * Get the QR Code string for connecting into the Platform
+ */
+deviceRouter.get('/api/getPlatformCredentials', device.getPlatformQRstring);
+
+/**
  * Get the QR Code image for the given device
  */
 deviceRouter.get('/qr/:deviceID', device.getQrCode);

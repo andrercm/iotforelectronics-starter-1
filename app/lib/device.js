@@ -82,6 +82,25 @@ device.QRcreds = function(req, res){
 	img.pipe(res);
 }
 
+device.getPlatformQRstring = function(req, res){
+	var VCAP_SERVICES = {};
+	if(process.env.VCAP_SERVICES)
+		VCAP_SERVICES = JSON.parse(process.env.VCAP_SERVICES);
+	
+	var appEnv = cfenv.getAppEnv();
+	var org = VCAP_SERVICES['iotf-service'][0]['credentials'].org;
+	var route = appEnv.url;
+	var guid = VCAP_SERVICES['AdvancedMobileAccess'][0]['credentials'].clientId;
+	var key = VCAP_SERVICES['iotf-service'][0]['credentials'].apiKey;
+	var token = VCAP_SERVICES['iotf-service'][0]['credentials'].apiToken;
+	var name = VCAP_SERVICES['iotf-service'][0].name;
+	var mqtt_host = VCAP_SERVICES['iotf-service'][0]['credentials'].mqtt_host;
+	
+	var text = ['1', org, route, guid, key, token, name, mqtt_host].join(',');
+	
+	res.send(text);
+}
+
 device.getAllDevicesStatus = function(req, res){
 	simulationClient.getAllDevicesStatus().then(function(data){
 		res.json(data);
