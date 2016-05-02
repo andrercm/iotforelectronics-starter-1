@@ -182,8 +182,7 @@ function removeDevice(deviceID){
   if(deviceID === $(this).find('span').text()){
     numberOfDevices--;
     $(this).remove();
-    var text = $('#alertDeviceDeleted p').html();
-    $('#alertDeviceDeleted p').html(text.replace(/^([\w\-!]+)/i, '<strong>$&</strong>').replace('{0}', deviceID));
+    $('#alertDeviceDeleted span').text(deviceID);
     $('#alertDeviceDeleted').fadeTo(500, 1);
     if(numberOfDevices !== MAX_DEVICES){
       $('#addNewDeviceButton').prop('disabled', false);

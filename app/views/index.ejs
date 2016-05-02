@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title><%= __('main_page.page_title') %></title>
+  <title>IoT for Electronics</title>
 
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css"/>
@@ -13,23 +13,23 @@
   <script src="/bootstrap/js/bootstrap.min.js"></script>
 </head>
 <body>
-  <h4 class="bluemix-bar"><%= __('main_page.top_title') %></h4>
+  <h4 class="bluemix-bar">IoT for Electronics Starter Experience</h4>
   <div class="main-section">
     <div class="container">
-      <h2><%= __('main_page.sections_heading') %></h2>
+      <h2 >What would you like to explore?</h2>
       <section class="col-xs-12 col-md-10 content">
         <div class="col-xs-12 col-sm-6 explore-info">
           <div name="selection-box-1" class="col-md-9 selection-box active">
             <img src="/images/Washer.svg"/>
-            <h3 class="section-info"><%= __('main_page.simulate_appliance_title') %></h3>
-            <p><%= __('main_page.simulate_appliance_text') %></p>
+            <h3 class="section-info">Simulate appliance</h3>
+            <p>View and change live simulated data on an example appliance.</p>
           </div>
         </div>
         <div class="col-xs-12 col-sm-6 explore-info">
           <div name="selection-box-2" class="col-md-9 selection-box">
             <img src="/images/Phone.svg" class="mobile-image"/>
-            <h3><%= __('main_page.consumer_app_title') %></h3>
-            <p><%= __('main_page.consumer_app_text') %></p>
+            <h3>Consumer app</h3>
+            <p>See how an appliance owner benefits from connected services.</p>
           </div>
         </div>
       </section>
@@ -43,9 +43,20 @@
           <img src="/images/SimulateAppliance_Diagram.png"/>
         </div>
         <div class="col-xs-12 col-md-6 explain">
-          <p><%= __('main_page.simulate_appliance_p1') %></p>
-          <p><%= __('main_page.simulate_appliance_p2') %></p>
-          <a href="https://new-console.ng.bluemix.net/docs/starters/IotElectronics/iotelectronics_overview.html" target="_blank"><img src="/images/LearnMoreArrow.svg"/> <%= __('main_page.learn_more') %> </a>
+          <p>An appliance can be connected to the
+            platform so that you can view streaming
+            live data. With this starter offering, you
+            can create your own simulated appliances.
+          </p>
+          <p>You will use a web-based app that
+            simulates an appliance receiving
+            commands and performing operations
+            connected through the IoT Platform. On
+            the platform you will be able to see the
+            the devices that you’ve created and the
+            messages they have sent.
+          </p>
+          <a href="https://new-console.ng.bluemix.net/docs/starters/IotElectronics/iotelectronics_overview.html" target="_blank"><img src="/images/LearnMoreArrow.svg"/> Learn More </a>
         </div>
       </section>
       <section name="description-selection-box-2" class="col-xs-12 col-md-10 content description-box hidden">
@@ -54,9 +65,26 @@
           <img src="/images/ConsumerApp_Diagram.png"/>
         </div>
         <div class="col-xs-12 col-md-6 explain">
-          <p><%= __('main_page.consumer_app_p1') %></p>
-          <p><%= __('main_page.consumer_app_p2') %></p>
-          <a href="https://new-console.ng.bluemix.net/docs/starters/IotElectronics/iotelectronics_overview.html" target="_blank"><img src="/images/LearnMoreArrow.svg"/> <%= __('main_page.learn_more') %> </a>
+          <p>You will experience a simulation of how
+            Heidi, an appliance owner, uses a mobile
+            app for the new washer that she has
+            purchased. An appliance company will be
+            able to offer these types of new services
+            to attract and retain customers. Future
+            appliances and services can be better
+            designed based on new sources of
+            customer data.
+          </p>
+          <p>You will use a mobile app on an iOS phone.
+            You will experience how Heidi can send
+            commands to the appliance and receive
+            updates from her appliance via the IoT
+            platform and Bluemix. You can use the
+            Appliance Simulator to mimic failure events
+            on Heidi’s washer, then view the results in
+            Heidi’s mobile app.
+          </p>
+          <a href="https://new-console.ng.bluemix.net/docs/starters/IotElectronics/iotelectronics_overview.html" target="_blank"><img src="/images/LearnMoreArrow.svg"/> Learn More </a>
         </div>
       </section>
     </div>
@@ -64,15 +92,15 @@
   <div class="main-section arrow-section">
     <div class="container">
       <section class="col-xs-12 col-md-10 content">
-        <h2><%= __('main_page.add_washer_heading') %></h2>
-        <p class="add-washer-message"><%= __('main_page.add_washer_message1') %><p>
-        <p class="max-washer-message hidden"><span><%= __('main_page.add_washer_message2') %></span></p>
+        <h2>Choose or add new simulated washer</h2>
+        <p class="add-washer-message">You can add up to five washers.<p>
+        <p class="max-washer-message hidden"><span>You have reached the limit of 5 washers.</span></p>
         <button id="addNewDeviceButton" class="add-button"><img src="/images/PlusWasher_en.svg"></button>
         <hr/>
         <div class="washer-list">
-          <p class="selection-text"><strong><%= __('main_page.your_washers') %></strong><span><%= __('main_page.select_washer') %></span></p>
-          <p class="no-washers-message"><%= __('main_page.no_washers_added') %></p>
-          <p class="appxp-washer-message hidden"><%= __('main_page.must_add_washer') %></p>
+          <p class="selection-text"><strong>Your washers</strong><span>Select a washer to control its simulated data. A new window will open.</span></p>
+          <p class="no-washers-message">No washers have been added.</p>
+          <p class="appxp-washer-message hidden">You must add a washer before continuing with the mobile app experience.</p>
           <div class="list-group">
           </div>
         </div>
@@ -82,24 +110,21 @@
   <div class="installation-section hidden">
     <div class="main-section gray-background arrow-section ">
       <div class="container">
-        <h2><%= __('main_page.mobile_app_heading') %></h2>
+        <h2 >Next, install the mobile app on an iOS phone</h2>
         <section class="col-xs-12 col-md-10 content">
-          <div class="col-xs-12 col-md-4">
+          <div class="col-xs-12 col-md-5">
             <img class="mobile-image" src="/images/Phone.svg"/>
           </div>
-          <div class="col-xs-12 col-md-8 instructions-section">
+          <div class="col-xs-12 col-md-7 instructions-section">
             <div class="install-info">
               <h3> <img src="/images/Install_Step1.svg"/>
-                <%= __('main_page.download_app') %>
-                <p>- <%= __('main_page.download_app_p1') %></p>
-                <p>- <%- mobileDownload %></p>
-              </h3>
+              Download the app to your workstation<br/>
+              <a href="https://github.com/ibm-watson-iot/iote-mobile" target="_blank">Download</a></h3>
             </div>
             <div class="install-info">
               <h3> <img src="/images/Install_Step2.svg"/>
-                <%= __('main_page.install_app') %>
-                <p><%- mobileInstructions %></p>
-              </h3>
+              Install on your iOS phone<br/>
+              <a href="https://github.com/ibm-watson-iot/iote-mobile/blob/master/README.md" target="_blank">Follow instructions in the README</a></h3>
             </div>
           </div>
         </section>
@@ -107,31 +132,35 @@
     </div>
     <div class="main-section arrow-section">
       <div class="container">
-        <h2><%= __('main_page.scan_heading') %></h2>
+        <h2 >In the mobile app on your phone, you'll be asked to scan QR Codes</h2>
         <section class="col-xs-12 col-md-10 content">
           <div class="col-xs-12 col-md-6 QR-code-info">
             <div class="col-md-10 selection-code active">
               <img src="/qr/getPlatformCredentials"/>
-              <p><%= __('main_page.scan_p1') %></p>
+              <!--<h3 >Connect your mobile app</h3>-->
+              <p>The first time you use your mobile app on your phone, you'll be asked
+                to scan this code to connect your mobile app to the platform.</p>
             </div>
           </div>
           <div class="col-xs-12 col-md-6 QR-code-info">
             <div class="col-md-10  selection-code active">
               <img class="preview" src="/images/washer-detail-preview.png"/>
-              <p><%= __('main_page.scan_p2') %></p>
+              <p>You'll be asked to scan a different QR Code to register a washer on your mobile app with the platform.
+              You will then go to the Add Washer section on this screen and click the washer being used. The window that opens displays
+              the QR Code for the washer.</p>
             </div>
           </div>
         </section>
       </div>
     </div>
   </div>
-  <a class="ibm-top-link hidden" aria-label="Back to top" href="#top" tabindex="0"><%= __('main_page.back_to_top') %></a>
+  <a class="ibm-top-link hidden" aria-label="Back to top" href="#top" tabindex="0">Back to top</a>
   <footer class="main-section gray-background">
     <div class="container">
       <section class="col-xs-12 col-md-10 content">
         <ul class="footer-links">
-          <li><p><%= __('main_page.explore_more') %></p></li>
-          <li><h4><a class="link" href="<%= platformDashboard %>" target="_blank"><%= __('main_page.manage_devices') %></a></h4></li>
+          <li><p>EXPLORE MORE</p></li>
+          <li><h4><a class="link" href="<%= platformDashboard %>" target="_blank">Manage your device on the platform ></a></h4></li>
         </ul>
       </section>
     </div>
@@ -140,7 +169,7 @@
   <div class="alert-messages">
     <div class="alert alert-success" id="alertDeviceDeleted">
       <a href="#" class="close">&times;</a>
-      <p><%= __('main_page.device_deleted') %></p>
+      <strong>Success!</strong> Device <span></span> was successfully deleted.
     </div>
   </div>
   
