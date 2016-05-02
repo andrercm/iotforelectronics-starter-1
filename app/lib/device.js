@@ -218,13 +218,10 @@ device.del = function(req, res){
 device.renderUI = function(req, res){
 	
 	simulationClient.getDeviceStatus(req.params.deviceID).then(function(data){
+		var status = 'appliance_page.' + data.attributes.status.toLowerCase();
 		return res.render('device', {
-			title:          'Watson IoT for Electronics',
 			deviceId:          data.deviceID,
-			deviceStatus:      data.attributes.status,
-			deviceProgram:     data.attributes.program,
-			deviceCurCycle:    data.attributes.currentCycle,
-			deviceFailureType: data.attributes.failureType,
+			deviceStatus:      res.__(status),
 			vibration:         data.attributes.vibration,
 			waterPressure:     data.attributes.waterPressure,
 			serialNumber:      data.attributes.serialNumber,

@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>IoT for Electronics</title>
+    <title><%= __('appliance_page.page_title') %></title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="/bootstrap/css/bootstrap-theme.min.css"/>
@@ -11,22 +11,22 @@
     <script src="/bootstrap/js/bootstrap.min.js"></script>
   </head>
   <body>
-    <h4 class="bluemix-bar">Simulated washer experience</h4>
+    <h4 class="bluemix-bar"><%= __('appliance_page.top_title') %></h4>
     <div class="main-section">
       <div class="container">
-        <h2 >Command and control your simulated washer</h2>
+        <h2><%= __('appliance_page.heading') %></h2>
         <section class="col-xs-12 col-md-10 content washer-content">
           <div class="col-xs-12 col-sm-4 problem-machine">
-            <h3>Select a problem</h3>
-            <p>Watch your washer's status change. When you try the consumer app, a status change message will automatically be sent to your iOS phone.</p>
+            <h3><%= __('appliance_page.problem_heading') %></h3>
+            <p><%= __('appliance_page.problem_text') %></p>
             <div class="problem-machine-icons">
-              <p class="enabled"><img src="/images/Board_failure_en.svg"><button>Board failure</button></p>
-              <p class="enabled"><img src="/images/Vibration_en.svg"/><button>Strong vibration</button></p>
-              <p class="enabled"><img src="/images/waterdrop.svg"/><button>Water leak</button></p>
+              <p class="enabled" data-text="Board failure"><img src="/images/Board_failure_en.svg"><button><%= __('appliance_page.board_failure') %></button></p>
+              <p class="enabled" data-text="Strong vibration"><img src="/images/Vibration_en.svg"/><button><%= __('appliance_page.strong_vibration') %></button></p>
+              <p class="enabled" data-text="Water leak"><img src="/images/waterdrop.svg"/><button><%= __('appliance_page.water_leak') %></button></p>
             </div>
             <div class="problem-machine-buttons">
-              <button id="resetMachines" disabled>Fix machine</button>
-              <button>Delete washer</button>
+              <button id="resetMachines" disabled><%= __('appliance_page.fix_machine') %></button>
+              <button><%= __('appliance_page.delete_washer') %></button>
             </div>
           </div>
           <div class="col-xs-12 col-sm-8 machine-info">
@@ -37,13 +37,13 @@
               <div class="washer-content">
                 <div class="washer-text">
                   <h3 class="washer-title"><span><%= deviceId %></span></h3>
-                  <ul class="text-list"><li>Device ID </li><li><%= deviceId %></li></ul>
-                  <ul class="text-list"><li>Serial Number </li><li><%= serialNumber %></li></ul>
-                  <ul class="text-list"><li>Make, Model </li><li><%= make %> <%= model %></li></ul>
-                  <h3 class="washer-title">Washer Status</h3>
-                  <ul class="text-list"><li>Overall status  </li><li><strong><%= deviceStatus %></strong><img src="../images/Checkmark.svg"></li></ul>
-                  <ul class="text-list"><li>Vibration </li><li><strong><%= vibration %> mps</strong><img src="../images/Checkmark.svg"></li></ul>
-                  <ul class="text-list"><li>Water pressure </li><li><strong><%= waterPressure %> psi</strong><img src="../images/Checkmark.svg"></li></ul>
+                  <ul class="text-list"><li><%= __('appliance_page.device_id') %> </li><li><%= deviceId %></li></ul>
+                  <ul class="text-list"><li><%= __('appliance_page.serial_number') %> </li><li><%= serialNumber %></li></ul>
+                  <ul class="text-list"><li><%= __('appliance_page.make_model') %> </li><li><%= make %> <%= model %></li></ul>
+                  <h3 class="washer-title"><%= __('appliance_page.washer_status') %></h3>
+                  <ul class="text-list"><li><%= __('appliance_page.overall_status') %>  </li><li><strong><%= deviceStatus %></strong><img src="../images/Checkmark.svg"></li></ul>
+                  <ul class="text-list"><li><%= __('appliance_page.vibration') %> </li><li><strong><%= vibration %> <%= __('appliance_page.vibration_unit') %></strong><img src="../images/Checkmark.svg"></li></ul>
+                  <ul class="text-list"><li><%= __('appliance_page.water_pressure') %> </li><li><strong><%= waterPressure %> <%= __('appliance_page.water_pressure_unit') %></strong><img src="../images/Checkmark.svg"></li></ul>
                 </div>
               </div>
             </div>
@@ -52,7 +52,7 @@
                 <img src="/qr/<%= deviceId %>"/>
               </div>
               <div>
-                <p class="qr-code-message">When you try the consumer app, you can scan the QR code to see this washer's status and other events on your phone.</p>
+                <p class="qr-code-message"><%= __('appliance_page.qr_text') %></p>
               </div>
             </div>
           </div>
@@ -73,7 +73,7 @@
             $(this).eq(0).addClass('active');
             $(this).children('button').eq(0).addClass('active');
 
-            var failureType = $(this).find('button').text();
+            var failureType = $(this).attr("data-text");
             var obj = {};
             var index = 0;
             var text = '';
@@ -97,7 +97,7 @@
               type: 'PUT',
               data: data,
               success: function() {
-                $('.washer-content .washer-text p strong').eq(0).text('Failure');
+                $('.washer-content .washer-text p strong').eq(0).text("<%= __('appliance_page.failure') %>");
                 if(index > 0){
                   $('.washer-content .washer-text p strong').eq(index).text(text);
                 }
@@ -121,7 +121,6 @@
               failureType: "",
               vibration: "80",
               waterPressure: "70"
-
             }
           });
         });
@@ -167,28 +166,38 @@
 
         if (id === "<%= deviceId %>" && length > 1) {
           if(device.status && device.status == 'Failure'){
-            $('.washer-content .washer-text ul li strong').eq(0).text(device.status);
+            $('.washer-content .washer-text ul li strong').eq(0).text("<%= __('appliance_page.failure') %>");
             $('.washer-content .washer-text ul li img').eq(0).attr('src', '/images/advise-icon.svg');
             if(device.failureType && device.failureType == 'Board failure'){
-              $('.washer-content .washer-text ul li strong').eq(1).text('No data');
-              $('.washer-content .washer-text ul li strong').eq(2).text('No data');
+              $('.washer-content .washer-text ul li strong').eq(1).text("<%= __('appliance_page.no_data') %>");
+              $('.washer-content .washer-text ul li strong').eq(2).text("<%= __('appliance_page.no_data') %>");
               $('.washer-content .washer-text ul li img').eq(1).attr('src', '/images/advise-icon.svg');
               $('.washer-content .washer-text ul li img').eq(2).attr('src', '/images/advise-icon.svg');
             } else if(device.failureType && device.failureType == 'Strong vibration'){
-              $('.washer-content .washer-text ul li strong').eq(1).text(device.vibration + ' mps');
+              $('.washer-content .washer-text ul li strong').eq(1).text(device.vibration + " <%= __('appliance_page.vibration_unit') %>");
               $('.washer-content .washer-text ul li img').eq(1).attr('src', '/images/advise-icon.svg');
             } else if(device.failureType && device.failureType == 'Water leak'){
-              $('.washer-content .washer-text ul li strong').eq(2).text(device.waterPressure + ' psi');
+              $('.washer-content .washer-text ul li strong').eq(2).text(device.waterPressure + " <%= __('appliance_page.water_pressure_unit') %>");
               $('.washer-content .washer-text ul li img').eq(2).attr('src', '/images/advise-icon.svg');
             }
           } else {
             if(device.status === 'Working'){
-              $('.washer-content .washer-text ul li strong').eq(0).text(device.currentCycle);
+              switch(device.currentCycle){
+                case 'Filling':      $('.washer-content .washer-text ul li strong').eq(0).text("<%= __('appliance_page.filling') %>"); break;
+                case 'Litespinning': $('.washer-content .washer-text ul li strong').eq(0).text("<%= __('appliance_page.litespinning') %>"); break;
+                case 'Soaking':      $('.washer-content .washer-text ul li strong').eq(0).text("<%= __('appliance_page.soaking') %>"); break;
+                case 'Spinning':     $('.washer-content .washer-text ul li strong').eq(0).text("<%= __('appliance_page.spinning') %>"); break;
+                case 'Draining':     $('.washer-content .washer-text ul li strong').eq(0).text("<%= __('appliance_page.draining') %>"); break;
+                case 'End':          $('.washer-content .washer-text ul li strong').eq(0).text("<%= __('appliance_page.end') %>"); break;
+              }
             } else {
-              $('.washer-content .washer-text ul li strong').eq(0).text(device.status);
+              switch(device.status){
+                case 'Ready':        $('.washer-content .washer-text ul li strong').eq(0).text("<%= __('appliance_page.ready') %>"); break;
+                case 'Stopped':      $('.washer-content .washer-text ul li strong').eq(0).text("<%= __('appliance_page.stopped') %>"); break;
+              }
             }
-            $('.washer-content .washer-text ul li strong').eq(1).text(device.vibration + ' mps');
-            $('.washer-content .washer-text ul li strong').eq(2).text(device.waterPressure + ' psi');
+            $('.washer-content .washer-text ul li strong').eq(1).text(device.vibration + " <%= __('appliance_page.vibration_unit') %>");
+            $('.washer-content .washer-text ul li strong').eq(2).text(device.waterPressure + " <%= __('appliance_page.water_pressure_unit') %>");
             $('.washer-content .washer-text ul li img').attr('src', '/images/Checkmark.svg');
           }          
         }
@@ -201,12 +210,12 @@
           <!-- dialog body -->
           <div class="modal-body">
             <button type="button" class="close" data-dismiss="modal">&times;</button>
-            This action cannot be undone. Are you sure?
+            <%= __('appliance_page.delete_prompt') %>
           </div>
           <!-- dialog buttons -->
           <div class="modal-footer">
-            <button id="btnCancel" type="button" class="btn btn-default">Cancel</button>
-            <button id="btnConfirm" type="button" class="btn btn-danger">Delete</button>
+            <button id="btnCancel" type="button" class="btn btn-default"><%= __('appliance_page.cancel') %></button>
+            <button id="btnConfirm" type="button" class="btn btn-danger"><%= __('appliance_page.delete') %></button>
           </div>
         </div>
       </div>
