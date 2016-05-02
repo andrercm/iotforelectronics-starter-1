@@ -34,14 +34,6 @@ var path            = require('path'),
     apiRouter       = require('./routes/api');
 
 var jsonParser = bodyParser.json();
-var i18n = require("i18n");
-
-i18n.configure({
-    directory: __dirname + '/locales',
-    defaultLocale: 'en',
-    queryParameter: 'lang',
-    objectNotation: true
-});
 
 dumpError = function(msg, err) {
 	if (typeof err === 'object') {
@@ -68,6 +60,21 @@ var host = (process.env.VCAP_APP_HOST || 'localhost');
 //global HTTP routers
 httpRouter = require('./routes/httpRouter');
 
+//allow cross domain calls
+app.use(cors());
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/', routes);
+app.use('/', httpRouter);
+app.use('/', device);
+app.use('/', simulator);
+app.use('/api', apiRouter);
+
 //Add a handler to inspect the req.secure flag (see
 //http://expressjs.com/api#req.secure). This allows us
 //to know whether the request was via http or https.
@@ -83,35 +90,6 @@ app.use(function (req, res, next) {
 		next();
 });
 
-//allow cross domain calls
-app.use(cors());
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(i18n.init);
-
-app.use(function(req, res, next){
-  if(req.query.mocked === 'true'){
-    var locale = req.getLocale();
-    req.setLocale('mocked_' + req.getLocale());
-    if(req.getLocale() !== 'mocked_' + locale){
-      req.setLocale(locale);
-    }
-    next();
-  } else {
-    next();
-  }
-});
-
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use('/', routes);
-app.use('/', httpRouter);
-app.use('/', device);
-app.use('/', simulator);
-app.use('/api', apiRouter);
-
 if(!VCAP_SERVICES || !VCAP_SERVICES["iotf-service"])
 	throw "Cannot get IoT-Foundation credentials"
 var iotfCredentials = VCAP_SERVICES["iotf-service"][0]["credentials"];
@@ -124,9 +102,9 @@ var iotfCredentials = VCAP_SERVICES["iotf-service"][0]["credentials"];
 // SETUP CLOUDANT
 //Key whichispermandencellansp
 //Password a8ba75e7534498a85a9f0c11adbe11e09ae03177 //
-var id = 'ca15409e-9847-4b9e-9d8c-ec26c4cf01ae-bluemix';
-var pword = 'f1ad812df21ef96a09dbfbaff6de261e3085b0a5da0518bede7ab69a1caff3f7';
-var host  = 'ca15409e-9847-4b9e-9d8c-ec26c4cf01ae-bluemix.cloudant.com';
+var id = 'ee7cb196-a1aa-4871-97e9-3e46813d9a4f-bluemix';
+var pword = 'f99a631bb23d340e741a3dd0ccd391dd1536ee1ca076f15812c4f005859b2a39';
+var host  = 'ee7cb196-a1aa-4871-97e9-3e46813d9a4f-bluemix.cloudant.com';
 var CLOUDANT_URL='https://' + id + ':' + pword + '@' + host;
 var dbname   = 'iot_for_electronics_registration';
 
@@ -189,10 +167,10 @@ app.get('/users/internal/:userID', function(req, res)
   	}
   	if (result.docs.length==0)
   	{
-  		res.status(404).send('User not found.')
+  		res.sendStatus(404)
   	}
   	else
-  		res.status(200).send('User exists.');
+  		res.sendStatus(200);
 
     	console.log('Found %d documents with userID', result.docs.length);
     	for (var i = 0; i < result.docs.length; i++)
@@ -223,29 +201,20 @@ app.get('/users/:userID', passport.authenticate('mca-backend-strategy', {session
 app.post("/users/internal", function (req, res)
 {
 	console.log("POST /users  ==> Begin");
-   var doc = JSON.parse(JSON.stringify(req.body));
-	 doc.orgID = currentOrgID;
 
-	 // search for docs at currentOrgID and userID given...
+   var doc = {userID: req.body.userID, name:req.body.name, telephone:req.body.telephone, address:req.body.address, orgID:currentOrgID};
    db.find({selector:{orgID: currentOrgID, userID:req.body.userID}}, function(er, result)
    {
 	   if (er)
 	   {
-		   res.status(er.statusCode).send('Error from cloudant.');
+		   res.sendStatus(er.statusCode);
 		   return;
 	   }
-		 //make sure they gave us a userID (required field)
- 	 	 else if (!doc.hasOwnProperty('userID'))
- 		 {
-			  console.log("userID is a required field.");
-				res.status(400).send('userID is a required field.');
-				return;
- 		 }
 	   //if user already exists, send error code
-	   else if (result.docs.length!=0)
+	   if (result.docs.length!=0)
 	   {
-			console.log("User already exists.");
-		   res.status(409).send('User already exists.')
+			console.log("User already exists at this orgID.");
+		   res.sendStatus(409)
 	   }
 	   else
 	   {
@@ -254,14 +223,14 @@ app.post("/users/internal", function (req, res)
 			   if(err)
 			   {
 				   console.log('POST /users  ==> Error:', er);
-				   res.status(err.statusCode).send('Error inserting into cloudant.');
+				   res.sendStatus(err.statusCode);
 			   }
 			   else
 			   {
 				   console.log("POST /users  ==> Inserting user document in Cloudant");
 				   console.log('POST /users  ==> id       = ', data.id);
 				   console.log('POST /users  ==> revision = ', data.rev);
-				   res.status(201).send('User registered successfully.');
+				   res.sendStatus(201);
 			   }
 		   });
 	   }
@@ -301,12 +270,15 @@ app.post("/users", passport.authenticate('mca-backend-strategy', {session: false
 /******************************************************************/
 app.post('/appliances/internal', function (req, res)
 {
-   console.log("POST /appliances  ==> Begin");
+    console.log("POST /appliances  ==> Begin");
    console.log("POST /appliances  ==> Inserting device document in Cloudant");
+   console.log(req.body.userID);
+   console.log(req.body.applianceID);
+	 //console.log("API KEY: " +  services.iotf-service.apiKey)
+	// console.log("API TOKEN: " + services.iotf-service.apiToken)
+   var doc = {userID: req.body.userID, applianceID: req.body.applianceID, serialNumber: req.body.serialNumber, manufacturer: req.body.manufacturer, name: req.body.name, dateOfPurchase: req.body.dateOfPurchase, model: req.body.model, orgID: currentOrgID, registrationCreatedOnPlatform: false};
 
-	 var doc = JSON.parse(JSON.stringify(req.body));
-	 doc.orgID = currentOrgID;
-	 var https = require('https');
+	var https = require('https');
 
     //API keys from IoTF
 		var auth_key = iotfCredentials["apiKey"];
@@ -323,41 +295,46 @@ app.post('/appliances/internal', function (req, res)
             auth: auth_key + ':' + auth_token
     };
 
+  console.log("LINE BEFORE HTTPS.GET")
 	https.get(options, function(platformRes)
 	{
+		console.log("INSIDE OF THE HTTPS.GET BLOCK..." + options)
 		var response = '';
 		platformRes.on('error', function(platformErr)
 		{
+			console.log("*******IN PLATFORM ERR*********")
 			console.log(platformErr.message)
-			res.status(platformErr.message).send('Error retrieving response from IOT platform.')
+			console.log("*******IN PLATFORM ERR*********")
 		});
 		platformRes.on('data', function(data)
 		{
 			response += data;
+					console.log("INSIDE OF THE platformRES.ON BLOCK..." + response)
 		});
 		platformRes.on('end', function()
 		{
+								console.log("INSIDE OF THE platformRES.ON END BLOCK..." + response)
 			if (response == '')
 			{
 				console.log(req.body.applianceID + " does not exist.");
-				res.status(409).send('409 Conflict: ' + req.body.applianceID + " does not exist.");
+				res.sendStatus(409);
 				return;
 			}
 			else
 			{
-				//make sure the ApplianceID doesn't exist
-				db.find({selector:{applianceID: req.body.applianceID}}, function(er, result)
+				//make sure the ApplianceID doesn't exist already for this user at this org
+				db.find({selector:{orgID: currentOrgID, userID:req.body.userID, applianceID: req.body.applianceID}}, function(er, result)
 				{
 					if (er)
 					{
-						res.status(er.statusCode).send('Error retrieving response from cloudant.');
+						res.sendStatus(er.statusCode);
 						return;
 					}
-					//if appliance already exists, send error
+					//if user already exists, send error code
 					if (result.docs.length!=0)
 					{
-					 console.log("ApplianceID already exists.");
-						res.status(409).send('409 Conflict: ApplianceID already exists.')
+					 console.log("ApplianceID already exists for this userID at this orgID.");
+						res.sendStatus(409)
 					}
 					else
 					{
@@ -366,7 +343,7 @@ app.post('/appliances/internal', function (req, res)
  					   if (err)
  					   {
  						     console.log('POST /appliances  ==> Error:', err);
- 					       res.status(err.statusCode).send('Error inserting into cloudant.');
+ 					       res.sendStatus(err.statusCode);
  					       return;
  					   }
  					   else
@@ -375,7 +352,7 @@ app.post('/appliances/internal', function (req, res)
  						   console.log(JSON.stringify(output, null, 2));
  						   console.log('POST /appliances  ==> id       = ', data.id);
  					       console.log('POST /appliances  ==> revision = ', data.rev);
- 					       res.status(201).json({'resultcode': '200'});
+ 					       res.sendStatus(201);
  					       return;
  					   }
  					 });
@@ -437,67 +414,34 @@ app.post('/appliances', passport.authenticate('mca-backend-strategy', {session: 
    });
 });
 
-
-// list all indexes...
-app.get("/index", function (req, res)
+app.get("/index", function(req, res)
 {
-   db.index(function(err, result)
-   {
-      if(err)
-      {
-        console.log('GET /index  ==> Error:', err.statusCode);
-        res.sendStatus(err.statusCode);
-      }
-      else
-      {
-        console.log('The database has %d indexes', result.indexes.length);
-				// try to create all indexes we need - if they already exist, skip
-				var index = {name:'userId', type:'json', index:{fields:['orgID','userID']}};
+	var index = {name:'userId', type:'json', index:{fields:['currentOrgID','userID']}};
 
-				   db.index(index, function(err, response)
-				   {
-				     if (err)
-				     {
-				       console.log('GET /index  ==> Error:', err.statusCode);
-				       return;
-				     }
-	 					console.log('Index creation result: %s', response.result);
-	 					//res.sendStatus(201);
+	   db.index(index, function(err, response)
+	   {
+	     if (err)
+	     {
+	       console.log('GET /index  ==> Error:', err.statusCode);
+	       return;
+	     }
+	     console.log('Index creation result: %s', response.result);
+	   });
 
-				   });
-
-				//create an index to find appliance doc for given userID and applianceID
-				var index = {name:'applianceByUser', type:'json', index:{fields:['orgID', 'userID', 'applianceID']}};
-				db.index(index, function(er, response)
-				{
-					if (er)
-					{
-						console.log(er);
-						return;
-					}
-					console.log('Index creation result: %s', response.result);
-					//res.sendStatus(201);
-
-				});
-
-				//create an index to find appliance doc (we need to know if it exists in db at all)
-				var index = {name:'appliance', type:'json', index:{fields:['applianceID']}};
-				db.index(index, function(er, response)
-				{
-					if (er)
-					{
-						console.log(er);
-						return;
-					}
-					console.log('Index creation result: %s', response.result);
-					//res.sendStatus(201);
-
-				});
-
-      }
-				res.sendStatus(201);
-   });
+	//create an index to find appliance doc for given userID and applianceID
+	var index = {name:'applianceByUser', type:'json', index:{fields:['currentOrgID', 'userID', 'applianceID']}};
+	db.index(index, function(er, response)
+	{
+		if (er)
+		{
+			console.log(er);
+			//throw er;
+		}
+		console.log('Index creation result: %s', response.result);
+	})
 });
+
+
 
 /***************************************************************/
 /* Route to show one user doc using Cloudant Query             */
@@ -517,19 +461,18 @@ app.get('/user/internal/:userID', function(req, res)
      {
        console.log("GET /user ==> Error received from database = " + err.statusCode);
        console.log(err);
-			 res.status(err.statusCode).send('Error from cloudant.')
        return;
      }
 
      if (result.docs.length==0)
      {
         console.log("GET /user ==> user:" + req.params.userID + " not in database");
-				res.status(404).send('userID not found.');
+		res.sendStatus(404);
         return;
      }
      else
      {
-	 	 		console.log(result);
+	 console.log(result);
         for (var i = 0; i < result.docs.length; i++)
         {
           if (!('applianceID'  in result.docs[i]))
@@ -586,13 +529,13 @@ app.get('/appliances/internal/:userID', function (req, res)
     	{
 			console.log("app.get ==> Error condition");
 			console.log(err);
-			res.status(err.statusCode).send('Error from cloudant.');
+			res.sendStatus(err.statusCode);
 			return;
     	}
      if (result.docs.length==0)
      {
-       console.log("app.get /appliance ==> Cannot find userID");
-       res.status(404).send('userID not found.');
+       console.log("app.get /appliance ==> Cannot find document");
+       res.sendStatus(404);
        return;
      }
 
@@ -659,13 +602,13 @@ app.get('/appliances/internal2/:userID/:applianceID', function (req, res)
     	{
 			console.log("app.get ==> Error condition");
 			console.log(err);
-			res.status(err.statusCode).send('Error from cloudant.');
+			res.sendStatus(err.statusCode);
 			return;
     	}
      if (result.docs.length==0)
      {
        console.log("app.get /appliance ==> Cannot find document");
-       res.status(404).send('Appliance not found.');
+       res.sendStatus(404);
        return;
      }
 
@@ -707,7 +650,7 @@ app.del('/appliances/internal/:userID/:applianceID', function(req, res)
    if (req.params.userID == null || req.params.applianceID == null)
    {
       console.log("DEL /appliance ==> userID and/or applianceID not provided");
-      res.status(400).send('userID and applianceID are required to delete an appliance.');
+      res.sendStatus(400);
       return;
    }
 
@@ -717,14 +660,14 @@ app.del('/appliances/internal/:userID/:applianceID', function(req, res)
      {
        console.log("DEL /appliance ==> Error condition");
        console.log(err);
-       res.status(err.statusCode).send('Error from cloudant.');
+       res.status(err.statusCode);
        return;
      }
 
      if (result.docs.length==0)
      {
        console.log("DEL /appliance ==> Cannot find document");
-       res.status(404).send('Appliance ' + req.params.applianceID + ' not found.');
+       res.status(404);
        return;
      }
 
@@ -748,12 +691,12 @@ app.del('/appliances/internal/:userID/:applianceID', function(req, res)
 				console.log('DEL /appliance  ==> Error:', err.statusCode);
 				console.log('DEL /appliance  ==> Error: Error deleting document');
 				console.log(err);
-				res.status(err.statusCode).send('Error from cloudant on delete.');
+				res.status(err.statusCode);
 			}
 			else
 			{
 				console.log("DEL /appliance ==> Deleted document for userID: " + req.params.userID + " applianceID: " + req.params.applianceID);
-				res.status(204).send('Deleted appliance document for userID: ' + req.params.userID + ' applianecID: ' + req.params.applianceID);
+				res.status(204);
 			}
 		});
 	}
@@ -775,12 +718,12 @@ app.del("/appliances/:userID/:applianceID", passport.authenticate('mca-backend-s
 /* Need to delete the appliance documents as well from our db  							   */
 /* If we created them on the platform, delete from platform (NOT for experimental)         */
 /*******************************************************************************************/
-app.del('/user/internal/:userID', function (req, res)
+app.delete('/user/internal/:userID', function (req, res)
 {
    if (req.params.userID == null)
    {
       console.log("DEL /user ==> userID not provided");
-      res.status(400).send('userID is a required field.');
+      res.sendStatus(400);
       return;
    }
 
@@ -790,14 +733,14 @@ app.del('/user/internal/:userID', function (req, res)
      {
        console.log("DEL /user ==> Error condition");
        console.log(err);
-       res.status(err.statusCode).send('Error from cloudant.');
+       res.sendStatus(err.statusCode);
        return;
      }
 
      if (result.docs.length==0)
      {
        console.log("DEL /user ==> Cannot find document in Cloudant");
-       res.status(404).send('Cannot find userID ' + req.params.userID);
+       res.sendStatus(404);
        return;
      }
 
@@ -832,7 +775,7 @@ app.del('/user/internal/:userID', function (req, res)
                  console.log('DEL /appliance  ==> Error:', err.statusCode);
                  console.log('DEL /appliance  ==> Error: Error deleting document');
                  console.log(err);
-                 res.status(err.statusCode).send('Error from cloudant on delete.');
+                 res.sendStatus(err.statusCode);
                }
                else
                {
@@ -854,7 +797,7 @@ app.del('/user/internal/:userID', function (req, res)
                console.log('DEL /user  ==> Error:', err.statusCode);
                console.log('DEL /user  ==> Error: Error deleting document');
                console.log(err);
-               res.status(err.statusCode).send('Error from cloudant on delete.');
+               res.sendStatus(err.statusCode);
              }
              else
              {
@@ -864,7 +807,7 @@ app.del('/user/internal/:userID', function (req, res)
        }
        i++;
      }
-     res.status(204).send('userID ' + req.params.userID + ' successfully deleted.');
+     res.sendStatus(204);
   });
 });
 
@@ -953,7 +896,6 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
     res.status(200).json(responseJson);
 });
 
-
 /********************************************************************** **/
 /*Solution Integrator Code                                               */
 /********************************************************************** **/
@@ -962,10 +904,10 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   	throw "Cannot get RTI credentials"
   var rtiCredentials = VCAP_SERVICES["IoT Real-Time Insight"][0]["credentials"];
 
-//Get IoT for Electronics credentials
-if(!VCAP_SERVICES || !VCAP_SERVICES["ibmiotforelectronics"])
-	throw "Cannot get IoT4E credentials"
-var iotECredentials = VCAP_SERVICES["ibmiotforelectronics"][0]["credentials"];
+// //Get IoT for Electronics credentials
+// //if(!VCAP_SERVICES || !VCAP_SERVICES["ibmiotforelectronics"])
+// //	throw "Cannot get IoT4E credentials"
+// //var ioteCredentials = VCAP_SERVICES["ibmiotforelectronics"][0]["credentials"];
 
 
  //IoT Platform Credentials
@@ -976,29 +918,21 @@ var iotECredentials = VCAP_SERVICES["ibmiotforelectronics"][0]["credentials"];
   var baseURI = iotfCredentials["base_uri"];
   var apiURI = 'https://' + iotfCredentials["http_host"] + ':443/api/v0002';
 
-//RTI Credentials
+ // //RTI Credentials
   var rtiApiKey = rtiCredentials["apiKey"];
   var rtiAuthToken = rtiCredentials["authToken"];
   var rtiBaseUrl = rtiCredentials["baseUrl"];
   var disabled = false;
 
-//IoT for Electronics Credentials
-  var iotETenant = iotECredentials["tenantID"];
-// //var iotePass = ioteCredentials["password"];
-
-// //IoT Platform Device Types
-// //var	iotpDevId = "washingMachine";
-// //var	iotpDescription = "IoT4E Washing Machine";
-// //var	iotpClassId = "Device"
-
-// //RTI Message Schema Info
-// //var	rtiSchemaName = "Electronics";
-
-// //IoT Platform Config Creation Method.
+ //RTI IDs
+ var sourceId = '';
+ var schemaId = '';
+ 
+ //IoT Platform Config Creation Method.
   var iotpPost = function iotpPost (path, json) {
-  console.log('calling api to POST: ' + baseURI);
-  console.log('IoTP API URI: ' + apiURI);
-  console.log('calling api on json: ' + JSON.stringify(json));
+    //console.log('calling api to POST: ' + baseURI);
+    //console.log('IoTP API URI: ' + apiURI);
+    //console.log('calling api on json: ' + JSON.stringify(json));
 
     var url = apiURI + path;
     var defer = q.defer();
@@ -1019,21 +953,25 @@ var iotECredentials = VCAP_SERVICES["ibmiotforelectronics"][0]["credentials"];
      })
      .on('response', function(response) {
         console.log('IoTP status: ' + response.statusCode);
+		console.log('IoTP error path: ' + path);
+		
     });
      return defer.promise;
   };
 
  // //RTI Config Creation Method.
   var rtiPost = function rtiPost (path, json) {
-    console.log('calling api to baseURL: ' + rtiBaseUrl);
-    console.log('calling api to Path ' + path);
-    console.log('Rti Api: ' + rtiApiKey);
-    console.log('Rti Token: ' + rtiAuthToken);
+    //console.log('calling api to baseURL: ' + rtiBaseUrl);
+    console.log('calling RTI api to Path ' + path);
+    //console.log('Rti Api: ' + rtiApiKey);
+    //console.log('Rti Token: ' + rtiAuthToken);
     console.log('calling api on json: ' + JSON.stringify(json));
 
     var url = rtiBaseUrl + path;
     var defer = q.defer();
     var body = '';
+	var responseBody = '';
+	var responseBodyParse = '';
 
     request
      .post({
@@ -1047,13 +985,28 @@ var iotECredentials = VCAP_SERVICES["ibmiotforelectronics"][0]["credentials"];
       .on('end', function() {
         var json = JSON.parse(body);
         defer.resolve(json);
-     })
-     .on('response', function(response) {
-        console.log('`RTI status: ' + response.statusCode); // 200
-    });
+     });
      return defer.promise;
    };
 
+ function generateMacAddress(){
+	var mac = Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16);		
+	var macStr = mac[0].toUpperCase() + mac[1].toUpperCase() + mac[2].toUpperCase() + mac[3].toUpperCase() + 
+	mac[4].toUpperCase() + mac[5].toUpperCase() + mac[6].toUpperCase() + mac[7].toUpperCase() + 
+	mac[8].toUpperCase() + mac[9].toUpperCase() + mac[10].toUpperCase() + mac[11].toUpperCase();
+	return macStr;
+};
  //IoT Platform device type creation call
   var iotpDeviceType = iotpPost('/device/types',{
   	"id": "washingMachine",
@@ -1061,12 +1014,10 @@ var iotECredentials = VCAP_SERVICES["ibmiotforelectronics"][0]["credentials"];
   	"classId": "Device"
  });
 
-// //IoT Platform device creation call
-// //var iotpDeviceType = iotpPost('/device/types/washingMachine/devices',{
-// //  //"id": "d:abc123:myType:myDevice",
-// //  "typeId": "washingMachine",
-// //  "deviceId": "washingMachineElec"
-// //});
+//IoT Platform device creation call
+//  var iotpDeviceType = iotpPost('/device/types/washingMachine/devices',{
+//    "deviceId": generateMacAddress()
+//  });
 
   //RTI data source creation call
   var rtiSource = rtiPost('/message/source',{
@@ -1074,26 +1025,31 @@ var iotECredentials = VCAP_SERVICES["ibmiotforelectronics"][0]["credentials"];
   	"orgId": orgId,
   	"apiKey": apiKey,
   	"authToken": authToken,
-  	"disabled": disabled})
-  		.then(function(json) {
-			defer.resolve(json);
-			console.log('RTI Source Return: ' + JSON.stringify(json));
-		});
+  "disabled": disabled})
+	.then(function(json) {
+		var source = JSON.parse(json);
+		sourceId = source.id;
+		console.log(' RTI Source ID: ' + sourceId);
+		//defer.resolve(json);
+  });
 
  // //RTI schema creation call
   var rtiSchema = rtiPost('/message/schema',{
   	"name": "Electronics",
   	"format": "JSON",
-  	"items": []});
-
+  "items": []})
+	.then(function(json) {
+		var schema = JSON.parse(json);
+		schemaId = schema.id;
+		console.log(' RTI Schema ID: ' + schemaId);
+  });
+	
  //RTI route creation call
   var rtiRoute = rtiPost('/message/route',{
-  	"sourceId": name,
+  	"sourceId": sourceId,
   	"deviceType": "washingMachine",
   	"eventType": "+",
-  	"schemaId": "Electronics"});
-
-console.log('IoT4E Credentials: ' + iotETenant);  
+  "schemaId": schemaId});	
 /********************************************************************** **/
 /*End of Solution Integrator Code                                        */
 /********************************************************************** **/
