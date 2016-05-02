@@ -362,6 +362,15 @@ button, a{
 	height: 140px;
 	margin-bottom: 50px;
 }
+.alert-messages {
+	position: fixed;
+	width: 50%;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	margin: auto;
+	z-index: 7000;
+}
 /*Footer*/
 footer{
   padding: 20px 0px;
