@@ -34,14 +34,6 @@ var path            = require('path'),
     apiRouter       = require('./routes/api');
 
 var jsonParser = bodyParser.json();
-var i18n = require("i18n");
-
-i18n.configure({
-    directory: __dirname + '/locales',
-    defaultLocale: 'en',
-    queryParameter: 'lang',
-    objectNotation: true
-});
 
 dumpError = function(msg, err) {
 	if (typeof err === 'object') {
@@ -68,6 +60,21 @@ var host = (process.env.VCAP_APP_HOST || 'localhost');
 //global HTTP routers
 httpRouter = require('./routes/httpRouter');
 
+//allow cross domain calls
+app.use(cors());
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/', routes);
+app.use('/', httpRouter);
+app.use('/', device);
+app.use('/', simulator);
+app.use('/api', apiRouter);
+
 //Add a handler to inspect the req.secure flag (see
 //http://expressjs.com/api#req.secure). This allows us
 //to know whether the request was via http or https.
@@ -82,35 +89,6 @@ app.use(function (req, res, next) {
 	else
 		next();
 });
-
-//allow cross domain calls
-app.use(cors());
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(i18n.init);
-
-app.use(function(req, res, next){
-  if(req.query.mocked === 'true'){
-    var locale = req.getLocale();
-    req.setLocale('mocked_' + req.getLocale());
-    if(req.getLocale() !== 'mocked_' + locale){
-      req.setLocale(locale);
-    }
-    next();
-  } else {
-    next();
-  }
-});
-
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use('/', routes);
-app.use('/', httpRouter);
-app.use('/', device);
-app.use('/', simulator);
-app.use('/api', apiRouter);
 
 if(!VCAP_SERVICES || !VCAP_SERVICES["iotf-service"])
 	throw "Cannot get IoT-Foundation credentials"
@@ -164,409 +142,6 @@ var cloudant = Cloudant(CLOUDANT_URL, function(err,cloudant){
 
 passport.use(new MCABackendStrategy());
 app.use(passport.initialize());
-
-/***************************************************************/
-/* Route to get 1 user document from Cloudant (1)              */
-/*   Internal API       									                     */
-/* Input: url params that contains the userID 			           */
-/* Returns: 200 for found user, 404 for user not found         */
-/* Usecase: Does this user exist? Yes/No											 */
-/* * to return the user doc in the body of the response,       */
-/* * use app.get('/user/'...) API below                        */
-/***************************************************************/
-app.get('/users/internal/:userID', function(req, res)
-{
-	console.log('GET /users  ==> Begin');
-  console.log('GET /users  ==> Incoming userID = '+ req.params.userID);
-
-	//find a user doc by using the userID index, given query string with userID
-  db.find({selector:{orgID: currentOrgID, userID:req.params.userID}}, function(er, result)
-  {
-  	if (er)
-  	{
-  		res.sendStatus(er.statusCode);
-  		throw er;
-  	}
-  	if (result.docs.length==0)
-  	{
-  		res.status(404).send('User not found.')
-  	}
-  	else
-  		res.status(200).send('User exists.');
-
-    	console.log('Found %d documents with userID', result.docs.length);
-    	for (var i = 0; i < result.docs.length; i++)
-    	{
-    		console.log('  Doc id: %s', result.docs[i]._id);
-    	}
-
-    });
-});
-
-/***************************************************************/
-/* Route to get 1 user document from Cloudant (1)              */
-/*															   */
-/* Input: url params that contains the userID 			       */
-/* Returns: 200 for found user, 404 for user not found         */
-/***************************************************************/
-app.get('/users/:userID', passport.authenticate('mca-backend-strategy', {session: false }), function(req, res)
-{
-	res.redirect('/users/internal/' + req.user.id);
-});
-
-/***************************************************************/
-/* Route to add 1 user document to Cloudant.   (2)             */
-/*           Internal API                                      */
-/* Input: JSON structure that contains the userID, name,       */
-/*             address, and telephone                          */
-/***************************************************************/
-app.post("/users/internal", function (req, res)
-{
-	console.log("POST /users  ==> Begin");
-   var doc = JSON.parse(JSON.stringify(req.body));
-	 doc.orgID = currentOrgID;
-
-	 // search for docs at currentOrgID and userID given...
-   db.find({selector:{orgID: currentOrgID, userID:req.body.userID}}, function(er, result)
-   {
-	   if (er)
-	   {
-		   res.status(er.statusCode).send('Error from cloudant.');
-		   return;
-	   }
-		 //make sure they gave us a userID (required field)
- 	 	 else if (!doc.hasOwnProperty('userID'))
- 		 {
-			  console.log("userID is a required field.");
-				res.status(400).send('userID is a required field.');
-				return;
- 		 }
-	   //if user already exists, send error code
-	   else if (result.docs.length!=0)
-	   {
-			console.log("User already exists.");
-		   res.status(409).send('User already exists.')
-	   }
-	   else
-	   {
-		   db.insert(doc, function(err, data)
-		   {
-			   if(err)
-			   {
-				   console.log('POST /users  ==> Error:', er);
-				   res.status(err.statusCode).send('Error inserting into cloudant.');
-			   }
-			   else
-			   {
-				   console.log("POST /users  ==> Inserting user document in Cloudant");
-				   console.log('POST /users  ==> id       = ', data.id);
-				   console.log('POST /users  ==> revision = ', data.rev);
-				   res.status(201).send('User registered successfully.');
-			   }
-		   });
-	   }
-
-   });
-
-
-});
-
-
-/***************************************************************/
-/* Route to add 1 user document to Cloudant.   (2)             */
-/*                                                             */
-/* Input: JSON structure that contains the userID, name,       */
-/*             address, and telephone			               */
-/***************************************************************/
-// passport.authenticate('mca-backend-strategy', {session: false }),
-app.post("/users", passport.authenticate('mca-backend-strategy', {session: false }),  function (req, res)
-{
-	var formData = req.body;
-	formData.userID = req.user.id;
-
-	request.post({url: 'https://' + application.application_uris[0] + '/users/internal', formData: formData}, function optionalCallback(err, httpResponse, body) {
-	if (err) {
-    return console.error('upload failed:', err);
-	}
-	});
-});
-
-
-/******************************************************************/
-/* Route to add 1 appliance document to registration Cloudant.(3) */
-/*                 												  */
-/*  Internal API                                                  */
-/* Input: JSON structure that contains the userID, applianceID,   */
-/*             serial number, manufacturer, and model             */
-/******************************************************************/
-app.post('/appliances/internal', function (req, res)
-{
-   console.log("POST /appliances  ==> Begin");
-   console.log("POST /appliances  ==> Inserting device document in Cloudant");
-
-	 var doc = JSON.parse(JSON.stringify(req.body));
-	 doc.orgID = currentOrgID;
-	 var https = require('https');
-
-    //API keys from IoTF
-		var auth_key = iotfCredentials["apiKey"];
- 		var auth_token = iotfCredentials["apiToken"];
-		console.log("KEY AND TOKEN: " + auth_key + "  " + auth_token)
-    //var auth_key = services.iotf-service.apiKey;
-    //var auth_token = services.iotf-service.apiToken;
-		var httpHost = iotfCredentials["http_host"]
-		console.log("HTTP HOST: " + httpHost)
-		var options =
-    {
-            host: httpHost,
-            path: '/api/v0002/device/types/washingMachine/devices/'+ req.body.applianceID,
-            auth: auth_key + ':' + auth_token
-    };
-
-	https.get(options, function(platformRes)
-	{
-		var response = '';
-		platformRes.on('error', function(platformErr)
-		{
-			console.log(platformErr.message)
-			res.status(platformErr.message).send('Error retrieving response from IOT platform.')
-		});
-		platformRes.on('data', function(data)
-		{
-			response += data;
-		});
-		platformRes.on('end', function()
-		{
-			if (response == '')
-			{
-				console.log(req.body.applianceID + " does not exist.");
-				res.status(409).send('409 Conflict: ' + req.body.applianceID + " does not exist.");
-				return;
-			}
-			else
-			{
-				//make sure the ApplianceID doesn't exist
-				db.find({selector:{applianceID: req.body.applianceID}}, function(er, result)
-				{
-					if (er)
-					{
-						res.status(er.statusCode).send('Error retrieving response from cloudant.');
-						return;
-					}
-					//if appliance already exists, send error
-					if (result.docs.length!=0)
-					{
-					 console.log("ApplianceID already exists.");
-						res.status(409).send('409 Conflict: ApplianceID already exists.')
-					}
-					else
-					{
-						db.insert(doc, function(err, data)
- 				    {
- 					   if (err)
- 					   {
- 						     console.log('POST /appliances  ==> Error:', err);
- 					       res.status(err.statusCode).send('Error inserting into cloudant.');
- 					       return;
- 					   }
- 					   else
- 					   {
- 						   var output = JSON.parse(response);
- 						   console.log(JSON.stringify(output, null, 2));
- 						   console.log('POST /appliances  ==> id       = ', data.id);
- 					       console.log('POST /appliances  ==> revision = ', data.rev);
- 					       res.status(201).json({'resultcode': '200'});
- 					       return;
- 					   }
- 					 });
-					}
-				});
-			}
-
-		});
-
-	});
-});
-
-//TEMPORARY EXTERNAL ROUTE FOR POST TO /appliances
-//FOR STEPHANIE TO TEST
-app.post('/stephAppliances', function (req, res)
-{
-	var bodyIn = req.body;
-
-	request.post({url: 'https://' + application.application_uris[0] + '/appliances/internal',
-								body: JSON.stringify(bodyIn),
-								headers: { "content-type": "application/json"}
-								},
-								function optionalCallback(err, httpResponse, body) {
-
-	 if (!err && httpResponse.statusCode == 201) {
-						 res.sendStatus(httpResponse.statusCode);
-						 console.log("SUCCESS: " + bodyIn);
-			 } else {
-				 console.log("Error in POST /appliances" + httpResponse.statusCode);
-				 res.sendStatus(httpResponse.statusCode);
-			 }
-	});
-});
-
-/***************************************************************/
-/* Route to add 1 appliance document to registration Cloudant.(3) */
-/*                                                             */
-/* Input: JSON structure that contains the userID, applianceID,*/
-/*             serial number, manufacturer, and model          */
-/***************************************************************/
-app.post('/appliances', passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)
-{
-   var bodyIn = req.body;
-   bodyIn.userID = req.user.id;
-
-   request.post({url: 'https://' + application.application_uris[0] + '/appliances/internal',
-                 body: JSON.stringify(bodyIn),
-                 headers: { "content-type": "application/json"}
-                 },
-                 function optionalCallback(err, httpResponse, body) {
-
-		if (!err && httpResponse.statusCode == 201) {
-							res.sendStatus(httpResponse.statusCode);
-              console.log("SUCCESS: " + bodyIn);
-        } else {
-					console.log("Error in POST /appliances" + httpResponse.statusCode);
-					res.sendStatus(httpResponse.statusCode);
-				}
-   });
-});
-
-
-// list all indexes...
-app.get("/index", function (req, res)
-{
-   db.index(function(err, result)
-   {
-      if(err)
-      {
-        console.log('GET /index  ==> Error:', err.statusCode);
-        res.sendStatus(err.statusCode);
-      }
-      else
-      {
-        console.log('The database has %d indexes', result.indexes.length);
-				// try to create all indexes we need - if they already exist, skip
-				var index = {name:'userId', type:'json', index:{fields:['orgID','userID']}};
-
-				   db.index(index, function(err, response)
-				   {
-				     if (err)
-				     {
-				       console.log('GET /index  ==> Error:', err.statusCode);
-				       return;
-				     }
-	 					console.log('Index creation result: %s', response.result);
-	 					//res.sendStatus(201);
-
-				   });
-
-				//create an index to find appliance doc for given userID and applianceID
-				var index = {name:'applianceByUser', type:'json', index:{fields:['orgID', 'userID', 'applianceID']}};
-				db.index(index, function(er, response)
-				{
-					if (er)
-					{
-						console.log(er);
-						return;
-					}
-					console.log('Index creation result: %s', response.result);
-					//res.sendStatus(201);
-
-				});
-
-				//create an index to find appliance doc (we need to know if it exists in db at all)
-				var index = {name:'appliance', type:'json', index:{fields:['applianceID']}};
-				db.index(index, function(er, response)
-				{
-					if (er)
-					{
-						console.log(er);
-						return;
-					}
-					console.log('Index creation result: %s', response.result);
-					//res.sendStatus(201);
-
-				});
-
-      }
-				res.sendStatus(201);
-   });
-});
-
-/***************************************************************/
-/* Route to show one user doc using Cloudant Query             */
-/*   Internal API											   */
-/* Takes a userID in the url params                            */
-/***************************************************************/
-app.get('/user/internal/:userID', function(req, res)
-{
-   console.log('GET /user  ==> Begin');
-    console.log('GET /users  ==> Incoming userID = '+ req.params.userID);
-
-   var responseDoc = {docs:[]};
-
-   db.find({selector:{orgID: currentOrgID, userID:req.params.userID}}, function(err, result)
-   {
-     if (err)
-     {
-       console.log("GET /user ==> Error received from database = " + err.statusCode);
-       console.log(err);
-			 res.status(err.statusCode).send('Error from cloudant.')
-       return;
-     }
-
-     if (result.docs.length==0)
-     {
-        console.log("GET /user ==> user:" + req.params.userID + " not in database");
-				res.status(404).send('userID not found.');
-        return;
-     }
-     else
-     {
-	 	 		console.log(result);
-        for (var i = 0; i < result.docs.length; i++)
-        {
-          if (!('applianceID'  in result.docs[i]))
-          {
-             responseDoc.docs.push({userID:    result.docs[i].userID,
-                                           name:      result.docs[i].name,
-                                           telephone: result.docs[i].telephone,
-                                           address:   result.docs[i].address});
-          }
-        }
-
-        res.status(200).json(responseDoc);
-        return;
-     }
-   });
-
-});
-
-
-/***************************************************************/
-/* Route to show one user doc using Cloudant Query             */
-/* Takes a userID in the url params                            */
-/***************************************************************/
-app.get('/user/:userID', passport.authenticate('mca-backend-strategy', {session: false }), function(req, res)
-{
-	res.redirect('user/internal/' + req.user.id, function (reqest, response){
-		if (response.statusCode == 201) {
-							res.sendStatus(httpResponse.statusCode);
-							console.log("SUCCESS: " + bodyIn);
-				} else {
-					console.log("Error in POST /appliances" + response.statusCode);
-					res.sendStatus(httpResponse.statusCode);
-				}
-	});
-
-});
-
 
 /***************************************************************/
 /* Route to get 1 user document from Cloudant (1)              */
@@ -1321,7 +896,6 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
     res.status(200).json(responseJson);
 });
 
-
 /********************************************************************** **/
 /*Solution Integrator Code                                               */
 /********************************************************************** **/
@@ -1330,10 +904,10 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   	throw "Cannot get RTI credentials"
   var rtiCredentials = VCAP_SERVICES["IoT Real-Time Insight"][0]["credentials"];
 
-//Get IoT for Electronics credentials
-//if(!VCAP_SERVICES || !VCAP_SERVICES["ibmiotforelectronics"])
-//	throw "Cannot get IoT4E credentials"
-//var iotECredentials = VCAP_SERVICES["ibmiotforelectronics"][0]["credentials"];
+// //Get IoT for Electronics credentials
+// //if(!VCAP_SERVICES || !VCAP_SERVICES["ibmiotforelectronics"])
+// //	throw "Cannot get IoT4E credentials"
+// //var ioteCredentials = VCAP_SERVICES["ibmiotforelectronics"][0]["credentials"];
 
 
  //IoT Platform Credentials
@@ -1344,29 +918,21 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   var baseURI = iotfCredentials["base_uri"];
   var apiURI = 'https://' + iotfCredentials["http_host"] + ':443/api/v0002';
 
-//RTI Credentials
+ // //RTI Credentials
   var rtiApiKey = rtiCredentials["apiKey"];
   var rtiAuthToken = rtiCredentials["authToken"];
   var rtiBaseUrl = rtiCredentials["baseUrl"];
   var disabled = false;
 
-//IoT for Electronics Credentials
-//  var iotETenant = iotECredentials["tenantID"];
-// //var iotePass = ioteCredentials["password"];
-
-// //IoT Platform Device Types
-// //var	iotpDevId = "washingMachine";
-// //var	iotpDescription = "IoT4E Washing Machine";
-// //var	iotpClassId = "Device"
-
-// //RTI Message Schema Info
-// //var	rtiSchemaName = "Electronics";
-
-// //IoT Platform Config Creation Method.
+ //RTI IDs
+ var sourceId = '';
+ var schemaId = '';
+ 
+ //IoT Platform Config Creation Method.
   var iotpPost = function iotpPost (path, json) {
-  console.log('calling api to POST: ' + baseURI);
-  console.log('IoTP API URI: ' + apiURI);
-  console.log('calling api on json: ' + JSON.stringify(json));
+    //console.log('calling api to POST: ' + baseURI);
+    //console.log('IoTP API URI: ' + apiURI);
+    //console.log('calling api on json: ' + JSON.stringify(json));
 
     var url = apiURI + path;
     var defer = q.defer();
@@ -1387,21 +953,25 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
      })
      .on('response', function(response) {
         console.log('IoTP status: ' + response.statusCode);
+		console.log('IoTP error path: ' + path);
+		
     });
      return defer.promise;
   };
 
  // //RTI Config Creation Method.
   var rtiPost = function rtiPost (path, json) {
-    console.log('calling api to baseURL: ' + rtiBaseUrl);
-    console.log('calling api to Path ' + path);
-    console.log('Rti Api: ' + rtiApiKey);
-    console.log('Rti Token: ' + rtiAuthToken);
+    //console.log('calling api to baseURL: ' + rtiBaseUrl);
+    console.log('calling RTI api to Path ' + path);
+    //console.log('Rti Api: ' + rtiApiKey);
+    //console.log('Rti Token: ' + rtiAuthToken);
     console.log('calling api on json: ' + JSON.stringify(json));
 
     var url = rtiBaseUrl + path;
     var defer = q.defer();
     var body = '';
+	var responseBody = '';
+	var responseBodyParse = '';
 
     request
      .post({
@@ -1415,13 +985,28 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
       .on('end', function() {
         var json = JSON.parse(body);
         defer.resolve(json);
-     })
-     .on('response', function(response) {
-        console.log('`RTI status: ' + response.statusCode); // 200
-    });
+     });
      return defer.promise;
    };
 
+ function generateMacAddress(){
+	var mac = Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16) +
+	Math.floor(Math.random() * 16).toString(16);		
+	var macStr = mac[0].toUpperCase() + mac[1].toUpperCase() + mac[2].toUpperCase() + mac[3].toUpperCase() + 
+	mac[4].toUpperCase() + mac[5].toUpperCase() + mac[6].toUpperCase() + mac[7].toUpperCase() + 
+	mac[8].toUpperCase() + mac[9].toUpperCase() + mac[10].toUpperCase() + mac[11].toUpperCase();
+	return macStr;
+};
  //IoT Platform device type creation call
   var iotpDeviceType = iotpPost('/device/types',{
   	"id": "washingMachine",
@@ -1429,12 +1014,10 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   	"classId": "Device"
  });
 
-// //IoT Platform device creation call
-// //var iotpDeviceType = iotpPost('/device/types/washingMachine/devices',{
-// //  //"id": "d:abc123:myType:myDevice",
-// //  "typeId": "washingMachine",
-// //  "deviceId": "washingMachineElec"
-// //});
+//IoT Platform device creation call
+//  var iotpDeviceType = iotpPost('/device/types/washingMachine/devices',{
+//    "deviceId": generateMacAddress()
+//  });
 
   //RTI data source creation call
   var rtiSource = rtiPost('/message/source',{
@@ -1442,26 +1025,31 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   	"orgId": orgId,
   	"apiKey": apiKey,
   	"authToken": authToken,
-  	"disabled": disabled})
-  		.then(function(json) {
-			defer.resolve(json);
-			console.log('RTI Source Return: ' + JSON.stringify(json));
-		});
+  "disabled": disabled})
+	.then(function(json) {
+		var source = JSON.parse(json);
+		sourceId = source.id;
+		console.log(' RTI Source ID: ' + sourceId);
+		//defer.resolve(json);
+  });
 
  // //RTI schema creation call
   var rtiSchema = rtiPost('/message/schema',{
   	"name": "Electronics",
   	"format": "JSON",
-  	"items": []});
-
+  "items": []})
+	.then(function(json) {
+		var schema = JSON.parse(json);
+		schemaId = schema.id;
+		console.log(' RTI Schema ID: ' + schemaId);
+  });
+	
  //RTI route creation call
   var rtiRoute = rtiPost('/message/route',{
-  	"sourceId": name,
+  	"sourceId": sourceId,
   	"deviceType": "washingMachine",
   	"eventType": "+",
-  	"schemaId": "Electronics"});
-
-//console.log('IoT4E Credentials: ' + iotETenant);  
+  "schemaId": schemaId});	
 /********************************************************************** **/
 /*End of Solution Integrator Code                                        */
 /********************************************************************** **/
