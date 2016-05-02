@@ -2,7 +2,9 @@
  * This file provides css styles.
  */
 
+
 body, html {
+    /*-webkit-font-smoothing: antialiased;*/
 	background-color: #FFF;
 	width: 100%;
 	height: 100%;
@@ -341,10 +343,14 @@ button, a{
 	display: inline-block;
 }
 .install-info a{
-	margin-left: 60px;
-	line-height: 7px;
-	font-size:16px;
+	/*line-height: 7px;*/
 	color: #4A97F8;
+}
+.install-info p{
+    font-size:16px;
+    margin-left: 58px;
+    margin-top: -6px;
+
 }
 .selection-code img{
 	width:128px;
@@ -356,18 +362,9 @@ button, a{
 	height: 140px;
 	margin-bottom: 50px;
 }
-.alert-messages {
-	position: fixed;
-	width: 50%;
-	top: 0px;
-	left: 0px;
-	right: 0px;
-	margin: auto;
-	z-index: 7000;
-}
 /*Footer*/
 footer{
-	padding: 20px 0px;
+  padding: 20px 0px;
 }
 footer.main-section{
 	z-index: 2;
@@ -409,11 +406,11 @@ footer.main-section{
 .washer-details .washer-content{
 	position: relative;
 	padding-top: 15px;
-	flex: 1;
+  flex: 1;
 }
 .washer-details .washer-content .washer-text{
-	display: inline-block;
-	margin-top: -25px;
+  display: inline-block;
+  margin-top: -25px;
 	text-align: left;
 	width: 100%;
 }
@@ -428,8 +425,8 @@ footer.main-section{
 }
 .washer-details .washer-content .text-list{
 	list-style: none;
-	padding: 0px;
-	width: 100%;
+  padding: 0px;
+  width: 100%;
 }
 .washer-details .washer-content .text-list li{
 	display: inline-block;
@@ -439,21 +436,22 @@ footer.main-section{
 .washer-details .washer-content .text-list li strong{
 	position: relative;
 	display: inline-block;
-	width: calc(100% - 55px);
+  width: calc(100% - 65px);
 }
 
 .washer-app-info{
-	display: flex;
-	font-size: 20px;
-	margin-top: 50px;
+  display: flex;
+	font-size:20px;
+	margin-top:50px;
 }
 .washer-app-info .qr-code-message{
 	text-align: left;
 	margin: 6px 0px;
 }
 .washer-app-info > div{
-	padding-left: 50px;
+  padding-left: 50px;
 }
+
 .washer-app-info img{
 	height: 100px;
 	width: 100px;
@@ -461,6 +459,14 @@ footer.main-section{
 .washer-app-info > div > img {
     margin-left: 10px;
 }
+
+/*For Safari 9+*/
+@supports (overflow:-webkit-marquee)
+   and (justify-content:inherit) {
+     .washer-app-info > div {padding-left: 90px;} 
+     .washer-app-info > div > img { margin-left: -10px;}  
+}
+
 .problem-machine{
 	text-align: left;
 	padding: 0px 25px;
