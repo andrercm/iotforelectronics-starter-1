@@ -313,6 +313,21 @@ simulationClient.prototype.onDeviceDisconnected = function(deviceID){
 	this.emit("deviceDisconnected", deviceID);
 };
 
+simulationClient.prototype.onDeviceDmAction = function(deviceID, action){
+	debug("Simulation event: onDeviceDmAction deviceID: " + deviceID);
+	this.emit("deviceDmAction", deviceID);
+};
+
+simulationClient.prototype.onDeviceFirmwareDownload = function(deviceID){
+	debug("Simulation event: onDeviceFirmwareDownload deviceID: " + deviceID);
+	this.emit("deviceFirmwareDownload", deviceID);
+};
+
+simulationClient.prototype.onDeviceFirmwareUpdate = function(deviceID){
+	debug("Simulation event: onDeviceFirmwareUpdate deviceID: " + deviceID);
+	this.emit("deviceFirmwareUpdate", deviceID);
+};
+
 simulationClient.prototype.onDeviceConnectionError = function(deviceID, errMsg, errStack){
 	debug("Simulation event: onDeviceConnectionError deviceID: " + deviceID + "errMsg: " + errMsg + " stacktrace: " + errStack);
 	this.emit("deviceConnectionError", deviceID, errMsg, errStack);
@@ -500,6 +515,15 @@ simulationClient.prototype.onMessage = function(msg){
 	case "deviceDisconnected":	
 		this.onDeviceDisconnected(message.deviceID);
 		break;
+	case "deviceDmAction":
+		this.onDeviceDmAction(message.deviceID, message.action);
+		break;
+	case "deviceFirmwareDownload":
+		this.onDeviceFirmwareDownload(message.deviceID);
+		break;
+	case "deviceFirmwareUpdate":
+		this.onDeviceFirmwareUpdate(message.deviceID);
+		break;
 	case "architectureDevices":
 		this.onDevicesSchema(message.archDevices);
 		break;
@@ -527,7 +551,7 @@ simulationClient.prototype.onMessage = function(msg){
 
 
 function callSimulationEngineAPI(method, paths, body){
-	var uri = appEnv.url + "/api";
+	var uri = "https://iot4esimulationengine.mybluemix.net/api";
 	var apiKey = "b52f6b93-5b22-4e76-a765-b3c8ad7a72a8";
 	var apiToken = "21b750f1-43ee-4c92-a11e-1a30ff503feb";	
 	if(paths){

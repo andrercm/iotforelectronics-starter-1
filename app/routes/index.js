@@ -12,12 +12,4 @@ router.get('/', function(req, res) {
 	});
 });
 
-/* GET home page. */
-router.get('/simulationClient', function(req, res) {
-	var protocol = (appEnv.isLocal) ? 'ws://' : 'wss://';
-	var address = (appEnv.isLocal) ? appEnv.bind +  ':' + appEnv.port : appEnv.url.split("://")[1]; 
-	var wsurl =  protocol + address + '/serverStatus';
-	res.render('simulationClient', { wsurl: wsurl });
-});
-
 module.exports = router;
