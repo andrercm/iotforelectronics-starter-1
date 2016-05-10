@@ -9,6 +9,38 @@ var fs = require('fs-extra');
 var request = require('request');
 var debug = require('debug')('simulationClient');
 var appEnv = require("cfenv").getAppEnv();
+var Cloudant = require('cloudant');
+
+function getDb(callback){
+	if(this.db){
+		callback(this.db);
+	} else {
+		// Cloudant setup
+		var username = 'ee7cb196-a1aa-4871-97e9-3e46813d9a4f-bluemix';
+		var password = 'f99a631bb23d340e741a3dd0ccd391dd1536ee1ca076f15812c4f005859b2a39';
+		var url = ['https://', username, ':', password, '@', username, '.cloudant.com'].join('');
+		var db_name = 'simulation_config';
+
+		var cloudant = Cloudant(url, function(err, cloudant){
+		  var db = cloudant.db.use(db_name);
+		  cloudant.db.get(db_name, function(err, body){
+		    if(err){
+		      cloudant.db.create(db_name, function(err, body){
+		        if(!err){
+		        	this.db = db;
+		        	callback(db);
+		        } else {
+		        	throw new Error("Cannot connect to database:", "simulation_config");
+		        }
+		      });
+		    } else {
+		    	this.db = db;
+		    	callback(db);
+		    }
+		  });
+		});
+	}
+};
 
 
 function simulationClient(config) {
@@ -41,32 +73,59 @@ simulationClient.prototype.getDevices = function(){
 	return this.simulationConfig.devices;	
 };
 
-simulationClient.prototype.loadConfiguration= function(simulationConfigFile, registerDevicetypes){
-	simulationConfigFile = (simulationConfigFile) ? simulationConfigFile: "./simulationConfig.json";
-	_.extend(this.simulationConfig, fs.readJsonSync(simulationConfigFile));	
-	if(!registerDevicetypes)
-		return Q(true);
-	var regDeviceTypeReqs = [];
-	_.each(this.simulationConfig.devicesSchemas, function(schema){
-		var iotFClient = getIotfAppClient();
-		regDeviceTypeReqs.push(iotFClient.callApi('POST', 200, true, ['device', 'types'], JSON.stringify({id: schema.name})).then(function onSuccess (response) {
-			Q.resolve(true);
+simulationClient.prototype.loadConfiguration = function(simulationConfigFile, registerDevicetypes){
+	var _this = this;
+	getDb(function(db){
+		var app_id = appEnv.app.application_id;
 
-		}, function onError (error) {
-			if(error.status == 409)
-				return true;
-			console.error(error);
-			Q.reject(error);
-		}));				
+		db.get(app_id, function(err, result){
+			if(err){
+	          if(err.message === 'missing' || err.message === 'deleted'){
+	          	simulationConfigFile = (simulationConfigFile) ? simulationConfigFile: "./simulationConfig.json";
+	          	_.extend(_this.simulationConfig, fs.readJsonSync(simulationConfigFile));
+	            db.insert(_this.simulationConfig, app_id, function(err, body){
+	            	_.extend(_this.simulationConfig, {"_id": body.id, "_rev": body.rev});
+	            });
+	          } else {
+	          	throw new Error("Error trying to create record: " + err);
+	          }
+	        } else {
+	        	_.extend(_this.simulationConfig, result);
+	        }
+		});
+		
+		if(!registerDevicetypes)
+			return Q(true);
+		var regDeviceTypeReqs = [];
+		_.each(_this.simulationConfig.devicesSchemas, function(schema){
+			var iotFClient = getIotfAppClient();
+			regDeviceTypeReqs.push(iotFClient.callApi('POST', 200, true, ['device', 'types'], JSON.stringify({id: schema.name})).then(function onSuccess (response) {
+				Q.resolve(true);
+
+			}, function onError (error) {
+				if(error.status == 409)
+					return true;
+				console.error(error);
+				Q.reject(error);
+			}));				
+		});
+		return Q.all(regDeviceTypeReqs).then(function(res){
+			return res;
+		})		
 	});
-	return Q.all(regDeviceTypeReqs).then(function(res){
-		return res;
-	})
-
 };
 
-simulationClient.prototype.saveSimulationConfig = function(path){
-	fs.writeJsonSync(path, this.simulationConfig);		
+simulationClient.prototype.saveSimulationConfig = function(){
+	var _this = this;
+	getDb(function(db){
+		db.insert(_this.simulationConfig, function(err, body){
+			if(!err){
+				_this.simulationConfig._rev = body.rev;
+			} else {
+				throw new Error("Error trying to update record: " + err);
+			}
+		});
+	});
 };
 
 
@@ -78,7 +137,7 @@ simulationClient.prototype.startSimulation = function(){
 		return _this.createws(resp.wsurl);		
 	}).fail(function(err){
 		consloe.error(err.message);
-		throw new Error("Cannot start simulation " + err.message);		
+		throw new Error("Cannot start simulation " + err.message);
 	});
 };
 
@@ -228,6 +287,7 @@ simulationClient.prototype.disconnectAllDevices = function(){
  */
 simulationClient.prototype.addDevice = function(device){
 	this.simulationConfig.devices.push(device);
+	this.saveSimulationConfig();
 	if(this.ws){
 		var command = {cmdType: 'addDevice', simulationDevice: device};
 		this.sendCommand(command);
@@ -239,7 +299,7 @@ simulationClient.prototype.deleteDevice = function(deviceID){
 	for(var i = 0; i < this.simulationConfig.devices.length; i++){
 		if(this.simulationConfig.devices[i].deviceID == deviceID){
 			this.simulationConfig.devices.splice(i, 1);
-			this.saveSimulationConfig("./simulationConfig.json");
+			this.saveSimulationConfig();
 			break;		
 		}
 	}
