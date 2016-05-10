@@ -3,7 +3,7 @@ var MAX_DEVICES = 5;
 
 $(document).ready(function(){
 
-  $('#alertDeviceDeleted').hide();
+  $('.alert-messages').hide();
 
   $('#addNewDeviceButton').prop('disabled', false);
   $('#addNewDeviceButton img').attr("src","../images/PlusWasher_en.svg");
@@ -183,7 +183,7 @@ function removeDevice(deviceID){
     numberOfDevices--;
     $(this).remove();
     $('#alertDeviceDeleted span').text(deviceID);
-    $('#alertDeviceDeleted').fadeTo(500, 1);
+    $('.alert-messages').fadeTo(500, 1);
     if(numberOfDevices !== MAX_DEVICES){
       $('#addNewDeviceButton').prop('disabled', false);
       $('#addNewDeviceButton img').attr("src","../images/PlusWasher_en.svg");
@@ -196,7 +196,7 @@ function removeDevice(deviceID){
 
 $('#alertDeviceDeleted a').on('click', function(e){
   e.preventDefault();
-  $('#alertDeviceDeleted').fadeTo(500, 0, function(){
+  $('.alert-messages').fadeTo(500, 0, function(){
     $(this).hide();
   });
 });
