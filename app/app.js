@@ -323,13 +323,14 @@ app.post('/appliances/internal', function (req, res)
 				{
 					if (er)
 					{
+						console.log("Entered Error on Post Appliances - Prod Issue.   ---> ", er.statusCode);
 						res.sendStatus(er.statusCode);
 						return;
 					}
 					//if user already exists, send error code
 					if (result.docs.length!=0)
 					{
-					 console.log("ApplianceID already exists for this userID at this orgID.");
+					 	console.log("ApplianceID already exists for this userID at this orgID.");
 						res.sendStatus(409)
 					}
 					else
