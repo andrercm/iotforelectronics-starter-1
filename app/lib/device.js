@@ -200,7 +200,7 @@ device.create = function(req, res){
 		}
 		
 		simulationClient.createDevices("washingMachine", numberOfDevices, configs).then(function(data){			
-			simulationClient.saveSimulationConfig("./simulationConfig.json");
+			simulationClient.saveSimulationConfig();
 			res.json(data);
 		});
 	} else {

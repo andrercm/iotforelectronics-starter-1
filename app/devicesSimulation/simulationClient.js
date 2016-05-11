@@ -287,7 +287,6 @@ simulationClient.prototype.disconnectAllDevices = function(){
  */
 simulationClient.prototype.addDevice = function(device){
 	this.simulationConfig.devices.push(device);
-	this.saveSimulationConfig();
 	if(this.ws){
 		var command = {cmdType: 'addDevice', simulationDevice: device};
 		this.sendCommand(command);
