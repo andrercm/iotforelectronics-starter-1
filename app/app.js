@@ -413,7 +413,7 @@ app.post('/appliances', passport.authenticate('mca-backend-strategy', {session: 
 
 app.get("/index", function(req, res)
 {
-	var index = {name:'userId', type:'json', index:{fields:['currentOrgID','userID']}};
+	var index = {name:'userId', type:'json', index:{fields:['orgID','userID']}};
 
 	   db.index(index, function(err, response)
 	   {
@@ -426,7 +426,7 @@ app.get("/index", function(req, res)
 	   });
 
 	//create an index to find appliance doc for given userID and applianceID
-	var index = {name:'applianceByUser', type:'json', index:{fields:['currentOrgID', 'userID', 'applianceID']}};
+	var index = {name:'applianceByUser', type:'json', index:{fields:['orgID', 'userID', 'applianceID']}};
 	db.index(index, function(er, response)
 	{
 		if (er)
