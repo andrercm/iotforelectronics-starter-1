@@ -7,7 +7,7 @@ var washingMachineIoTFClient = exports;
 //payload maybe null is format is other then json
 washingMachineIoTFClient.statusReportMessageArrived = null;
 washingMachineIoTFClient.failureAlertMessageArrived = null;
-washingMachineIoTFClient.doorOpenChangeMessageArrived = null;
+washingMachineIoTFClient.waterConsumptionMessageArrived = null;
 
 //device status callbacks
 //override with - function(id, payload)
@@ -31,9 +31,9 @@ washingMachineIoTFClient.connectToBroker = function(credentials) {
     this.iotClient.callbacks.deviceStatus = washingMachineIoTFClient.dispatchDeviceStatus;
     // Subscribe to device events
     this.iotClient.callbacks.deviceEvent = washingMachineIoTFClient.dispatchDeviceEvent;
-    this.iotClient.subscribeToDeviceEvents("washingMachine", "+", "statusReport", "json");   
-    this.iotClient.subscribeToDeviceEvents("washingMachine", "+", "failureAlert", "json");   
-    this.iotClient.subscribeToDeviceEvents("washingMachine", "+", "doorOpenChange", "json");       
+    this.iotClient.subscribeToDeviceEvents("washingMachine", "+", "statusReport", "json");
+    this.iotClient.subscribeToDeviceEvents("washingMachine", "+", "failureAlert", "json");
+    this.iotClient.subscribeToDeviceEvents("washingMachine", "+", "waterConsumption", "json");
 };
 
 washingMachineIoTFClient.dispatchDeviceEvent = function (type, id, event, format, payload, topic) {
@@ -53,9 +53,9 @@ washingMachineIoTFClient.dispatchDeviceEvent = function (type, id, event, format
     	if(washingMachineIoTFClient.failureAlertMessageArrived)    		
     		washingMachineIoTFClient.failureAlertMessageArrived(id, payloadObj, format, payload, topic);
     	break;
-    case "doorOpenChange":
-    	if(washingMachineIoTFClient.doorOpenChangeMessageArrived)    		
-    		washingMachineIoTFClient.doorOpenChangeMessageArrived(id, payloadObj, format, payload, topic);
+    case "waterConsumption":
+    	if(washingMachineIoTFClient.waterConsumptionMessageArrived)
+    		washingMachineIoTFClient.waterConsumptionMessageArrived(id, payloadObj, format, payload, topic);
     	break;        
     };
    

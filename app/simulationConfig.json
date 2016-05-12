@@ -7,7 +7,7 @@
         {
           "name": "statusReport",
           "qos": "0",
-          "payload": "status,failureType,program,currentCycle,vibration,waterPressure,serialNumber,make,model,waterConsumption",
+          "payload": "status,failureType,program,currentCycle,vibration,waterPressure,serialNumber,make,model",
           "pattern": {
             "rate": 3,
             "type": "Periodic"
@@ -17,6 +17,15 @@
           "name": "failureAlert",
           "qos": "0",
           "payload": "failureType",
+          "pattern": {
+            "rate": 1,
+            "type": "OnChange"
+          }
+        },
+        {
+          "name": "waterConsumption",
+          "qos": "0",
+          "payload": "waterConsumption",
           "pattern": {
             "rate": 1,
             "type": "OnChange"

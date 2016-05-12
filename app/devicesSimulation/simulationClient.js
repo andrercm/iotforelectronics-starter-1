@@ -92,26 +92,27 @@ simulationClient.prototype.loadConfiguration = function(simulationConfigFile, re
 	        } else {
 	        	_.extend(_this.simulationConfig, result);
 	        }
-		});
-		
-		if(!registerDevicetypes)
-			return Q(true);
-		var regDeviceTypeReqs = [];
-		_.each(_this.simulationConfig.devicesSchemas, function(schema){
-			var iotFClient = getIotfAppClient();
-			regDeviceTypeReqs.push(iotFClient.callApi('POST', 200, true, ['device', 'types'], JSON.stringify({id: schema.name})).then(function onSuccess (response) {
-				Q.resolve(true);
 
-			}, function onError (error) {
-				if(error.status == 409)
-					return true;
-				console.error(error);
-				Q.reject(error);
-			}));				
+	        if(!registerDevicetypes)
+				return Q(true);
+
+			var regDeviceTypeReqs = [];
+			_.each(_this.simulationConfig.devicesSchemas, function(schema){
+				var iotFClient = getIotfAppClient();
+				regDeviceTypeReqs.push(iotFClient.callApi('POST', 200, true, ['device', 'types'], JSON.stringify({id: schema.name})).then(function onSuccess (response) {
+					Q.resolve(true);
+
+				}, function onError (error) {
+					if(error.status == 409)
+						return true;
+					console.error(error);
+					Q.reject(error);
+				}));				
+			});
+			return Q.all(regDeviceTypeReqs).then(function(res){
+				return res;
+			});
 		});
-		return Q.all(regDeviceTypeReqs).then(function(res){
-			return res;
-		})		
 	});
 };
 
