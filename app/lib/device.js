@@ -190,24 +190,33 @@ device.reset = function(req, res){
 
 device.create = function(req, res){
 	var numberOfDevices = parseInt(req.params.numberOfDevices);
+	var existingDevices = 0;
 	if(!isNaN(numberOfDevices)){
-		
-		var configs = [];
-		var devices;
-		
-		for(var i = 0; i < numberOfDevices; i++){
-			configs.push({connected: true});
-		}
-		
-		simulationClient.createDevices("washingMachine", numberOfDevices, configs).then(function(data){			
-			simulationClient.saveSimulationConfig();
-			res.json(data);
+		simulationClient.getAllDevicesStatus().then(function(data){
+			for(var key in data) if(data.hasOwnProperty(key)) existingDevices++;
+			if((numberOfDevices + existingDevices) > 5){
+				res.status(400).json({
+					error: "Limit exceeded.",
+					message: "You already have " + existingDevices + " devices created. Adding " + numberOfDevices + " more would exceed the limit of 5 devices."
+				});
+			} else {
+				var configs = [];
+				var devices;
+				for(var i = 0; i < numberOfDevices; i++){
+					configs.push({connected: true});
+				}
+				simulationClient.createDevices("washingMachine", numberOfDevices, configs).then(function(data){			
+					simulationClient.saveSimulationConfig();
+					res.json(data);
+				});
+			}
 		});
 	} else {
-		res.status(400);
-		res.json("Invalid number of devices was provided. Please check and try again.");
-	}
-	
+		res.status(400).json({
+			error: "Not a number.",
+			message: "Invalid number of devices was provided. Please check and try again."
+		});
+	}	
 }
 
 device.del = function(req, res){
