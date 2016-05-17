@@ -59,7 +59,7 @@ function simulationClient(config) {
 	var _this = this;
 	if(config.simulationConfigFile)
 		this.loadConfiguration(config.simulationConfigFile, true, function(){
-			_this.startSimulation();
+			_this.restartSimulation();
 		});
 	this.ws = null;	
 };
