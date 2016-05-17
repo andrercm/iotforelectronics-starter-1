@@ -56,8 +56,11 @@ function simulationClient(config) {
 							"devices": (config.devices) ? config.devices : []
 	};
 
+	var _this = this;
 	if(config.simulationConfigFile)
-		this.loadConfiguration(config.simulationConfigFile, true);
+		this.loadConfiguration(config.simulationConfigFile, true, function(){
+			_this.startSimulation();
+		});
 	this.ws = null;	
 };
 
@@ -73,7 +76,7 @@ simulationClient.prototype.getDevices = function(){
 	return this.simulationConfig.devices;	
 };
 
-simulationClient.prototype.loadConfiguration = function(simulationConfigFile, registerDevicetypes){
+simulationClient.prototype.loadConfiguration = function(simulationConfigFile, registerDevicetypes, done){
 	var _this = this;
 	getDb(function(db){
 		var app_id = appEnv.app.application_id;
@@ -85,12 +88,14 @@ simulationClient.prototype.loadConfiguration = function(simulationConfigFile, re
 	          	_.extend(_this.simulationConfig, fs.readJsonSync(simulationConfigFile));
 	            db.insert(_this.simulationConfig, app_id, function(err, body){
 	            	_.extend(_this.simulationConfig, {"_id": body.id, "_rev": body.rev});
+	            	done();
 	            });
 	          } else {
 	          	throw new Error("Error trying to create record: " + err);
 	          }
 	        } else {
 	        	_.extend(_this.simulationConfig, result);
+	        	done();
 	        }
 
 	        if(!registerDevicetypes)
