@@ -1,5 +1,6 @@
 var qr = require('qr-image');
 var cfenv = require('cfenv');
+var queue = require('seq-queue').createQueue(30000);
 
 var device = module.exports;
 
@@ -189,12 +190,12 @@ device.reset = function(req, res){
 }
 
 device.create = function(req, res){
-	var numberOfDevices = parseInt(req.params.numberOfDevices);
-	var existingDevices = 0;
-	if(!isNaN(numberOfDevices)){
-		simulationClient.getAllDevicesStatus().then(function(data){
-			for(var key in data) if(data.hasOwnProperty(key)) existingDevices++;
+	queue.push(function(task){
+		var numberOfDevices = parseInt(req.params.numberOfDevices);
+		var existingDevices = simulationClient.simulationConfig.devices.length;
+		if(!isNaN(numberOfDevices)){
 			if((numberOfDevices + existingDevices) > 5){
+				task.done();
 				res.status(400).json({
 					error: "Limit exceeded.",
 					message: "You already have " + existingDevices + " devices created. Adding " + numberOfDevices + " more would exceed the limit of 5 devices."
@@ -207,16 +208,18 @@ device.create = function(req, res){
 				}
 				simulationClient.createDevices("washingMachine", numberOfDevices, configs).then(function(data){			
 					simulationClient.saveSimulationConfig();
+					task.done();
 					res.json(data);
 				});
 			}
-		});
-	} else {
-		res.status(400).json({
-			error: "Not a number.",
-			message: "Invalid number of devices was provided. Please check and try again."
-		});
-	}	
+		} else {
+			task.done();
+			res.status(400).json({
+				error: "Not a number.",
+				message: "Invalid number of devices was provided. Please check and try again."
+			});
+		}
+	});	
 }
 
 device.del = function(req, res){

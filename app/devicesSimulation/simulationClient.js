@@ -10,6 +10,7 @@ var request = require('request');
 var debug = require('debug')('simulationClient');
 var appEnv = require("cfenv").getAppEnv();
 var Cloudant = require('cloudant');
+var queue = require('seq-queue').createQueue(30000);
 
 function getDb(callback){
 	if(this.db){
@@ -95,6 +96,7 @@ simulationClient.prototype.loadConfiguration = function(simulationConfigFile, re
 	          }
 	        } else {
 	        	_.extend(_this.simulationConfig, result);
+	        	_this.simulationConfig._rev = result._rev;
 	        	done();
 	        }
 
@@ -123,13 +125,16 @@ simulationClient.prototype.loadConfiguration = function(simulationConfigFile, re
 
 simulationClient.prototype.saveSimulationConfig = function(){
 	var _this = this;
-	getDb(function(db){
-		db.insert(_this.simulationConfig, function(err, body){
-			if(!err){
-				_this.simulationConfig._rev = body.rev;
-			} else {
-				throw new Error("Error trying to update record: " + err);
-			}
+	queue.push(function(task){
+		getDb(function(db){
+			db.insert(_this.simulationConfig, function(err, body){
+				if(!err){
+					_this.simulationConfig._rev = body.rev;
+					task.done();
+				} else {
+					throw new Error("Error trying to update record: " + err);
+				}
+			});
 		});
 	});
 };
@@ -215,7 +220,8 @@ simulationClient.prototype.createDevices = function(deviceType, numOfDevices, co
 		};
 		bulkRegRequest.push(regReq);		
 	};
-	var _this = this;	
+	var _this = this;
+
 	iotFClient.callApi('POST', 201, true, ['bulk', 'devices', 'add'], JSON.stringify(bulkRegRequest)).then(
 			function onSuccess (responses) {
 				var result = [];
