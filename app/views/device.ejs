@@ -32,6 +32,7 @@
           <div class="col-xs-12 col-sm-8 machine-info">
             <div class="washer-details">
               <div class="washer-content">
+                <button id="actionWasher">Start</button>
                 <img src="/images/Washer.svg" class="washer-machine"/>
               </div>
               <div class="washer-content">
@@ -62,11 +63,38 @@
     <script type="text/javascript">
       $(document).ready(function(){
 
+        // Send Start / Stop Washing command
+        $('#actionWasher').click(function(e){
+          e.preventDefault();
+          var label = $(this).text();
+          switch(label){
+            case 'Start':
+              $.ajax({
+                url: '/washingMachine/<%= deviceId %>/startWashing',
+                type: 'PUT',
+                success: function() {
+                  $('#actionWasher').text('Stop');
+                }
+              });
+              break;
+            case 'Stop':
+              $.ajax({
+                url: '/washingMachine/<%= deviceId %>/stopWashing',
+                type: 'PUT',
+                success: function() {
+                  $('#actionWasher').text('Start');
+                }
+              });
+              break;
+          }
+        });
+
         // Send Failure Event
         $('.problem-machine-icons p').click(function(e) {
           e.preventDefault();
           if($('#resetMachines').prop('disabled')) {
             $('#resetMachines').prop('disabled', false);
+            $('#actionWasher').prop('disabled', true);
             $('.problem-machine-icons button').removeClass('active');
             $('.problem-machine-icons p').removeClass('enabled');
             $('.problem-machine-icons p').removeClass('active');
@@ -110,6 +138,7 @@
         $('.problem-machine-buttons #resetMachines').click(function(e) {
           e.preventDefault();
           $('#resetMachines').prop('disabled', true);
+          $('#actionWasher').prop('disabled', false);
           $('.problem-machine-icons button').removeClass('active');
           $('.problem-machine-icons p').addClass('enabled');
 
@@ -167,6 +196,7 @@
 
         if (id === "<%= deviceId %>" && length > 1) {
           if(device.status && device.status == 'Failure'){
+            if(!($('#actionWasher').prop('disabled'))) $('#actionWasher').prop('disabled', true);
             $('.washer-content .washer-text ul li strong').eq(0).text(device.status);
             $('.washer-content .washer-text ul li img').eq(0).attr('src', '/images/advise-icon.svg');
             if(device.failureType && device.failureType == 'Board failure'){
@@ -182,9 +212,12 @@
               $('.washer-content .washer-text ul li img').eq(2).attr('src', '/images/advise-icon.svg');
             }
           } else {
+            if($('#actionWasher').prop('disabled')) $('#actionWasher').prop('disabled', false);
             if(device.status === 'Working'){
+              $('#actionWasher').text('Stop');
               $('.washer-content .washer-text ul li strong').eq(0).text(device.currentCycle);
             } else {
+              $('#actionWasher').text('Start');
               $('.washer-content .washer-text ul li strong').eq(0).text(device.status);
             }
             $('.washer-content .washer-text ul li strong').eq(1).text(device.vibration + ' mps');
