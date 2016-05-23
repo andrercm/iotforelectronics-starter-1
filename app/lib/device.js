@@ -194,11 +194,11 @@ device.create = function(req, res){
 		var numberOfDevices = parseInt(req.params.numberOfDevices);
 		var existingDevices = simulationClient.simulationConfig.devices.length;
 		if(!isNaN(numberOfDevices)){
-			if((numberOfDevices + existingDevices) > 5){
+			if((numberOfDevices + existingDevices) > 20){
 				task.done();
 				res.status(400).json({
 					error: "Limit exceeded.",
-					message: "You already have " + existingDevices + " devices created. Adding " + numberOfDevices + " more would exceed the limit of 5 devices."
+					message: "You already have " + existingDevices + " devices created. Adding " + numberOfDevices + " more would exceed the limit of 20 devices."
 				});
 			} else {
 				var configs = [];
