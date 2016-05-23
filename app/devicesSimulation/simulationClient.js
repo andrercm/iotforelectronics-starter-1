@@ -724,6 +724,9 @@ function generateMacAddress(){
 	return macStr;
 };
 
+process.on('uncaughtException', function(err){
+  console.log('An error has occured.');
+});
 
 //get service credentials
 /*
