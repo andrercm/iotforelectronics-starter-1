@@ -206,7 +206,13 @@ device.create = function(req, res){
 				for(var i = 0; i < numberOfDevices; i++){
 					configs.push({connected: true});
 				}
-				simulationClient.createDevices("washingMachine", numberOfDevices, configs).then(function(data){			
+				simulationClient.createDevices("washingMachine", numberOfDevices, configs).then(function(data){
+					for(var key in data){
+						var deviceID = data[key]['deviceID'];
+						simulationClient.getDeviceStatus(deviceID).then(function(data){
+							simulationClient.updateSerialNumber(deviceID, data.attributes.serialNumber);
+						});
+					}
 					simulationClient.saveSimulationConfig();
 					task.done();
 					res.json(data);

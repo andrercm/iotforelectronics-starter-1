@@ -216,7 +216,15 @@ simulationClient.prototype.createDevices = function(deviceType, numOfDevices, co
 		var config = (configs[i]) ? configs[i] : {};
 		var regReq = {
 				deviceId: (config.deviceId) ? config.deviceId : generateMacAddress(),
-						typeId: deviceType				
+				typeId: deviceType,
+				deviceInfo: {
+					manufacturer: "Swirlmore",
+					model: "wkw007ge",
+					deviceClass: "Device",
+					description: "Washing Machine",
+					fwVersion: "1.0.0",
+					hwVersion: "1.0.0"
+				}
 		};
 		bulkRegRequest.push(regReq);		
 	};
@@ -327,6 +335,16 @@ simulationClient.prototype.setAttributeValue = function(deviceID, attributeName,
 	var command = {cmdType: 'setAttribute', deviceID: deviceID, attributeName: attributeName, attributeValue: attributeValue};
 	this.sendCommand(command);
 };
+
+/*
+ * Update Serial Number
+ */
+simulationClient.prototype.updateSerialNumber = function(deviceID, serialNumber){
+	var iotFClient = getIotfAppClient();
+	var body = {deviceInfo: {serialNumber: serialNumber}};
+	iotFClient.callApi('PUT', 200, true, ['device', 'types', 'washingMachine', 'devices', deviceID], JSON.stringify(body));
+};
+
 /*
  * Devices status - connection status & attributes values 
  */
