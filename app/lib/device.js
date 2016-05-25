@@ -102,6 +102,26 @@ device.getPlatformQRstring = function(req, res){
 	res.send(text);
 }
 
+device.startWashing = function(req, res) {
+	washingMachineIoTFClient.sendstartWashingMessage(req.params.deviceID);
+	res.status(200).json({
+		success: "true",
+		command: "startWashing",
+		device: req.params.deviceID,
+		message: "The start washing command was sent successfully."
+	});
+}
+
+device.stopWashing = function(req, res) {
+	washingMachineIoTFClient.sendstopWashingMessage(req.params.deviceID);
+	res.status(200).json({
+		success: "true",
+		command: "stopWashing",
+		device: req.params.deviceID,
+		message: "The stop washing command was sent successfully."
+	});
+}
+
 device.getAllDevicesStatus = function(req, res){
 	simulationClient.getAllDevicesStatus().then(function(data){
 		res.json(data);

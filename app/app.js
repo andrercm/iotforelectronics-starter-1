@@ -54,9 +54,6 @@ dumpError = function(msg, err) {
 //The IP address of the Cloud Foundry DEA (Droplet Execution Agent) that hosts this application:
 var host = (process.env.VCAP_APP_HOST || 'localhost');
 
-//global HTTP routers
-httpRouter = require('./routes/httpRouter');
-
 //Add a handler to inspect the req.secure flag (see
 //http://expressjs.com/api#req.secure). This allows us
 //to know whether the request was via http or https.
@@ -82,7 +79,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
-app.use('/', httpRouter);
 app.use('/', device);
 app.use('/', simulator);
 
