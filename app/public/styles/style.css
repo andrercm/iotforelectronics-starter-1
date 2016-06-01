@@ -459,7 +459,7 @@ footer.main-section{
 	margin: 6px 0px;
 }
 .washer-app-info > div{
-  padding-left: 50px;
+  padding-left: 45px;
 }
 
 .washer-app-info img{
@@ -467,7 +467,8 @@ footer.main-section{
 	width: 100px;
 }
 .washer-app-info > div > img {
-    margin-left: 10px;
+    margin-left: 20px;
+    margin-right: 20px;
 }
 
 /*For Safari 9+*/
