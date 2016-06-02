@@ -140,12 +140,11 @@ $(document).ready(function(){
     if ($('.selection-box.active').attr('name') === 'selection-box-2'){
       if(numberOfDevices < 1){
         appNoWasherMessage.removeClass('hidden');
-        installationSection.addClass('hidden');
       }
       if(numberOfDevices > 0 ){
         appNoWasherMessage.addClass('hidden');
-        installationSection.removeClass('hidden');
       }
+      installationSection.removeClass('hidden');
     }
     else{
       appNoWasherMessage.addClass('hidden');

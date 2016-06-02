@@ -571,6 +571,26 @@ footer.main-section{
 	border-color: #4A97F8;
 	opacity: 1;
 }
+@media only screen and (min-width: 992px) and (max-width: 1199px){
+	#actionWasher {
+		font-size: 12px;
+		top: 27px;
+		left: 60px;
+		padding: 2px;
+		width: 48px;
+		height: 23px;
+  }
+}
+@media only screen and (min-width: 769px) and (max-width: 991px){
+	#actionWasher {
+		font-size: 12px;
+		top: 24px;
+		left: 58px;
+		padding: 0px;
+		width: 41px;
+		height: 20px;
+  }
+}
 @media only screen and (max-width: 768px){
   .explore-info .selection-box:before,
 	.explore-info .selection-box:after{
