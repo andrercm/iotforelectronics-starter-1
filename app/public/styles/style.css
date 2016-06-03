@@ -352,6 +352,10 @@ button, a{
     margin-top: -6px;
 
 }
+.platform-qr-code {
+	width: 128px;
+	height: 128px;
+}
 .selection-code img{
 	width:150px;
 	height:150px;
