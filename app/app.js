@@ -893,9 +893,9 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
 /*Solution Integrator Code                                               */
 /********************************************************************** **/
   //Get RTI credentials
-  if(!VCAP_SERVICES || !VCAP_SERVICES["IoT Real-Time Insight"])
-  	throw "Cannot get RTI credentials"
-  var rtiCredentials = VCAP_SERVICES["IoT Real-Time Insight"][0]["credentials"];
+//  if(!VCAP_SERVICES || !VCAP_SERVICES["IoT Real-Time Insight"])
+//  	throw "Cannot get RTI credentials"
+//  var rtiCredentials = VCAP_SERVICES["IoT Real-Time Insight"][0]["credentials"];
 
 // //Get IoT for Electronics credentials
 // //if(!VCAP_SERVICES || !VCAP_SERVICES["ibmiotforelectronics"])
@@ -912,14 +912,14 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
   var apiURI = 'https://' + iotfCredentials["http_host"] + ':443/api/v0002';
 
  // //RTI Credentials
-  var rtiApiKey = rtiCredentials["apiKey"];
-  var rtiAuthToken = rtiCredentials["authToken"];
-  var rtiBaseUrl = rtiCredentials["baseUrl"];
-  var disabled = false;
+  //var rtiApiKey = rtiCredentials["apiKey"];
+  //var rtiAuthToken = rtiCredentials["authToken"];
+  //var rtiBaseUrl = rtiCredentials["baseUrl"];
+  //var disabled = false;
 
  //RTI IDs
- var sourceId = '';
- var schemaId = '';
+ //var sourceId = '';
+ //var schemaId = '';
  
  //IoT Platform Config Creation Method.
   var iotpPost = function iotpPost (path, json) {
@@ -1013,36 +1013,36 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
 //  });
 
   //RTI data source creation call
-  var rtiSource = rtiPost('/message/source',{
-  	"name": name,
-  	"orgId": orgId,
-  	"apiKey": apiKey,
-  	"authToken": authToken,
-  "disabled": disabled})
-	.then(function(json) {
-		var source = JSON.parse(json);
-		sourceId = source.id;
-		console.log(' RTI Source ID: ' + sourceId);
-		//defer.resolve(json);
-  });
+  //var rtiSource = rtiPost('/message/source',{
+  //	"name": name,
+  //	"orgId": orgId,
+  //	"apiKey": apiKey,
+  //	"authToken": authToken,
+  //"disabled": disabled})
+//	.then(function(json) {
+//		var source = JSON.parse(json);
+//		sourceId = source.id;
+//		console.log(' RTI Source ID: ' + sourceId);
+//		//defer.resolve(json);
+//  });
 
  // //RTI schema creation call
-  var rtiSchema = rtiPost('/message/schema',{
-  	"name": "Electronics",
-  	"format": "JSON",
-  "items": []})
-	.then(function(json) {
-		var schema = JSON.parse(json);
-		schemaId = schema.id;
-		console.log(' RTI Schema ID: ' + schemaId);
-  });
+//  var rtiSchema = rtiPost('/message/schema',{
+//  	"name": "Electronics",
+//  	"format": "JSON",
+//  "items": []})
+//	.then(function(json) {
+//		var schema = JSON.parse(json);
+//		schemaId = schema.id;
+//		console.log(' RTI Schema ID: ' + schemaId);
+//  });
 	
  //RTI route creation call
-  var rtiRoute = rtiPost('/message/route',{
-  	"sourceId": sourceId,
-  	"deviceType": "washingMachine",
-  	"eventType": "+",
-  "schemaId": schemaId});	
+//  var rtiRoute = rtiPost('/message/route',{
+//  	"sourceId": sourceId,
+//  	"deviceType": "washingMachine",
+//  	"eventType": "+",
+//  "schemaId": schemaId});	
 /********************************************************************** **/
 /*End of Solution Integrator Code                                        */
 /********************************************************************** **/
