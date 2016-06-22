@@ -3,25 +3,16 @@ var MAX_DEVICES = 5;
 
 $(document).ready(function(){
 
-  $('.alert-messages').hide();
+  $('#alertDeviceDeleted').hide();
+  $('#alertError').hide();
 
   $('#addNewDeviceButton').prop('disabled', false);
   $('#addNewDeviceButton img').attr("src","../images/PlusWasher_en.svg");
 
-  function runFunction(name){
-    switch(name){
-      case 'getDevices':    getDevices();    break;
-      case 'createDevices': createDevices(); break;
-    }
-  }
-
-  function restartSimulator(method){
+  function restartSimulator(){
     $.ajax({
       url: '/restartSimulator',
       type: 'GET',
-      success: function(){
-        window.setTimeout(runFunction(method), 3000);
-      },
       error: function(e){
         console.log(e.responseText);
       }
@@ -32,7 +23,7 @@ $(document).ready(function(){
     $.ajax({
       url: '/washingMachine/getStatus',
       type: 'GET',
-      timeout: 5000,
+      timeout: 30000,
       success: function(data){
         $.each(data, function(index, value){
           numberOfDevices++;
@@ -47,7 +38,9 @@ $(document).ready(function(){
       },
       error: function(x, t, m){
         if(t === "timeout") {
-          restartSimulator('getDevices');
+          $('#alertError p').html('The request to list the devices has timed out, the simulation will restart. Please, refresh the page and try again.');
+          $('#alertError').fadeTo(500, 1);
+          restartSimulator();
         }
       }
     });
@@ -57,7 +50,7 @@ $(document).ready(function(){
     $.ajax({
        url: '/washingMachine/createDevices/1',
        type: 'POST',
-       timeout: 5000,
+       timeout: 30000,
        success: function(data){
          $.each(data, function(index, value){
            $('.list-group').append('<button class="list-item"><span>' + value.deviceID + '</span></button>');
@@ -73,7 +66,9 @@ $(document).ready(function(){
        },
        error: function(x, t, m){
         if(t === "timeout") {
-          restartSimulator('createDevices');
+          $('#alertError p').html('The request to create a device has timed out, the simulation will restart. Please, refresh the page and try again.');
+          $('#alertError').fadeTo(500, 1);
+          restartSimulator();
         }
        }
      });
@@ -182,7 +177,14 @@ function removeDevice(deviceID){
     numberOfDevices--;
     $(this).remove();
     $('#alertDeviceDeleted span').text(deviceID);
-    $('.alert-messages').fadeTo(500, 1);
+    $('#alertDeviceDeleted').fadeTo(500, 1);
+
+    setTimeout(function(){
+      $('#alertDeviceDeleted').fadeTo(500, 0, function(){
+        $(this).hide();
+      });
+    }, 5000);
+
     if(numberOfDevices !== MAX_DEVICES){
       $('#addNewDeviceButton').prop('disabled', false);
       $('#addNewDeviceButton img').attr("src","../images/PlusWasher_en.svg");
@@ -195,7 +197,14 @@ function removeDevice(deviceID){
 
 $('#alertDeviceDeleted a').on('click', function(e){
   e.preventDefault();
-  $('.alert-messages').fadeTo(500, 0, function(){
+  $('#alertDeviceDeleted').fadeTo(500, 0, function(){
+    $(this).hide();
+  });
+});
+
+$('#alertError a').on('click', function(e){
+  e.preventDefault();
+  $('#alertError').fadeTo(500, 0, function(){
     $(this).hide();
   });
 });
