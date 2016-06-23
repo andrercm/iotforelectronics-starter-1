@@ -509,7 +509,7 @@ app.get("/appliances/:userID/:applianceID", passport.authenticate('mca-backend-s
 /* Route to delete appliance records                           */
 /*    Internal API											   */
 /***************************************************************/
-app.del("/appliances/:userID/:applianceID", passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)
+app['delete']("/appliances/:userID/:applianceID", passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)
 {
 	//DOING THIS DELETE HOW WE DO POSTS ABOVE
 	//will need to test to see which works (or which works better)
@@ -548,7 +548,7 @@ app.del("/appliances/:userID/:applianceID", passport.authenticate('mca-backend-s
 /* Need to delete the appliance documents as well from our db  							   */
 /* If we created them on the platform, delete from platform (NOT for experimental)         */
 /*******************************************************************************************/
-app.delete("/user/:userID", passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)
+app['delete']("/user/:userID", passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)
 {
 	//DOING THIS DELETE HOW WE DO GETS ABOVE
 	//make sure userID on params matches userID coming in thru MCA
@@ -804,11 +804,11 @@ app.get('/validation', function(req, res)
    };
 
 //IoT Platform device type creation call
- var iotpDeviceType = iotpPost('/device/types',{
- 	"id": "washingMachine",
- 	"description": "IoT4E Washing Machine",
-	"classId": "Device"
-});
+// var iotpDeviceType = iotpPost('/device/types',{
+// 	"id": "washingMachine",
+// 	"description": "IoT4E Washing Machine",
+//	"classId": "Device"
+// });
 
 // //IoT Platform device creation call
 // //var iotpDeviceType = iotpPost('/device/types/washingMachine/devices',{
