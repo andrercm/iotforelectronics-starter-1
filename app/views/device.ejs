@@ -9,7 +9,6 @@
     <script src="/javascripts/iotAppMonitorClient.js"></script>
     <script src="/jquery/jquery.min.js"></script>
     <script src="/bootstrap/js/bootstrap.min.js"></script>
-	<script src="/analytics/bluemix-analytics.js"></script>
 	<!--script type="text/javascript"> digitalData = {page: {pageInfo: {pageID: "IOTELECTRONICS"}}} </script-->    		
   </head>
   <body>
@@ -77,7 +76,6 @@
                 type: 'PUT',
                 success: function() {
                   $('#actionWasher').text("<%= __('appliance_page.stop') %>");
-				  analytics.track("IoT for Electronics -> Start Washer", {});
                 }
               });
               break;
@@ -87,7 +85,6 @@
                 type: 'PUT',
                 success: function() {
                   $('#actionWasher').text("<%= __('appliance_page.start') %>");
-				  analytics.track("IoT for Electronics -> Stop Washer", {});
                 }
               });
               break;
@@ -96,7 +93,6 @@
 
         // Send Failure Event
         $('.problem-machine-icons p').click(function(e) {
-		  analytics.track("IoT for Electronics -> Washer failed", {});
           e.preventDefault();
           if($('#resetMachines').prop('disabled')) {
             $('#resetMachines').prop('disabled', false);
@@ -142,7 +138,6 @@
 
         // Reset Machine
         $('.problem-machine-buttons #resetMachines').click(function(e) {
-		  analytics.track("IoT for Electronics -> Washer Fixed", {});
           e.preventDefault();
           $('#resetMachines').prop('disabled', true);
           $('#actionWasher').prop('disabled', false);
@@ -170,7 +165,6 @@
         // Delete Washer - Modal
         $("#confirmDelete").on('show.bs.modal', function() {
           $("#btnConfirm").on("click", function(e) {
-            analytics.track("IoT for Electronics -> Delete Device", {});
             $.ajax({
               url: '/washingMachine/<%= deviceId %>',
               type: 'DELETE',
