@@ -38,11 +38,7 @@ $(document).ready(function(){
       },
       error: function(x, t, m){
         if(t === "timeout") {
-<<<<<<< HEAD
           $('#alertError p').html(TIMEOUT_LIST);
-=======
-          $('#alertError p').html('The request to list the devices has timed out, the simulation will restart. Please, refresh the page and try again.');
->>>>>>> d2c66fa2a16caffade88619f39ed363d4dce62d4
           $('#alertError').fadeTo(500, 1);
           restartSimulator();
         }
@@ -180,13 +176,9 @@ function removeDevice(deviceID){
   if(deviceID === $(this).find('span').text()){
     numberOfDevices--;
     $(this).remove();
-<<<<<<< HEAD
     $('#alertDeviceDeleted p').html(DEVICE_DELETED_MSG);
     var text = $('#alertDeviceDeleted p').html();
     $('#alertDeviceDeleted p').html(text.replace(/^([\w\-!]+)/i, '<strong>$&</strong>').replace('{0}', deviceID));
-=======
-    $('#alertDeviceDeleted span').text(deviceID);
->>>>>>> d2c66fa2a16caffade88619f39ed363d4dce62d4
     $('#alertDeviceDeleted').fadeTo(500, 1);
 
     setTimeout(function(){
