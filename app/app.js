@@ -119,9 +119,9 @@ if(!VCAP_SERVICES || !VCAP_SERVICES["iotf-service"])
 var iotfCredentials = VCAP_SERVICES["iotf-service"][0]["credentials"];
 
 //Get IoT for Electronics credentials
-if(!VCAP_SERVICES || !VCAP_SERVICES["ibmiotforelectronics"])
+if(!VCAP_SERVICES || !VCAP_SERVICES["ibm-iot-for-electronics"])
 	throw "Cannot get IoT4E credentials"
-var iotECredentials = VCAP_SERVICES["ibmiotforelectronics"][0]["credentials"];
+var iotECredentials = VCAP_SERVICES["ibm-iot-for-electronics"][0]["credentials"];
 
 //IoT Platform Credentials
 var name = iotfCredentials["org"];
