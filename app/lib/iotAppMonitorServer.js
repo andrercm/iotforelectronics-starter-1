@@ -4,7 +4,11 @@
 
 module.exports = function (server) {
 	
-	var io = require('socket.io')(server);
+	var io = require('socket.io')(server, {
+			  serveClient: true,
+			  path: '/socket.io'
+			});
+	io.set('transports', ['websocket']);
 
 	io.on('connection', function(socket){
 		//socket.emit('iotwb-http', { message: 'Connected to application. Waiting for http calls.' });

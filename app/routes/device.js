@@ -70,7 +70,7 @@ deviceRouter.get('/washingMachine/:deviceID/getAttributes', device.getAttributes
  * ************ PUT REQUESTS ************
  * ************ ************ ************/
 
-/**
+ /**
  * Start the washing cycle for the given device
  */
 deviceRouter.put('/washingMachine/:deviceID/startWashing', device.startWashing);

@@ -12,6 +12,7 @@ var cfenv = require('cfenv');
 var log4js = require('log4js');
 
 var app = express();
+
 //set the app object to export so it can be required
 module.exports = app;
 
@@ -31,6 +32,21 @@ var path            = require('path'),
     q               = require('q');
 
 var jsonParser = bodyParser.json();
+var i18n = require("i18n");
+
+i18n.configure({
+    directory: __dirname + '/locales',
+    defaultLocale: 'en',
+    queryParameter: 'lang',
+    objectNotation: true,
+    fallbacks: {
+      'pt'   : 'pt_BR',
+      'pt-BR': 'pt_BR',
+      'zh-CN': 'zh_CN',
+      'zh-TW': 'zh_TW'
+    },
+    prefix: 'electronics-'
+});
 
 dumpError = function(msg, err) {
 	if (typeof err === 'object') {
@@ -64,7 +80,7 @@ app.use(function (req, res, next) {
 	});
 	//force https
 	if(!appEnv.isLocal && req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] == 'http')
-		res.redirect('https://' + req.headers.host + req.url);
+		res.redirect(308, 'https://' + req.headers.host + req.url);
 	else
 		next();
 });
@@ -75,6 +91,20 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(i18n.init);
+
+app.use(function(req, res, next){
+  if(req.query.mocked === 'true'){
+    var locale = req.getLocale();
+    req.setLocale('mocked_' + req.getLocale());
+    if(req.getLocale() !== 'mocked_' + locale){
+      req.setLocale(locale);
+    }
+    next();
+  } else {
+    next();
+  }
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -82,9 +112,30 @@ app.use('/', routes);
 app.use('/', device);
 app.use('/', simulator);
 
+//Get credentials of related services.
+//Get IoTP credentials
 if(!VCAP_SERVICES || !VCAP_SERVICES["iotf-service"])
 	throw "Cannot get IoT-Foundation credentials"
 var iotfCredentials = VCAP_SERVICES["iotf-service"][0]["credentials"];
+
+//Get IoT for Electronics credentials
+if(!VCAP_SERVICES || !VCAP_SERVICES["ibmiotforelectronics"])
+	throw "Cannot get IoT4E credentials"
+var iotECredentials = VCAP_SERVICES["ibmiotforelectronics"][0]["credentials"];
+
+//IoT Platform Credentials
+var name = iotfCredentials["org"];
+var orgId = iotfCredentials["org"];
+var apiKey = iotfCredentials["apiKey"];
+var authToken = iotfCredentials["apiToken"];
+var baseURI = iotfCredentials["base_uri"];
+var apiURI = 'https://' + iotfCredentials["http_host"] + ':443/api/v0002';
+var iotpHttpHost = iotfCredentials["http_host"];
+
+//IoT for Electronics Credentials
+var iotETenant = iotECredentials["tenantID"];
+var iotEAuthToken = iotECredentials["authToken"];
+var iotEApiKey = iotECredentials["apiKey"];
 
 /***************************************************************/
 //STEPHANIES'S CODE *************
@@ -94,142 +145,158 @@ var iotfCredentials = VCAP_SERVICES["iotf-service"][0]["credentials"];
 // SETUP CLOUDANT
 //Key whichispermandencellansp
 //Password a8ba75e7534498a85a9f0c11adbe11e09ae03177 //
-var id = 'ee7cb196-a1aa-4871-97e9-3e46813d9a4f-bluemix';
-var pword = 'f99a631bb23d340e741a3dd0ccd391dd1536ee1ca076f15812c4f005859b2a39';
-var host  = 'ee7cb196-a1aa-4871-97e9-3e46813d9a4f-bluemix.cloudant.com';
-var CLOUDANT_URL='https://' + id + ':' + pword + '@' + host;
-var dbname   = 'iot_for_electronics_registration';
-
 var passport   = require('passport');
 var MCABackendStrategy = require('bms-mca-token-validation-strategy').MCABackendStrategy;
-var Cloudant   = require('cloudant');
-
 var services = JSON.parse(process.env.VCAP_SERVICES)
 var application = JSON.parse(process.env.VCAP_APPLICATION)
 var currentOrgID = iotfCredentials["org"];
 
-var cloudant = Cloudant(CLOUDANT_URL, function(err,cloudant){
-	db = cloudant.db.use(dbname);
-	//make sure it is created
-	cloudant.db.get(dbname, function(err, body) {
-		if(err){
-			console.log('creating ' + dbname);
-			cloudant.db.create(dbname, function(err,body) {
-				if (!err)
-					console.log('DB created ');
-				else
-					console.error('Err creating DB ' + err );
-			});
-		}
-		else {
-			console.log("connected to DB");
-		}
-});
-});
-
 /***************************************************************/
 /* Set up express server & passport                            */
 /***************************************************************/
-
-
 passport.use(new MCABackendStrategy());
 app.use(passport.initialize());
 
+const https = require('https');
+
+
+
 /***************************************************************/
-/* Route to get 1 user document from Cloudant (1)              */
-/*   Internal API       									                     */
-/* Input: url params that contains the userID 			           */
-/* Returns: 200 for found user, 404 for user not found         */
-/* Usecase: Does this user exist? Yes/No											 */
-/* * to return the user doc in the body of the response,       */
-/* * use app.get('/user/'...) API below                        */
+/* Route to update 1 user document in Cloudant                 */
+/*					        	       */
+/* Input: url params that contains the userID 		       */
+/* Returns:  404 for user not found, 200 for success           */
 /***************************************************************/
-app.get('/users/internal/:userID', function(req, res)
+app.put('/users', passport.authenticate('mca-backend-strategy', {session: false }), function(req, res)
 {
-	console.log('GET /users  ==> Begin');
-  console.log('GET /users  ==> Incoming userID = '+ req.params.userID);
+	//var formData = req.body;
+	var userDocIn = JSON.parse(JSON.stringify(req.body)); 
+	userDocIn.orgID = currentOrgID;
+	
+	//verify that userID coming in MCA matches doc userID
+	if (userDocIn.userID != req.user.id)
+	{
+		res.status(500).send("User ID in request does not match MCA authenticated user.")
+		console.log("doc userID and mca userID do not match")
+	}
+	request({
+   		url: 'https://iotforelectronicstile.mybluemix.net/v001/users',
+		json: userDocIn,
+		method: 'PUT', 
+		headers: {
+    				'Content-Type': 'application/json',
+    				'tenantID':iotETenant,
+    				'orgID':currentOrgID
+  		},
+  		auth: {user:iotEApiKey, pass:iotEAuthToken}
 
-	//find a user doc by using the userID index, given query string with userID
-  db.find({selector:{orgID: currentOrgID, userID:req.params.userID}}, function(er, result)
-  {
-  	if (er)
-  	{
-  		res.sendStatus(er.statusCode);
-  		throw er;
-  	}
-  	if (result.docs.length==0)
-  	{
-  		res.sendStatus(404)
-  	}
-  	else
-  		res.sendStatus(200);
-
-    	console.log('Found %d documents with userID', result.docs.length);
-    	for (var i = 0; i < result.docs.length; i++)
-    	{
-    		console.log('  Doc id: %s', result.docs[i]._id);
-    	}
-
-    });
+    	}, function(error, response, body){
+    		if(error) {
+        		console.log('ERROR: ' + error);
+			console.log('BODY: ' + error);
+        		res.status(500).send(response);
+    		} else {
+        		console.log(response.statusCode, body);
+        		res.status(200).send(response);
+		}});
 });
 
+/********************************************************/
+/* Admin. function specifically for adding a user doc   */
+/* on mobile login, when one doesn't already exist      */
+/* for the user logging in                              */
+/********************************************************/
+createUser = function (username)
+{
+	console.log("inside createUser function");
+	//first see if the user exists
+	var options =
+	{
+		url: ('https://iotforelectronicstile.mybluemix.net/v001/users/'+ username),
+		method: 'GET',
+		headers: {
+    				'Content-Type': 'application/json',
+    				'tenantID':iotETenant,
+    				'orgID':currentOrgID
+  		},
+  		auth: {user:iotEApiKey, pass:iotEAuthToken}
+	};
+	request(options, function (error, response, body) {
+	    if (!error && response.statusCode == 200) {
+	    	//we already have a user, so do nothing
+        	console.log('User exists, wont create one.' + body);
+        	return;
+	    }else if (error){
+        	console.log("The request came back with an error: " + error);
+        	return;
+        	}else{
+        		//no user doc found, register this user
+        		userDoc = {};
+        		userDoc.orgID = currentOrgID;
+        		userDoc.userID = username;
+			request({
+   				url: 'https://iotforelectronicstile.mybluemix.net/v001/users',
+				json: userDoc,
+				method: 'POST', 
+				headers: {
+    						'Content-Type': 'application/json',
+    						'tenantID':iotETenant,
+    						'orgID':currentOrgID
+  				},
+  				auth: {user:iotEApiKey, pass:iotEAuthToken}
+
+	    		}, function(error, response, body){
+	    			if(error) {
+	        			console.log('ERROR: ' + error);
+					console.log('BODY: ' + error);
+					return;
+    				} else {
+		        		console.log(response.statusCode, body);
+		        		return;
+				}
+    		   	});
+        	}
+        });
+}
+
+
 /***************************************************************/
 /* Route to get 1 user document from Cloudant (1)              */
-/*															   */
-/* Input: url params that contains the userID 			       */
+/*					  		   	*/
+/* Input: url params that contains the userID 			 */
 /* Returns: 200 for found user, 404 for user not found         */
 /***************************************************************/
 app.get('/users/:userID', passport.authenticate('mca-backend-strategy', {session: false }), function(req, res)
 {
-	res.redirect('/users/internal/' + req.user.id);
-});
-
-/***************************************************************/
-/* Route to add 1 user document to Cloudant.   (2)             */
-/*           Internal API                                      */
-/* Input: JSON structure that contains the userID, name,       */
-/*             address, and telephone                          */
-/***************************************************************/
-app.post("/users/internal", function (req, res)
-{
-	console.log("POST /users  ==> Begin");
-
-   var doc = {userID: req.body.userID, name:req.body.name, telephone:req.body.telephone, address:req.body.address, orgID:currentOrgID};
-   db.find({selector:{orgID: currentOrgID, userID:req.body.userID}}, function(er, result)
-   {
-	   if (er)
-	   {
-		   res.sendStatus(er.statusCode);
-		   return;
-	   }
-	   //if user already exists, send error code
-	   if (result.docs.length!=0)
-	   {
-			console.log("User already exists at this orgID.");
-		   res.sendStatus(409)
-	   }
-	   else
-	   {
-		   db.insert(doc, function(err, data)
-		   {
-			   if(err)
-			   {
-				   console.log('POST /users  ==> Error:', er);
-				   res.sendStatus(err.statusCode);
-			   }
-			   else
-			   {
-				   console.log("POST /users  ==> Inserting user document in Cloudant");
-				   console.log('POST /users  ==> id       = ', data.id);
-				   console.log('POST /users  ==> revision = ', data.rev);
-				   res.sendStatus(201);
-			   }
-		   });
-	   }
-
-   });
-
-
+	//make sure userID on params matches userID coming in thru MCA
+	if (req.params.userID != req.user.id)
+	{
+		res.status(500).send("User ID on request does not match MCA authenticated user.")
+	}
+	var options =
+	{
+		url: ('https://iotforelectronicstile.mybluemix.net/v001/users/'+ req.user.id), 
+		method: 'GET',
+		headers: {
+    				'Content-Type': 'application/json',
+    				'tenantID':iotETenant,
+    				'orgID':currentOrgID
+  		},
+  		auth: {user:iotEApiKey, pass:iotEAuthToken}
+	};
+	request(options, function (error, response, body) {
+	    if (!error && response.statusCode == 200) {
+        	// Print out the response body
+        	console.log(body);
+        	res.status(response.statusCode).send(response);
+	    }else{
+        	console.log("The request came back with an error: " + error);
+        	//for now I'm giving this a 500 so that postman won't be left hanging.
+        	res.status(response.statusCode).send(response);
+        	return;
+        	}
+        	
+        	});
 });
 
 
@@ -237,148 +304,45 @@ app.post("/users/internal", function (req, res)
 /* Route to add 1 user document to Cloudant.   (2)             */
 /*                                                             */
 /* Input: JSON structure that contains the userID, name,       */
-/*             address, and telephone			               */
+/*             address, and telephone			       */
 /***************************************************************/
 // passport.authenticate('mca-backend-strategy', {session: false }),
 app.post("/users", passport.authenticate('mca-backend-strategy', {session: false }),  function (req, res)
 {
-	var formData = req.body;
-	formData.userID = req.user.id;
-
-	request.post({url: 'https://' + application.application_uris[0] + '/users/internal', formData: formData}, function optionalCallback(err, httpResponse, body) {
-	if (err) {
-    return console.error('upload failed:', err);
-	}
-	});
-});
-
-
-/******************************************************************/
-/* Route to add 1 appliance document to registration Cloudant.(3) */
-/*                 												  */
-/*  Internal API                                                  */
-/* Input: JSON structure that contains the userID, applianceID,   */
-/*             serial number, manufacturer, and model             */
-/******************************************************************/
-app.post('/appliances/internal', function (req, res)
-{
-    console.log("POST /appliances  ==> Begin");
-   console.log("POST /appliances  ==> Inserting device document in Cloudant");
-   console.log(req.body.userID);
-   console.log(req.body.applianceID);
-	 //console.log("API KEY: " +  services.iotf-service.apiKey)
-	// console.log("API TOKEN: " + services.iotf-service.apiToken)
-   var doc = {userID: req.body.userID, applianceID: req.body.applianceID, serialNumber: req.body.serialNumber, manufacturer: req.body.manufacturer, name: req.body.name, dateOfPurchase: req.body.dateOfPurchase, model: req.body.model, orgID: currentOrgID, registrationCreatedOnPlatform: false};
-
-	var https = require('https');
-
-    //API keys from IoTF
-		var auth_key = iotfCredentials["apiKey"];
- 		var auth_token = iotfCredentials["apiToken"];
-		console.log("KEY AND TOKEN: " + auth_key + "  " + auth_token)
-    //var auth_key = services.iotf-service.apiKey;
-    //var auth_token = services.iotf-service.apiToken;
-		var httpHost = iotfCredentials["http_host"]
-		console.log("HTTP HOST: " + httpHost)
-		var options =
-    {
-            host: httpHost,
-            path: '/api/v0002/device/types/washingMachine/devices/'+ req.body.applianceID,
-            auth: auth_key + ':' + auth_token
-    };
-
-  console.log("LINE BEFORE HTTPS.GET")
-	https.get(options, function(platformRes)
+	//var formData = req.body;
+	var formData = JSON.parse(JSON.stringify(req.body)); 
+	formData.orgID = currentOrgID;
+	
+	//verify that userID coming in MCA matches doc userID
+	if (formData.userID != req.user.id)
 	{
-		console.log("INSIDE OF THE HTTPS.GET BLOCK..." + options)
-		var response = '';
-		platformRes.on('error', function(platformErr)
-		{
-			console.log("*******IN PLATFORM ERR*********")
-			console.log(platformErr.message)
-			console.log("*******IN PLATFORM ERR*********")
-		});
-		platformRes.on('data', function(data)
-		{
-			response += data;
-					console.log("INSIDE OF THE platformRES.ON BLOCK..." + response)
-		});
-		platformRes.on('end', function()
-		{
-								console.log("INSIDE OF THE platformRES.ON END BLOCK..." + response)
-			if (response == '')
-			{
-				console.log(req.body.applianceID + " does not exist.");
-				res.sendStatus(409);
-				return;
-			}
-			else
-			{
-				//make sure the ApplianceID doesn't exist already for this user at this org
-				db.find({selector:{orgID: currentOrgID, userID:req.body.userID, applianceID: req.body.applianceID}}, function(er, result)
-				{
-					if (er)
-					{
-						console.log("Entered Error on Post Appliances - Prod Issue.   ---> ", er.statusCode);
-						res.sendStatus(er.statusCode);
-						return;
-					}
-					//if user already exists, send error code
-					if (result.docs.length!=0)
-					{
-					 	console.log("ApplianceID already exists for this userID at this orgID.");
-						res.sendStatus(409)
-					}
-					else
-					{
-						db.insert(doc, function(err, data)
- 				    {
- 					   if (err)
- 					   {
- 						     console.log('POST /appliances  ==> Error:', err);
- 					       res.sendStatus(err.statusCode);
- 					       return;
- 					   }
- 					   else
- 					   {
- 						   var output = JSON.parse(response);
- 						   console.log(JSON.stringify(output, null, 2));
- 						   console.log('POST /appliances  ==> id       = ', data.id);
- 					       console.log('POST /appliances  ==> revision = ', data.rev);
- 					       res.sendStatus(201);
- 					       return;
- 					   }
- 					 });
-					}
-				});
-			}
+		res.status(500).send("User ID in request does not match MCA authenticated user.")
+		//might need a return here, needs test
+		//see if logic ^ works first before finishing this
+		console.log("doc userID and mca userID do not match")
+	}
+	request({
+   		url: 'https://iotforelectronicstile.mybluemix.net/v001/users',
+		json: formData,
+		method: 'POST', 
+		headers: {
+    				'Content-Type': 'application/json',
+    				'tenantID':iotETenant,
+    				'orgID':currentOrgID
+  		},
+  		auth: {user:iotEApiKey, pass:iotEAuthToken}
 
-		});
-
-	});
+    	}, function(error, response, body){
+    		if(error) {
+        		console.log('ERROR: ' + error);
+			console.log('BODY: ' + error);
+        		res.status(response.statusCode).send(response);
+    		} else {
+        		console.log(response.statusCode, body);
+        		res.status(response.statusCode).send(response);
+		}});
 });
 
-//TEMPORARY EXTERNAL ROUTE FOR POST TO /appliances
-//FOR STEPHANIE TO TEST
-app.post('/stephAppliances', function (req, res)
-{
-	var bodyIn = req.body;
-
-	request.post({url: 'https://' + application.application_uris[0] + '/appliances/internal',
-								body: JSON.stringify(bodyIn),
-								headers: { "content-type": "application/json"}
-								},
-								function optionalCallback(err, httpResponse, body) {
-
-	 if (!err && httpResponse.statusCode == 201) {
-						 res.sendStatus(httpResponse.statusCode);
-						 console.log("SUCCESS: " + bodyIn);
-			 } else {
-				 console.log("Error in POST /appliances" + httpResponse.statusCode);
-				 res.sendStatus(httpResponse.statusCode);
-			 }
-	});
-});
 
 /***************************************************************/
 /* Route to add 1 appliance document to registration Cloudant.(3) */
@@ -388,100 +352,36 @@ app.post('/stephAppliances', function (req, res)
 /***************************************************************/
 app.post('/appliances', passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)
 {
-   var bodyIn = req.body;
-   bodyIn.userID = req.user.id;
-
-   request.post({url: 'https://' + application.application_uris[0] + '/appliances/internal',
-                 body: JSON.stringify(bodyIn),
-                 headers: { "content-type": "application/json"}
-                 },
-                 function optionalCallback(err, httpResponse, body) {
-
-		if (!err && httpResponse.statusCode == 201) {
-							res.sendStatus(httpResponse.statusCode);
-              console.log("SUCCESS: " + bodyIn);
-        } else {
-					console.log("Error in POST /appliances" + httpResponse.statusCode);
-					res.sendStatus(httpResponse.statusCode);
-				}
-   });
-});
-
-app.get("/index", function(req, res)
-{
-	var index = {name:'userId', type:'json', index:{fields:['orgID','userID']}};
-
-	   db.index(index, function(err, response)
-	   {
-	     if (err)
-	     {
-	       console.log('GET /index  ==> Error:', err.statusCode);
-	       return;
-	     }
-	     console.log('Index creation result: %s', response.result);
-	   });
-
-	//create an index to find appliance doc for given userID and applianceID
-	var index = {name:'applianceByUser', type:'json', index:{fields:['orgID', 'userID', 'applianceID']}};
-	db.index(index, function(er, response)
+	var bodyIn = JSON.parse(JSON.stringify(req.body)); 
+   	bodyIn.userID = req.user.id;
+   	bodyIn.orgID = currentOrgID;
+	
+	//verify that userID coming in MCA matches doc userID
+	if (bodyIn.userID != req.user.id)
 	{
-		if (er)
-		{
-			console.log(er);
-			//throw er;
-		}
-		console.log('Index creation result: %s', response.result);
-	})
-});
-
-
-
-/***************************************************************/
-/* Route to show one user doc using Cloudant Query             */
-/*   Internal API											   */
-/* Takes a userID in the url params                            */
-/***************************************************************/
-app.get('/user/internal/:userID', function(req, res)
-{
-   console.log('GET /user  ==> Begin');
-    console.log('GET /users  ==> Incoming userID = '+ req.params.userID);
-
-   var responseDoc = {docs:[]};
-
-   db.find({selector:{orgID: currentOrgID, userID:req.params.userID}}, function(err, result)
-   {
-     if (err)
-     {
-       console.log("GET /user ==> Error received from database = " + err.statusCode);
-       console.log(err);
-       return;
-     }
-
-     if (result.docs.length==0)
-     {
-        console.log("GET /user ==> user:" + req.params.userID + " not in database");
-		res.sendStatus(404);
-        return;
-     }
-     else
-     {
-	 console.log(result);
-        for (var i = 0; i < result.docs.length; i++)
-        {
-          if (!('applianceID'  in result.docs[i]))
-          {
-             responseDoc.docs.push({userID:    result.docs[i].userID,
-                                           name:      result.docs[i].name,
-                                           telephone: result.docs[i].telephone,
-                                           address:   result.docs[i].address});
-          }
-        }
-
-        res.status(200).json(responseDoc);
-        return;
-     }
-   });
-
+		res.status(500).send("User ID in request does not match MCA authenticated user.")
+		//might need a return here, needs test
+	}
+	request({
+		url: 'https://iotforelectronicstile.mybluemix.net/v001/appliances',
+		json: bodyIn,
+		method: 'POST', 
+		headers: {
+    				'Content-Type': 'application/json',
+    				'tenantID':iotETenant,
+    				'orgID':currentOrgID
+  		},
+  		auth: {user:iotEApiKey, pass:iotEAuthToken}
+		}, function(error, response, body){
+			if(error) {
+				console.log('ERROR: ' + error);
+				console.log('BODY: ' + error);
+				res.status(response.statusCode).send(response);
+			} else {
+				console.log(response.statusCode, body);
+				res.status(response.statusCode).send(response);
+			}
+		});
 });
 
 
@@ -491,79 +391,39 @@ app.get('/user/internal/:userID', function(req, res)
 /***************************************************************/
 app.get('/user/:userID', passport.authenticate('mca-backend-strategy', {session: false }), function(req, res)
 {
-	res.redirect('user/internal/' + req.user.id, function (reqest, response){
-		if (response.statusCode == 201) {
-							res.sendStatus(httpResponse.statusCode);
-							console.log("SUCCESS: " + bodyIn);
-				} else {
-					console.log("Error in POST /appliances" + response.statusCode);
-					res.sendStatus(httpResponse.statusCode);
-				}
-	});
-
+	//make sure userID on params matches userID coming in thru MCA
+	if (req.params.userID != req.user.id)
+	{
+		res.status(500).send("User ID on request does not match MCA authenticated user.")
+		//might need a return here, needs test
+	}
+	
+	var options =
+	{
+		url: ('https://iotforelectronicstile.mybluemix.net/v001/user/'+ req.params.userID),
+		method: 'GET',
+		headers: {
+    				'Content-Type': 'application/json',
+    				'tenantID':iotETenant,
+    				'orgID':currentOrgID
+  		},
+  		auth: {user:iotEApiKey, pass:iotEAuthToken}
+	};
+	request(options, function (error, response, body) {
+	    if (!error) {
+        	// Print out the response body
+        	console.log(body);
+        	res.status(response.statusCode).json(body);
+	    }else{
+        	console.log("The request came back with an error: " + error);
+        	//for now I'm giving this a 500 so that postman won't be left hanging.
+        	res.status(response.statusCode).send(response);
+        	return;
+        	}
+        	
+        	});
 });
 
-
-/***************************************************************/
-/* Route to list all appliance documents for given user   (4)  */
-/*   Internal API            								   */
-/* Input: Query string with userID and optional applianceID    */
-/***************************************************************/
-app.get('/appliances/internal/:userID', function (req, res)
-{
-	// create empty array responseDoc, to hold just the appliance docs (will filter out user docs) to return
-	var responseDoc = {docs:[]};
-	//find a device doc given query string with userID and optional applianceID
-	//first query by user, then by applianceID
-  console.log(req.params.userID);
-	db.find({selector:{orgID: currentOrgID, userID:req.params.userID}}, function(err, result)
-    {
-    	if (err)
-    	{
-			console.log("app.get ==> Error condition");
-			console.log(err);
-			res.sendStatus(err.statusCode);
-			return;
-    	}
-     if (result.docs.length==0)
-     {
-       console.log("app.get /appliance ==> Cannot find document");
-       res.sendStatus(404);
-       return;
-     }
-
-    	var i=0;
-    while (i < result.docs.length)
-    {
-       if ('applianceID' in result.docs[i])
-       {
-         responseDoc.docs.push({userID: result.docs[i].userID,
-                                applianceID: result.docs[i].applianceID,
-                                serialNumber: result.docs[i].serialNumber,
-									   						manufacturer: result.docs[i].manufacturer,
-									   						name: result.docs[i].name,
-									   						dateOfPurchase: result.docs[i].dateOfPurchase,
-                                model: result.docs[i].model});
-       }
-       i++;
-    }
-
-	//we found something and didn't hit an error, send 200 and the result
-    res.status(200).json(responseDoc);
-	});
-
-});
-
-/***************************************************************/
-/* Route to list all appliance documents for given user   (4)  */
-/*       													   */
-/* Input: Query string with userID and optional applianceID    */
-/***************************************************************/
-app.get('/appliancesSteph/:userID', function (req, res)
-{
-	res.redirect('/appliances/internal/' + req.params.userID);
-
-});
 
 /***************************************************************/
 /* Route to list all appliance documents for given user   (4)  */
@@ -572,55 +432,39 @@ app.get('/appliancesSteph/:userID', function (req, res)
 /***************************************************************/
 app.get('/appliances/:userID', passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)
 {
-	res.redirect('/appliances/internal/' + req.user.id);
+	//make sure userID on params matches userID coming in thru MCA
+	if (req.params.userID != req.user.id)
+	{
+		res.status(500).send("User ID on request does not match MCA authenticated user.")
+		//might need a return here, needs test
+	}
+	var options =
+	{
+		url: ('https://iotforelectronicstile.mybluemix.net/v001/appliances/'+ req.user.id),
+		method: 'GET',
+		headers: {
+    				'Content-Type': 'application/json',
+    				'tenantID':iotETenant,
+    				'orgID':currentOrgID
+  		},
+  		auth: {user:iotEApiKey, pass:iotEAuthToken}
+	};
+	request(options, function (error, response, body) {
+	    if (!error) {
+        	// Print out the response body
+        	console.log("body: " + body);
+        	console.log("response: " + response);
+        	res.status(response.statusCode).send(body);
+	    }else{
+        	console.log("The request came back with an error: " + error);
+        	//for now I'm giving this a 500 so that postman won't be left hanging.
+        	res.status(response.statusCode).send(response);
+        	return;
+        	}
+        	
+        	});
 });
 
-
-
-/****************************************************************************/
-/* Route to list 1 appliance document for given userID and applianceID (4)  */
-/*       Internal API										   				*/
-/* Input: Query string with userID and optional applianceID    				*/
-/****************************************************************************/
-app.get('/appliances/internal2/:userID/:applianceID', function (req, res)
-{
-	// create empty array responseDoc, to hold just the appliance docs (will filter out user docs) to return
-	var responseDoc = {docs:[]};
-	//find a device doc given query string with userID and optional applianceID
-	//first query by user, then by applianceID
-
-	db.find({selector:{orgID: currentOrgID, userID:req.params.userID, applianceID:req.params.applianceID}}, function(err, result)
-    {
-    	if (err)
-    	{
-			console.log("app.get ==> Error condition");
-			console.log(err);
-			res.sendStatus(err.statusCode);
-			return;
-    	}
-     if (result.docs.length==0)
-     {
-       console.log("app.get /appliance ==> Cannot find document");
-       res.sendStatus(404);
-       return;
-     }
-
-         responseDoc.docs.push({userID: result.docs[0].userID,
-                                applianceID: result.docs[0].applianceID,
-                                serialNumber: result.docs[0].serialNumber,
-									   						manufacturer: result.docs[0].manufacturer,
-									   						name: result.docs[0].name,
-									   						dateOfPurchase: result.docs[0].dateOfPurchase,
-                                model: result.docs[0].model});
-
-
-    //we found something and didn't hit an error, send 200 and the result
-    res.status(200).json(responseDoc);
-
-    });
-
-
-});
 
 /****************************************************************************/
 /* Route to list 1 appliance document for given userID and applianceID (4)  */
@@ -629,71 +473,36 @@ app.get('/appliances/internal2/:userID/:applianceID', function (req, res)
 /****************************************************************************/
 app.get("/appliances/:userID/:applianceID", passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)
 {
-	res.redirect('/appliances/internal2/' + req.user.id + '/' + req.params.applianceID);
-});
-
-
-
-/***************************************************************/
-/* Route to delete appliance records                           */
-/***************************************************************/
-app.del('/appliances/internal/:userID/:applianceID', function(req, res)
-{
-	//first check that userID AND applianceID were given
-   if (req.params.userID == null || req.params.applianceID == null)
-   {
-      console.log("DEL /appliance ==> userID and/or applianceID not provided");
-      res.sendStatus(400);
-      return;
-   }
-
-   db.find({selector:{orgID:currentOrgID, userID:req.params.userID, applianceID:req.params.applianceID}}, function(err, result)
-   {
-     if (err)
-     {
-       console.log("DEL /appliance ==> Error condition");
-       console.log(err);
-       res.status(err.statusCode);
-       return;
-     }
-
-     if (result.docs.length==0)
-     {
-       console.log("DEL /appliance ==> Cannot find document");
-       res.status(404);
-       return;
-     }
-
-	if (result.docs[0].registrationCreatedOnPlatform == true)
-    {
-       /*******************************************************************/
-       /* Delete from platform and registration databases.                */
-       /* For experimental this code will not get executed                */
-       /* because registrationCreatedOnPlatform will always be false.     */
-       /*******************************************************************/
-      console.log("DEL /appliance ==> Deleting appliance from platform and registration database.");
-    }
-    else
-    {
-		//delete the record from our db only
-		console.log("DEL /appliance ==> Deleting appliance from registration database only.");
-		db.destroy(result.docs[0]._id,result.docs[0]._rev, function(err,data)
-		{
-			if(err)
-			{
-				console.log('DEL /appliance  ==> Error:', err.statusCode);
-				console.log('DEL /appliance  ==> Error: Error deleting document');
-				console.log(err);
-				res.status(err.statusCode);
-			}
-			else
-			{
-				console.log("DEL /appliance ==> Deleted document for userID: " + req.params.userID + " applianceID: " + req.params.applianceID);
-				res.status(204);
-			}
-		});
+	//make sure userID on params matches userID coming in thru MCA
+	if (req.params.userID != req.user.id)
+	{
+		res.status(500).send("User ID on request does not match MCA authenticated user.")
+		//might need a return here, needs test
 	}
-  });
+	var options =
+	{
+		url: ('https://iotforelectronicstile.mybluemix.net/v001/appliances/'+ req.user.id + '/' + req.body.applianceID),
+		method: 'GET',
+		headers: {
+    				'Content-Type': 'application/json',
+    				'tenantID':iotETenant,
+    				'orgID':currentOrgID
+  		},
+  		auth: {user:iotEApiKey, pass:iotEAuthToken}
+	};
+	request(options, function (error, response, body) {
+	    if (!error) {
+        	// Print out the response body
+        	console.log(body);
+        	res.status(response.statusCode).json(body);
+	    }else{
+        	console.log("The request came back with an error: " + error);
+        	//for now I'm giving this a 500 so that postman won't be left hanging.
+        	res.status(response.statusCode).send(response);
+        	return;
+        	}
+        	
+        	});
 });
 
 /***************************************************************/
@@ -702,107 +511,37 @@ app.del('/appliances/internal/:userID/:applianceID', function(req, res)
 /***************************************************************/
 app.del("/appliances/:userID/:applianceID", passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)
 {
-	res.redirect('/appliances/internal/' + req.user.id + '/' + req.params.applianceID);
+	//DOING THIS DELETE HOW WE DO POSTS ABOVE
+	//will need to test to see which works (or which works better)
+	
+	//verify that userID coming in MCA matches doc userID
+	if (req.params.userID != req.user.id)
+	{
+		res.status(500).send("User ID in request does not match MCA authenticated user.")
+		//might need a return here, needs test
+	}
+	request({
+		url: ('https://iotforelectronicstile.mybluemix.net/v001/appliances/'+ req.params.userID + '/' + req.params.applianceID),
+		method: 'DELETE', 
+		headers: {
+    				'Content-Type': 'application/json',
+    				'tenantID':iotETenant,
+    				'orgID':currentOrgID
+  		},
+  		auth: {user:iotEApiKey, pass:iotEAuthToken}
+		}, function(error, response, body){
+			if(error) {
+				console.log('ERROR: ' + error);
+				console.log('BODY: ' + error);
+				res.status(response.statusCode).send(response);
+			} else {
+				console.log(response.statusCode, body);
+				res.status(response.statusCode).send(response);
+			}
+		});
 });
 
 
-/**************************************************************************************** **/
-/* Route to delete user documents.                              						   */
-/* Need to delete the appliance documents as well from our db  							   */
-/* If we created them on the platform, delete from platform (NOT for experimental)         */
-/*******************************************************************************************/
-app.delete('/user/internal/:userID', function (req, res)
-{
-   if (req.params.userID == null)
-   {
-      console.log("DEL /user ==> userID not provided");
-      res.sendStatus(400);
-      return;
-   }
-
-   db.find({selector:{orgID:currentOrgID, userID:req.params.userID}}, function(err, result)
-   {
-     if (err)
-     {
-       console.log("DEL /user ==> Error condition");
-       console.log(err);
-       res.sendStatus(err.statusCode);
-       return;
-     }
-
-     if (result.docs.length==0)
-     {
-       console.log("DEL /user ==> Cannot find document in Cloudant");
-       res.sendStatus(404);
-       return;
-     }
-
-     var i=0;
-     while (i < result.docs.length)
-     {
-       if ('applianceID' in result.docs[i])
-       {
-          /*******************************************************************/
-          /* Deleting an appliance document(s)                               */
-          /*******************************************************************/
-          if (result.docs[i].registrationCreatedOnPlatform == true)
-          {
-            /*******************************************************************/
-            /* Delete from platform and registration databases                 */
-            /* As of March 30, 2016, this code will not get executed           */
-            /* because registrationCreatedOnPlatform will always be false.     */
-            /*******************************************************************/
-            console.log("DEL /appliance ==> Deleting appliance from platform and registration database.");
-          }
-          else
-          {
-            /*******************************************************************/
-            /* Delete from registration database only                          */
-            /*******************************************************************/
-            console.log("DEL /appliance ==> Deleting appliance from registration database only.");
-
-            db.destroy(result.docs[i]._id,result.docs[i]._rev, function(err,data)
-            {
-               if(err)
-               {
-                 console.log('DEL /appliance  ==> Error:', err.statusCode);
-                 console.log('DEL /appliance  ==> Error: Error deleting document');
-                 console.log(err);
-                 res.sendStatus(err.statusCode);
-               }
-               else
-               {
-                 console.log("DEL /appliance ==> Deleted appliance document for userID: " + req.params.userID);
-               }
-            });
-          }
-       }
-       else if (!('applianceID' in result.docs[i]))
-       {
-          console.log("DEL /appliance ==> Deleting userID document");
-          /*******************************************************************/
-          /* Delete the user document                                        */
-          /*******************************************************************/
-          db.destroy(result.docs[i]._id,result.docs[i]._rev, function(err,result)
-          {
-             if(err)
-             {
-               console.log('DEL /user  ==> Error:', err.statusCode);
-               console.log('DEL /user  ==> Error: Error deleting document');
-               console.log(err);
-               res.sendStatus(err.statusCode);
-             }
-             else
-             {
-               console.log("DEL /user ==> Deleted user document for userID: " + req.params.userID);
-             }
-          });
-       }
-       i++;
-     }
-     res.sendStatus(204);
-  });
-});
 
 /**************************************************************************************** **/
 /* Route to delete user documents.                              						   */
@@ -811,7 +550,37 @@ app.delete('/user/internal/:userID', function (req, res)
 /*******************************************************************************************/
 app.delete("/user/:userID", passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)
 {
-	res.redirect('/user/internal/' + req.user.id);
+	//DOING THIS DELETE HOW WE DO GETS ABOVE
+	//make sure userID on params matches userID coming in thru MCA
+	if (req.params.userID != req.user.id)
+	{
+		res.status(500).send("User ID on request does not match MCA authenticated user.")
+		//might need a return here, needs test
+	}
+	var options =
+	{
+		url: ('https://iotforelectronicstile.mybluemix.net/v001/user/'+ req.user.id),
+		method: 'DELETE',
+		headers: {
+    				'Content-Type': 'application/json',
+    				'tenantID':iotETenant,
+    				'orgID':currentOrgID
+  		},
+  		auth: {user:iotEApiKey, pass:iotEAuthToken}
+	};
+	request(options, function (error, response, body) {
+	    if (!error) {
+        	// Print out the response body
+        	console.log(body);
+        	res.status(response.statusCode).send(response);
+	    }else{
+        	console.log("The request came back with an error: " + error);
+        	//for now I'm giving this a 500 so that postman won't be left hanging.
+        	res.status(response.statusCode).send(response);
+        	return;
+        	}
+        	
+        	});
 });
 
 //get IoT-Foundation credentials
@@ -869,7 +638,8 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
     if (userRepository[username] == null) {
         userRepository[username]={password: password, displayName: username, dob:"December 31, 2016"};
     }
-
+	//create a user doc in registration for this user if one doesn't already exist
+        createUser(username);
     var userObject = userRepository[username];
 
     if (userObject && userObject.password == password ){
@@ -882,50 +652,102 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
                 dob: userObject.dob
             }
         };
-    } else {
-        logger.debug("Login failure for userId ::", username);
-    }
-
-    res.status(200).json(responseJson);
+        
+    	} else {
+	        logger.debug("Login failure for userId ::", username);
+    	}
+	
+    	res.status(200).json(responseJson);
 });
+
 
 /********************************************************************** **/
 /*Solution Integrator Code                                               */
 /********************************************************************** **/
   //Get RTI credentials
-//  if(!VCAP_SERVICES || !VCAP_SERVICES["IoT Real-Time Insight"])
+// if(!VCAP_SERVICES || !VCAP_SERVICES["IoT Real-Time Insight"])
 //  	throw "Cannot get RTI credentials"
-//  var rtiCredentials = VCAP_SERVICES["IoT Real-Time Insight"][0]["credentials"];
+// var rtiCredentials = VCAP_SERVICES["IoT Real-Time Insight"][0]["credentials"];
 
-// //Get IoT for Electronics credentials
-// //if(!VCAP_SERVICES || !VCAP_SERVICES["ibmiotforelectronics"])
-// //	throw "Cannot get IoT4E credentials"
-// //var ioteCredentials = VCAP_SERVICES["ibmiotforelectronics"][0]["credentials"];
+//RTI Credentials
+//  var rtiApiKey = rtiCredentials["apiKey"];
+//  var rtiAuthToken = rtiCredentials["authToken"];
+//  var rtiBaseUrl = rtiCredentials["baseUrl"];
+//  var disabled = false;
 
+//Stephanie's deletedDoc Doc creation for Metering
+console.log('Creating doc to track deleted docs');
+var urlDel = 'https://iotforelectronicstile.mybluemix.net/deletedDocs/' + currentOrgID;
+console.log('Deleted Docs API URL:', urlDel);
+request
+  .get(urlDel, {timeout: 3000})
+  .on('response', function(response){
+    console.log('Response received.');
+  })
+  .on('error', function(error){
+    if(error.code === 'ETIMEDOUT')
+      console.log('Request timed out.');
+    else
+      console.log(error);
+  }); 
+  
+console.log('About to store IoTP Credentials');
+var url = ['https://iotforelectronicstile.mybluemix.net/credentials', currentOrgID, apiKey, authToken, iotpHttpHost, iotEAuthToken,iotEApiKey].join('/');
+console.log('Credentials API URL:', url);
+request
+  .get(url, {timeout: 3000})
+  .on('response', function(response){
+    console.log('Response received.');
+  })
+  .on('error', function(error){
+    if(error.code === 'ETIMEDOUT')
+      console.log('Request timed out.');
+    else
+      console.log(error);
+  }); 
 
- //IoT Platform Credentials
-  var name = iotfCredentials["org"];
-  var orgId = iotfCredentials["org"];
-  var apiKey = iotfCredentials["apiKey"];
-  var authToken = iotfCredentials["apiToken"];
-  var baseURI = iotfCredentials["base_uri"];
-  var apiURI = 'https://' + iotfCredentials["http_host"] + ':443/api/v0002';
+/***************************************************************/
+/* Route to show one user doc using Cloudant Query             */
+/* Takes a userID in the url params                            */
+/***************************************************************/
+app.get('/validation', function(req, res)
+{
+	var options =
+	{
+		url: 'https://iotforelectronicstile.mybluemix.net/validation/' + iotETenant + '/' +  iotEAuthToken + '/' + iotEApiKey,
+		auth: iotEAuthToken + ':' + iotEApiKey,
+		method: 'GET',
+		headers: {
+    				'Content-Type': 'application/json'
+  		}
+	};
+	request(options, function (error, response, body) {
+	    if (!error && response.statusCode == 200) {
+        	// Print out the response body
+        	console.log(body);
+        	//response.status(200).send("Successful test GET")
+	    }else{
+        	console.log(error);
+        	//response.status(error.statusCode).send("ERROR on test GET")
+        	}
+        	
+        	});
+});
+// //var iotePass = ioteCredentials["password"];
 
- // //RTI Credentials
-  //var rtiApiKey = rtiCredentials["apiKey"];
-  //var rtiAuthToken = rtiCredentials["authToken"];
-  //var rtiBaseUrl = rtiCredentials["baseUrl"];
-  //var disabled = false;
+// //IoT Platform Device Types
+// //var	iotpDevId = "washingMachine";
+// //var	iotpDescription = "IoT4E Washing Machine";
+// //var	iotpClassId = "Device"
 
- //RTI IDs
- //var sourceId = '';
- //var schemaId = '';
- 
- //IoT Platform Config Creation Method.
+// //RTI Message Schema Info
+// //var	rtiSchemaName = "Electronics";
+
+// //IoT Platform Config Creation Method.
   var iotpPost = function iotpPost (path, json) {
-    //console.log('calling api to POST: ' + baseURI);
-    //console.log('IoTP API URI: ' + apiURI);
-    //console.log('calling api on json: ' + JSON.stringify(json));
+  console.log('calling api to POST: ' + baseURI);
+  console.log('IoTP API URI: ' + apiURI);
+  console.log('calling api on json: ' + JSON.stringify(json));
 
     var url = apiURI + path;
     var defer = q.defer();
@@ -946,25 +768,21 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
      })
      .on('response', function(response) {
         console.log('IoTP status: ' + response.statusCode);
-		console.log('IoTP error path: ' + path);
-		
     });
      return defer.promise;
   };
 
  // //RTI Config Creation Method.
   var rtiPost = function rtiPost (path, json) {
-    //console.log('calling api to baseURL: ' + rtiBaseUrl);
-    console.log('calling RTI api to Path ' + path);
-    //console.log('Rti Api: ' + rtiApiKey);
-    //console.log('Rti Token: ' + rtiAuthToken);
+    console.log('calling api to baseURL: ' + rtiBaseUrl);
+    console.log('calling api to Path ' + path);
+    console.log('Rti Api: ' + rtiApiKey);
+    console.log('Rti Token: ' + rtiAuthToken);
     console.log('calling api on json: ' + JSON.stringify(json));
 
     var url = rtiBaseUrl + path;
     var defer = q.defer();
     var body = '';
-	var responseBody = '';
-	var responseBodyParse = '';
 
     request
      .post({
@@ -978,71 +796,57 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
       .on('end', function() {
         var json = JSON.parse(body);
         defer.resolve(json);
-     });
+     })
+     .on('response', function(response) {
+        console.log('`RTI status: ' + response.statusCode); // 200
+    });
      return defer.promise;
    };
 
- function generateMacAddress(){
-	var mac = Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16);		
-	var macStr = mac[0].toUpperCase() + mac[1].toUpperCase() + mac[2].toUpperCase() + mac[3].toUpperCase() + 
-	mac[4].toUpperCase() + mac[5].toUpperCase() + mac[6].toUpperCase() + mac[7].toUpperCase() + 
-	mac[8].toUpperCase() + mac[9].toUpperCase() + mac[10].toUpperCase() + mac[11].toUpperCase();
-	return macStr;
-};
- //IoT Platform device type creation call
-  var iotpDeviceType = iotpPost('/device/types',{
-  	"id": "washingMachine",
-  	"description": "IoT4E Washing Machine",
-  	"classId": "Device"
- });
+//IoT Platform device type creation call
+ var iotpDeviceType = iotpPost('/device/types',{
+ 	"id": "washingMachine",
+ 	"description": "IoT4E Washing Machine",
+	"classId": "Device"
+});
 
-//IoT Platform device creation call
-//  var iotpDeviceType = iotpPost('/device/types/washingMachine/devices',{
-//    "deviceId": generateMacAddress()
-//  });
+// //IoT Platform device creation call
+// //var iotpDeviceType = iotpPost('/device/types/washingMachine/devices',{
+// //  //"id": "d:abc123:myType:myDevice",
+// //  "typeId": "washingMachine",
+// //  "deviceId": "washingMachineElec"
+// //});
 
-  //RTI data source creation call
-  //var rtiSource = rtiPost('/message/source',{
-  //	"name": name,
-  //	"orgId": orgId,
-  //	"apiKey": apiKey,
-  //	"authToken": authToken,
-  //"disabled": disabled})
-//	.then(function(json) {
-//		var source = JSON.parse(json);
-//		sourceId = source.id;
-//		console.log(' RTI Source ID: ' + sourceId);
-//		//defer.resolve(json);
-//  });
+//RTI data source creation call
+/*var rtiSource = rtiPost('/message/source',{
+	"name": name,
+	"orgId": orgId,
+	"apiKey": apiKey,
+	"authToken": authToken,
+	"disabled": disabled})
+		.then(function(json) {
+			console.log('RTI Source Return: ' + JSON.stringify(json));
+			var sourceValues = JSON.parse(JSON.stringify(json)); 
+			console.log('RTI Source ID: ' + sourceValues.id);
+			//RTI schema creation call
+			  var rtiSchema = rtiPost('/message/schema',{
+			  	"name": "Electronics",
+			  	"format": "JSON",
+			  	"items": []})
+			  .then(function(json){
+			  	console.log('RTI Schema Return: ' + JSON.stringify(json));
+			  	var schemaValues = JSON.parse(JSON.stringify(json)); 
+				//RTI route creation call
+				  var rtiRoute = rtiPost('/message/route',{
+				  	"sourceId": sourceValues.id,
+				  	"deviceType": "washingMachine",
+				  	"eventType": "+",
+				  	"schemaId": schemaValues.id});
+			  });
+});*/
 
- // //RTI schema creation call
-//  var rtiSchema = rtiPost('/message/schema',{
-//  	"name": "Electronics",
-//  	"format": "JSON",
-//  "items": []})
-//	.then(function(json) {
-//		var schema = JSON.parse(json);
-//		schemaId = schema.id;
-//		console.log(' RTI Schema ID: ' + schemaId);
-//  });
-	
- //RTI route creation call
-//  var rtiRoute = rtiPost('/message/route',{
-//  	"sourceId": sourceId,
-//  	"deviceType": "washingMachine",
-//  	"eventType": "+",
-//  "schemaId": schemaId});	
+
+console.log('IoT4E Credentials: ' + iotETenant);  
 /********************************************************************** **/
 /*End of Solution Integrator Code                                        */
 /********************************************************************** **/

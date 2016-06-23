@@ -5,7 +5,7 @@ var iotAppMonitorClient = (function () {
 	
 	var result = {};
 	
-	var socket = io.connect(window.location.host);
+	var socket = io.connect(window.location.host, {transports:['websocket']});
 	
 	if (socket){
 		

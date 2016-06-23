@@ -18,7 +18,7 @@ function getDb(callback){
 	} else {
 		// Cloudant setup
 		var username = 'ee7cb196-a1aa-4871-97e9-3e46813d9a4f-bluemix';
-		var password = 'f99a631bb23d340e741a3dd0ccd391dd1536ee1ca076f15812c4f005859b2a39';
+		var password = 'f99a631bb23d340e741a3dd0ccd391dd1536ee1ca076f15812c4f005859b2a39'		
 		var url = ['https://', username, ':', password, '@', username, '.cloudant.com'].join('');
 		var db_name = 'simulation_config';
 
@@ -229,7 +229,7 @@ simulationClient.prototype.createDevices = function(deviceType, numOfDevices, co
 		bulkRegRequest.push(regReq);		
 	};
 	var _this = this;
-
+	
 	iotFClient.callApi('POST', 201, true, ['bulk', 'devices', 'add'], JSON.stringify(bulkRegRequest)).then(
 			function onSuccess (responses) {
 				var result = [];
