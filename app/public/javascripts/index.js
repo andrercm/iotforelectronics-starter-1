@@ -82,7 +82,9 @@ $(document).ready(function(){
        },
       error: function(x, t, m){
         if(t === "timeout") {
-          restartSimulator('getDevices');
+          $('#alertError p').html(TIMEOUT_CREATE);
+          $('#alertError').fadeTo(500, 1);
+          restartSimulator();
         }
       }
      });
