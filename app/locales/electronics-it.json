@@ -85,7 +85,7 @@
 		"ready": "Pronto",
 		"stopped": "Arrestato",
 		"filling": "Riempimento",
-		"litespinning": "Centrifuga leggera",
+		"washing": "Centrifuga leggera",
 		"soaking": "Ammollo",
 		"spinning" : "Centrifuga",
 		"draining": "Asciugatura",
@@ -93,4 +93,3 @@
 		"no_data": "Nessun dato"
 	}
 }
-

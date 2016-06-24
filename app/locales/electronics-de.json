@@ -85,7 +85,7 @@
 		"ready": "Bereit",
 		"stopped": "Gestoppt",
 		"filling": "Füllen",
-		"litespinning": "Schonschleudern",
+		"washing": "Schonschleudern",
 		"soaking": "Einweichen",
 		"spinning" : "Schleudern",
 		"draining": "Pumpen",
@@ -93,4 +93,3 @@
 		"no_data": "Keine Daten"
 	}
 }
-

@@ -85,7 +85,7 @@
 		"ready": "대기",
 		"stopped": "중지됨",
 		"filling": "급수 중",
-		"litespinning": "세탁 중",
+		"washing": "세탁 중",
 		"soaking": "담금 중",
 		"spinning" : "탈수 중",
 		"draining": "배수 중",

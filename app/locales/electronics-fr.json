@@ -85,7 +85,7 @@
 		"ready": "Terminé",
 		"stopped": "Arrêté",
 		"filling": "Remplissage ",
-		"litespinning": "Lavage ",
+		"washing": "Lavage ",
 		"soaking": "Trempage ",
 		"spinning" : "Essorage ",
 		"draining": "Vidange ",
@@ -93,4 +93,3 @@
 		"no_data": "Pas de données"
 	}
 }
-
