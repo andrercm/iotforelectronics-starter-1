@@ -13,6 +13,11 @@ $(document).ready(function(){
     $.ajax({
       url: '/restartSimulator',
       type: 'GET',
+      success: function(){
+        setTimeout(function(){
+          getDevices();
+        }, 3000);
+      },
       error: function(e){
         console.log(e.responseText);
       }
@@ -35,6 +40,11 @@ $(document).ready(function(){
         });
         validateNoWasherMessage();
         validateMaxWasherMessage();
+        $('#ajaxBusy').hide();
+        if(numberOfDevices !== MAX_DEVICES){
+          $('#addNewDeviceButton').prop('disabled', false);
+          $('#addNewDeviceButton img').attr("src","../images/PlusWasher_en.svg");
+        }
       },
       error: function(x, t, m){
         if(t === "timeout") {
@@ -64,6 +74,11 @@ $(document).ready(function(){
          validateNoWasherMessage();
          validateAppExperienceWasherMessage();
          //analytics.track("IoT for Electronics -> Add Device", {});
+         $('#ajaxBusy').hide();
+         if(numberOfDevices !== MAX_DEVICES){
+          $('#addNewDeviceButton').prop('disabled', false);
+          $('#addNewDeviceButton img').attr("src","../images/PlusWasher_en.svg");
+         }
        },
       error: function(x, t, m){
         if(t === "timeout") {
@@ -73,7 +88,7 @@ $(document).ready(function(){
      });
   }
 
-  getDevices();
+  restartSimulator();
   validateAppExperienceWasherMessage();
 
   $(document).on('click', '#addNewDeviceButton', function(e){
@@ -185,7 +200,7 @@ function removeDevice(deviceID){
       $('#alertDeviceDeleted').fadeTo(500, 0, function(){
         $(this).hide();
       });
-    }, 5000);
+    }, 3000);
 
     if(numberOfDevices !== MAX_DEVICES){
       $('#addNewDeviceButton').prop('disabled', false);
@@ -230,8 +245,8 @@ $('#ajaxBusy').css({
 // Ajax activity indicator bound to ajax start/stop document events
 $(document).ajaxStart(function(){
   $('#ajaxBusy').show();
-}).ajaxStop(function(){
-  $('#ajaxBusy').hide();
+  $('#addNewDeviceButton').prop('disabled', true);
+  $('#addNewDeviceButton img').attr("src","../images/PlusWasher_dis.svg");
 });
 
 //Scroll page control
