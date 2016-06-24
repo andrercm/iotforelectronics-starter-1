@@ -85,7 +85,7 @@
 		"ready": "Listo",
 		"stopped": "Detenido",
 		"filling": "Llenando",
-		"litespinning": "Centrifugado suave",
+		"washing": "Centrifugado suave",
 		"soaking": "Remojo",
 		"spinning" : "Centrifugando",
 		"draining": "Vaciando",
@@ -93,4 +93,3 @@
 		"no_data": "Sin datos"
 	}
 }
-
