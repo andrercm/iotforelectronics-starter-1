@@ -16,7 +16,7 @@
     ],
     "defaultMemory": 512,
     "startCommand": "node app.js",
-    "description": "IoT for Electronics is an integrated end-to-end solution (made of multiple services and apps) that enables your apps to communicate with, control, analyze, and update connected electronics.",
+    "description": "IoT for Electronics is ann integrated end-to-end solution (made of multiple services and apps) that enables your apps to communicate with, control, analyze, and update connected electronics.",
     "type": "web",
     "version": "1.0",
     "smallIcon": "iotforelectronics-24.png",
@@ -25,7 +25,7 @@
     "featuredIcon": "iotforelectronics-64.png",
     "marqueeIcon": "260x100.png",
     "headingIcon": "500x190.png",
-    "system_tags": ["ibm_created", "ibm_release"],
+    "system_tags": ["ibm_created", "ibm_experimental"],
     "source" : {
   		"scmType" : "git",
         "url" : "https://github.com/alexisrs/iotforelectronics-starter.git",
