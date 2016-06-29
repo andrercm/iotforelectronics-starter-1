@@ -3,8 +3,7 @@ var MAX_DEVICES = 5;
 
 $(document).ready(function(){
 
-  $('#alertDeviceDeleted').hide();
-  $('#alertError').hide();
+  $('.alert-messages, #alertDeviceDeleted, #alertError').hide();
 
   $('#addNewDeviceButton').prop('disabled', false);
   $('#addNewDeviceButton img').attr("src","../images/PlusWasher_en.svg");
@@ -83,7 +82,7 @@ $(document).ready(function(){
       error: function(x, t, m){
         if(t === "timeout") {
           $('#alertError p').html(TIMEOUT_CREATE);
-          $('#alertError').fadeTo(500, 1);
+          $('.alert-messages, #alertError').fadeTo(500, 1);
           restartSimulator();
         }
       }
@@ -196,7 +195,7 @@ function removeDevice(deviceID){
     $('#alertDeviceDeleted p').html(DEVICE_DELETED_MSG);
     var text = $('#alertDeviceDeleted p').html();
     $('#alertDeviceDeleted p').html(text.replace(/^([\w\-!]+)/i, '<strong>$&</strong>').replace('{0}', deviceID));
-    $('#alertDeviceDeleted').fadeTo(500, 1);
+    $('.alert-messages, #alertDeviceDeleted').fadeTo(500, 1);
 
     setTimeout(function(){
       $('#alertDeviceDeleted').fadeTo(500, 0, function(){
