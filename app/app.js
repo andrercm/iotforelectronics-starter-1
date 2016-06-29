@@ -695,15 +695,16 @@ console.log('About to store IoTP Credentials');
 var url = ['https://iotforelectronicstile.mybluemix.net/credentials', currentOrgID, apiKey, authToken, iotpHttpHost, iotEAuthToken,iotEApiKey].join('/');
 console.log('Credentials API URL:', url);
 request
-  .get(url, {timeout: 3000})
+  .get(url, {timeout: 000})
   .on('response', function(response){
+  	console.log('Store IoTP Credentials called');
     console.log('Response received.');
   })
   .on('error', function(error){
     if(error.code === 'ETIMEDOUT')
       console.log('Request timed out.');
     else
-      console.log(error);
+      console.log('Error happened in Store IoTP credentials call --->',error);
   }); 
 
 /***************************************************************/
