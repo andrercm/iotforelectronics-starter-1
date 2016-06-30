@@ -697,7 +697,8 @@ console.log('Credentials API URL:', url);
 request
   .get(url, {timeout: 000})
   .on('response', function(response){
-  	console.log('Store IoTP Credentials called');
+  	console.log('Response Status Code --->', response.statusCode);
+  	console.log('Response Message --->', response.message);
     console.log('Response received.');
   })
   .on('error', function(error){
