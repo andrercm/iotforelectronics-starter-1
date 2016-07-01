@@ -48,7 +48,7 @@ $(document).ready(function(){
       error: function(x, t, m){
         if(t === "timeout") {
           $('#alertError p').html(TIMEOUT_LIST);
-          $('#alertError').fadeTo(500, 1);
+          $('.alert-messages, #alertError').fadeTo(500, 1);
           restartSimulator();
         }
       }
@@ -198,7 +198,7 @@ function removeDevice(deviceID){
     $('.alert-messages, #alertDeviceDeleted').fadeTo(500, 1);
 
     setTimeout(function(){
-      $('#alertDeviceDeleted').fadeTo(500, 0, function(){
+      $('.alert-messages, #alertDeviceDeleted').fadeTo(500, 0, function(){
         $(this).hide();
       });
     }, 3000);
@@ -215,14 +215,14 @@ function removeDevice(deviceID){
 
 $('#alertDeviceDeleted a').on('click', function(e){
   e.preventDefault();
-  $('#alertDeviceDeleted').fadeTo(500, 0, function(){
+  $('.alert-messages, #alertDeviceDeleted').fadeTo(500, 0, function(){
     $(this).hide();
   });
 });
 
 $('#alertError a').on('click', function(e){
   e.preventDefault();
-  $('#alertError').fadeTo(500, 0, function(){
+  $('.alert-messages, #alertError').fadeTo(500, 0, function(){
     $(this).hide();
   });
 });

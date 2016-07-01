@@ -120,8 +120,8 @@ button, a{
 .explore-info .selection-box{
 	position: relative;
 	border: 2px solid transparent;
-	width:302px;
-	height: 360px;
+	width:320px;
+	height: 370px;
 	cursor: pointer;
 }
 .explore-info .selection-box.active, .explore-info .selection-box:hover{
@@ -450,7 +450,7 @@ footer.main-section{
 .washer-details .washer-content .text-list li strong{
 	position: relative;
 	display: inline-block;
-  width: calc(100% - 65px);
+  width: calc(100% - 30px);
 }
 
 .washer-app-info{
@@ -535,7 +535,7 @@ footer.main-section{
 	background: #FFF;
 	margin: 7px 0px;
 	padding: 8px;
-	width: 120px;
+	width: 140px;
 	height: 40px;
 	border: 1px solid #000;
 	outline: 0 !important;

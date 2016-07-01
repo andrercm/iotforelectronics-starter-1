@@ -10,39 +10,6 @@ var request = require('request');
 var debug = require('debug')('simulationClient');
 var appEnv = require("cfenv").getAppEnv();
 var Cloudant = require('cloudant');
-var queue = require('seq-queue').createQueue(30000);
-
-function getDb(callback){
-	if(this.db){
-		callback(this.db);
-	} else {
-		// Cloudant setup
-		var username = 'ee7cb196-a1aa-4871-97e9-3e46813d9a4f-bluemix';
-		var password = 'f99a631bb23d340e741a3dd0ccd391dd1536ee1ca076f15812c4f005859b2a39';
-		var url = ['https://', username, ':', password, '@', username, '.cloudant.com'].join('');
-		var db_name = 'simulation_config';
-
-		var cloudant = Cloudant(url, function(err, cloudant){
-		  var db = cloudant.db.use(db_name);
-		  cloudant.db.get(db_name, function(err, body){
-		    if(err){
-		      cloudant.db.create(db_name, function(err, body){
-		        if(!err){
-		        	this.db = db;
-		        	callback(db);
-		        } else {
-		        	throw new Error("Cannot connect to database:", "simulation_config");
-		        }
-		      });
-		    } else {
-		    	this.db = db;
-		    	callback(db);
-		    }
-		  });
-		});
-	}
-};
-
 
 function simulationClient(config) {
 	if (!(this instanceof simulationClient)) {
@@ -79,66 +46,59 @@ simulationClient.prototype.getDevices = function(){
 
 simulationClient.prototype.loadConfiguration = function(simulationConfigFile, registerDevicetypes, done){
 	var _this = this;
-	getDb(function(db){
-		var app_id = appEnv.app.application_id;
 
-		db.get(app_id, function(err, result){
-			if(err){
-	          if(err.message === 'missing' || err.message === 'deleted'){
-	          	simulationConfigFile = (simulationConfigFile) ? simulationConfigFile: "./simulationConfig.json";
+	callSimulationEngineAPI("GET", ["db", "loadDocument", appEnv.app.application_id]).then(function(resp){
+		if(resp.err){
+			if(resp.err.message === 'missing' || resp.err.message === 'deleted'){
+				simulationConfigFile = (simulationConfigFile) ? simulationConfigFile: "./simulationConfig.json";
 	          	_.extend(_this.simulationConfig, fs.readJsonSync(simulationConfigFile));
-	            db.insert(_this.simulationConfig, app_id, function(err, body){
-	            	_.extend(_this.simulationConfig, {"_id": body.id, "_rev": body.rev});
-	            	done();
-	            });
-	          } else {
-	          	throw new Error("Error trying to create record: " + err);
-	          }
-	        } else {
-	        	_.extend(_this.simulationConfig, result);
-	        	_this.simulationConfig._rev = result._rev;
-	        	done();
-	        }
+	          	callSimulationEngineAPI("POST", ["db", "insertDocument", appEnv.app.application_id], _this.simulationConfig).then(function(resp){
+	          		if(resp.err){
+	          			console.error('An error occurred when trying to create the configuration file in the database:', resp.err);
+	          		} else {
+	          			_.extend(_this.simulationConfig, {"_id": resp.body.id, "_rev": resp.body.rev});
+	            		done();
+	          		}
+	          	});
+			}
+		} else {
+			_.extend(_this.simulationConfig, resp.result);
+        	_this.simulationConfig._rev = resp.result._rev;
+        	done();
+		}
 
-	        if(!registerDevicetypes)
+		if(!registerDevicetypes)
 				return Q(true);
 
-			var regDeviceTypeReqs = [];
-			_.each(_this.simulationConfig.devicesSchemas, function(schema){
-				var iotFClient = getIotfAppClient();
-				regDeviceTypeReqs.push(iotFClient.callApi('POST', 200, true, ['device', 'types'], JSON.stringify({id: schema.name})).then(function onSuccess (response) {
-					Q.resolve(true);
+		var regDeviceTypeReqs = [];
+		_.each(_this.simulationConfig.devicesSchemas, function(schema){
+			var iotFClient = getIotfAppClient();
+			regDeviceTypeReqs.push(iotFClient.callApi('POST', 200, true, ['device', 'types'], JSON.stringify({id: schema.name})).then(function onSuccess (response) {
+				Q.resolve(true);
 
-				}, function onError (error) {
-					if(error.status == 409)
-						return true;
-					console.error(error);
-					Q.reject(error);
-				}));				
-			});
-			return Q.all(regDeviceTypeReqs).then(function(res){
-				return res;
-			});
+			}, function onError (error) {
+				if(error.status == 409)
+					return true;
+				console.error(error);
+				Q.reject(error);
+			}));				
+		});
+		return Q.all(regDeviceTypeReqs).then(function(res){
+			return res;
 		});
 	});
 };
 
 simulationClient.prototype.saveSimulationConfig = function(){
 	var _this = this;
-	queue.push(function(task){
-		getDb(function(db){
-			db.insert(_this.simulationConfig, function(err, body){
-				if(!err){
-					_this.simulationConfig._rev = body.rev;
-					task.done();
-				} else {
-					throw new Error("Error trying to update record: " + err);
-				}
-			});
-		});
+	callSimulationEngineAPI("POST", ["db", "insertDocument", appEnv.app.application_id], _this.simulationConfig).then(function(resp){
+		if(resp.err){
+			throw new Error("Error trying to update record: " + resp.err);
+		} else {
+			_this.simulationConfig._rev = resp.body.rev;
+		}
 	});
 };
-
 
 simulationClient.prototype.startSimulation = function(){
 	var _this = this;
