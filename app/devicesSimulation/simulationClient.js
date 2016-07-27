@@ -10,6 +10,7 @@ var request = require('request');
 var debug = require('debug')('simulationClient');
 var appEnv = require("cfenv").getAppEnv();
 var Cloudant = require('cloudant');
+var encryptor = require('simple-encryptor')(process.env.KEY);
 
 function simulationClient(config) {
 	if (!(this instanceof simulationClient)) {
@@ -602,8 +603,8 @@ simulationClient.prototype.onMessage = function(msg){
 
 function callSimulationEngineAPI(method, paths, body){
 	var uri = "https://iot4esimulationengine.mybluemix.net/api";
-	var apiKey = "b52f6b93-5b22-4e76-a765-b3c8ad7a72a8";
-	var apiToken = "21b750f1-43ee-4c92-a11e-1a30ff503feb";	
+	var apiKey = encryptor.decrypt('adb33b3b7e023efcb10ad68a8977d0c78d2ae6aa7e37d37331d56d33ccf67562b66fa079f14b21d49e56de4ea8924de7UcHcMC5d9fv2rkXJjka2cPR3+l8/5NPHBH8vOBoKDRX57AhzUCgFT5Dqmjmd6qhv');
+	var apiToken = encryptor.decrypt('55febf36e62bdb74bc4464e834c0c4fe10627dff7a5eb9911e0bfd122dab6bacf22fe75126aafaa36ec6130e0e39ab79veloJdh8Sp4SxPSa366uATBsM0lw8YOacPj92RKSbtpZqbEhcbI2H/UG3MJNHg2G');
 	if(paths){
 		for(i in paths){
 			uri += '/'+paths[i];

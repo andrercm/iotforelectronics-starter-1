@@ -367,6 +367,7 @@ button, a{
 	margin-bottom: 50px;
 }
 .alert-messages {
+	display: none;
 	position: fixed;
 	width: 50%;
 	top: 0px;
@@ -375,6 +376,11 @@ button, a{
 	margin: auto;
 	z-index: 7000;
 }
+
+.alert {
+	display: none;
+}
+
 /*Footer*/
 footer{
   padding: 20px 0px;

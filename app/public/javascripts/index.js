@@ -3,8 +3,6 @@ var MAX_DEVICES = 5;
 
 $(document).ready(function(){
 
-  $('.alert-messages, #alertDeviceDeleted, #alertError').hide();
-
   $('#addNewDeviceButton').prop('disabled', false);
   $('#addNewDeviceButton img').attr("src","../images/PlusWasher_en.svg");
 
