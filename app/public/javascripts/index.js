@@ -25,7 +25,14 @@ $(document).ready(function(){
     $.ajax({
       url: '/washingMachine/getStatus',
       type: 'GET',
-      timeout: 30000,
+      timeout: 60000,
+      statusCode: {
+        500: function(response){
+          setTimeout(function(){
+            getDevices();
+          }, 1000);
+        }
+      },
       success: function(data){
         $.each(data, function(index, value){
           numberOfDevices++;
