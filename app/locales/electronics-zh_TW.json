@@ -8,7 +8,7 @@
 	],
 	"main_page": {
 		"page_title": "IoT for Electronics",
-		"top_title": "IoT for Electronics 新手體驗",
+		"top_title": "IoT for Electronics Starter 體驗",
 		"sections_preheading": "從製造商及消費者的角度體驗 IoT for Electronics",
 		"sections_headingx": "選取要執行的動作：",
 		"sections_heading": "連線並管理模擬家用電器",
@@ -22,7 +22,7 @@
 		"consumer_app_text": "使用行動式應用程式來查看消費者將怎樣體驗此解決方案。",
 		"simulate_appliance_subtitle": "管理模擬家用電器",
 		"simulate_appliance_p1": "直接在這裡建立模擬家用電器，傳送指令並檢視回應。",
-		"simulate_appliance_p2": "使用此新手入門供應項目中的 Web 型應用程式，監視來自專屬家用電器的即時多媒體串流資料。家用電器會自動連線至 IBM Watson IoT Platform。在此平台上，可以查看裝置及裝置傳送給您的資料與訊息。",
+		"simulate_appliance_p2": "使用此入門供應項目中的 Web 型應用程式，監視來自專屬家用電器的即時串流資料。家用電器會自動連線至 IBM Watson IoT Platform。在此平台上，可以查看裝置及裝置傳送給您的資料與訊息。",
 		"learn_more": "進一步瞭解",
 		"consumer_app_subtitle": "探索消費者體驗",
 		"consumer_app_p1": "此行動式應用程式可讓家用電器擁有者使用行動式裝置來控制並監視新洗衣機。",
@@ -31,7 +31,7 @@
 	    "consumer_app_p4": "家用電器公司可以提供這些類型的應用程式及服務來吸引並留住客戶。這些公司還可以使用收集的資料來改良產品功能並提供新服務。",
 		"add_washer_heading": "接下來，選擇或新增模擬洗衣機",
 		"add_washer_message1": "最多可以新增五部洗衣機。",
-		"add_washer_message2": "洗衣機數目已達到 5 部這一上限。",
+		"add_washer_message2": "洗衣機數目已達上限 5 部。",
 		"your_washers": "洗衣機",
 		"select_washer": "選取洗衣機來控制其模擬資料。此時將開啟一個新視窗。",
 		"no_washers_added": "尚未新增任何洗衣機。",
@@ -43,8 +43,7 @@
 		"connect_app": "連線應用程式",	
 		"connect_app_p1": "在手機上啟動應用程式。",
 		"connect_app_p2": "提示您連線 IoT for Electronics 環境時，請掃描下面的連線 QR 碼",
-		"mobile_download_more_details": "如需詳細指示，請按一下",
-		"mobile_download_instructions_here" : "這裡",
+		"mobile_download_more_details": "如需詳細指示，請參閱文件。",
 		"scan_heading": "系統將要求您掃描此 QR 碼，以使應用程式與環境相連",
 		"connection_code": "連線 QR 碼",
 		"scan_p1": "第一次在手機上使用行動式消費者應用程式時，將掃描此 QR 碼以使行動式裝置與 IoT for Electronics Bluemix 環境相連。",
@@ -52,14 +51,16 @@
 		"back_to_top": "回到頂端",
 		"explore_more": "進一步探索",
 		"manage_devices": "現在，可以從平台管理裝置 >",
-		"device_deleted": "成功！裝置 {0} 已順利地刪除。"	
+		"device_deleted": "成功！裝置 {0} 已順利地刪除。",
+		"timeout_list": "要求列出裝置時發生逾時，將重新啟動模擬作業。請重新整理頁面，然後再試一次。",
+		"timeout_create": "要求建立裝置時發生逾時，將重新啟動模擬作業。請重新整理頁面，然後再試一次。"
 	},
 	"appliance_page": {
 		"page_title": "IoT for Electronics",
 		"top_title": "模擬洗衣機體驗",
 		"heading": "命令並控制模擬洗衣機",
 		"problem_heading": "選取問題",
-		"problem_text": "監看洗衣機的狀態變更。嘗試消費者應用程式時，將自動傳送狀態變更訊息至 iOS 手機。",
+		"problem_text": "監看洗衣機的狀態變更。試用消費者應用程式時，將自動傳送狀態變更訊息至 iOS 手機。",
 		"board_failure": "主機板故障",
 		"strong_vibration": "強烈振動",
 		"water_leak": "漏水",
@@ -77,7 +78,7 @@
 		"water_pressure": "水壓",
 		"water_pressure_unit": "psi",
 		"appliance_code": "家用電器碼",
-		"qr_text": "嘗試消費者應用程式時，可以掃描 QR 碼以在手機上查看此洗衣機的狀態及其他事件。",
+		"qr_text": "試用消費者應用程式時，可以掃描 QR 碼以在手機上查看此洗衣機的狀態及其他事件。",
 		"delete_prompt": "此動作無法復原。您確定嗎？",
 		"cancel": "取消",
 		"delete": "刪除",
@@ -85,7 +86,7 @@
 		"ready": "備妥",
 		"stopped": "已停止",
 		"filling": "填充中",
-		"washing": "輕柔脫水",
+		"washing": "清洗中",
 		"soaking": "浸泡中",
 		"spinning" : "旋轉中",
 		"draining": "排水中",
@@ -93,4 +94,3 @@
 		"no_data": "無資料"
 	}
 }
-

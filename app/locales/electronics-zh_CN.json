@@ -8,7 +8,7 @@
 	],
 	"main_page": {
 		"page_title": "IoT for Electronics",
-		"top_title": "IoT for Electronics 入门体验",
+		"top_title": "IoT for Electronics Starter 体验",
 		"sections_preheading": "从制造商和消费者的角度来体验 IoT for Electronics",
 		"sections_headingx": "选择您要执行的操作：",
 		"sections_heading": "连接和管理模拟家电",
@@ -22,7 +22,7 @@
 		"consumer_app_text": "使用移动应用来了解消费者将如何体验该解决方案。",
 		"simulate_appliance_subtitle": "管理模拟家电",
 		"simulate_appliance_p1": "在此处创建模拟家电、发送命令并查看响应。",
-		"simulate_appliance_p2": "使用本入门产品中基于 Web 的应用监视来自您自家家电的实时流数据。您的家电将自动连接到 IBM Watson IoT Platform。在该平台上，您可以查看自己的设备以及由这些设备发送的数据和消息。",
+		"simulate_appliance_p2": "使用本入门产品中基于 Web 的应用来监视来自您自家家电的实时流数据。您的家电将自动连接到 IBM Watson IoT 平台。在该平台上，您可以查看自己的设备以及由这些设备发送的数据和消息。",
 		"learn_more": "了解更多信息",
 		"consumer_app_subtitle": "探究消费者体验",
 		"consumer_app_p1": "家电所有者可以在移动设备上通过移动应用来控制和监视新洗衣机。",
@@ -43,8 +43,7 @@
 		"connect_app": "连接应用",	
 		"connect_app_p1": "在您的手机上启动该应用。",
 		"connect_app_p2": "在出现提示时扫描下方的连接 QR 代码以连接到 IoT for Electronics 环境",
-		"mobile_download_more_details": "有关详细的指示信息，请单击",
-		"mobile_download_instructions_here" : "此处",
+		"mobile_download_more_details": "有关详细指示信息，请参阅文档。",
 		"scan_heading": "要将该应用连接到此环境，您需要扫描该 QR 代码",
 		"connection_code": "连接 QR 代码",
 		"scan_p1": "首次在您的手机上使用移动消费者应用时，您需要扫描该代码以将移动设备连接到 IoT for Electronics Bluemix 环境。",
@@ -52,7 +51,9 @@
 		"back_to_top": "返回到顶部",
 		"explore_more": "浏览更多内容",
 		"manage_devices": "您现在可以从该平台上管理设备 >",
-		"device_deleted": "成功！已成功删除设备 {0}。"	
+		"device_deleted": "成功！已成功删除设备 {0}。",
+		"timeout_list": "请求列出设备已超时，将重新启动模拟。请刷新页面并重试。",
+		"timeout_create": "请求创建设备已超时，将重新启动模拟。请刷新页面并重试。"
 	},
 	"appliance_page": {
 		"page_title": "IoT for Electronics",
@@ -85,7 +86,7 @@
 		"ready": "准备就绪",
 		"stopped": "已停止",
 		"filling": "正在注水",
-		"washing": "轻柔脱水",
+		"washing": "正在洗涤",
 		"soaking": "浸泡",
 		"spinning" : "正常脱水",
 		"draining": "放水",
@@ -93,4 +94,3 @@
 		"no_data": "无数据"
 	}
 }
-
