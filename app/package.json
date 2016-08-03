@@ -17,6 +17,7 @@
          "debug": "~2.2.0",
          "bms-mca-token-validation-strategy": "^2.0.3",
          "cloudant": "^1.4.1",
+         "helmet": "^2.1.2",
          "http": "0.0.0",
          "https": "^1.0.0",
          "passport": "^0.3.2",
