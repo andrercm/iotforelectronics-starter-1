@@ -147,8 +147,6 @@ var iotEApiKey = iotECredentials["apiKey"];
 /***************************************************************/
 
 // SETUP CLOUDANT
-//Key whichispermandencellansp
-//Password a8ba75e7534498a85a9f0c11adbe11e09ae03177 //
 var passport   = require('passport');
 var MCABackendStrategy = require('bms-mca-token-validation-strategy').MCABackendStrategy;
 var services = JSON.parse(process.env.VCAP_SERVICES)
@@ -680,22 +678,64 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
 //  var disabled = false;
 
 //Stephanie's deletedDoc Doc creation for Metering
+//And storing credentials
 console.log('Creating doc to track deleted docs');
-var urlDel = 'https://iotforelectronicstile.mybluemix.net/deletedDocs/' + currentOrgID;
-console.log('Deleted Docs API URL:', urlDel);
-request
-  .get(urlDel, {timeout: 3000})
-  .on('response', function(response){
-    console.log('Response received.');
-  })
-  .on('error', function(error){
-    if(error.code === 'ETIMEDOUT')
-      console.log('Request timed out.');
-    else
-      console.log(error);
-  }); 
+//console.log('Deleted Docs API URL:', urlDel);
+console.log('About to store credentials into Cloudant.');
+var body = {
+		"orgID":currentOrgID,
+		"apiKey":apiKey,
+		"authToken":authToken,
+		"httpHost":iotpHttpHost,
+		"iotEApiKey":iotEApiKey
+	   };
+var options =
+	{
+		url: ('https://iotforelectronicstile.mybluemix.net/deletedDocs'),
+		json: body,
+		method: 'POST',
+		headers: {
+    				'Content-Type': 'application/json'
+  		}
+	};
+function retryRequest(body, options)
+{
+	request(options, function (errorR, responseR, bodyR) {
+		if (!error) {
+   			// Print out the response body
+   			console.log('***Response Status Code --->', response.statusCode);
+			console.log('***Response received: ' + response.message);
+			if (response.statusCode === 404)
+			{
+				retryRequest();
+			}
+	    		}else{
+        			console.log("The request came back with an error: " + error);
+					console.log("Error code: " + error.statusCode);
+					console.log("Error message: " + error.message);
+        			return;
+      			}
+	});
+};
+console.log('Body Values being sent in: ' + JSON.parse(JSON.stringify(body)));
+request(options, function (error, response, body) {
+    if (!error) {
+       	// Print out the response body
+       	console.log('***Response Status Code --->', response.statusCode);
+	console.log('***Response received: ' + response.message);
+	if (response.statusCode === 404)
+	{
+		retryRequest();
+        }else{
+        	console.log("The request came back with an error: " + error);
+			console.log("Error code: " + error.statusCode);
+			console.log("Error message: " + error.message);
+        	return;
+        }    	
+}
+});
   
-console.log('About to store IoTP Credentials');
+/*console.log('About to store IoTP Credentials');
 var url = ['https://iotforelectronicstile.mybluemix.net/credentials', currentOrgID, apiKey, authToken, iotpHttpHost, iotEAuthToken,iotEApiKey].join('/');
 console.log('Credentials API URL:', url);
 request
@@ -711,7 +751,7 @@ request
     else
       console.log('Error happened in Store IoTP credentials call --->',error);
   }); 
-
+*/
 /***************************************************************/
 /* Route to show one user doc using Cloudant Query             */
 /* Takes a userID in the url params                            */
@@ -739,6 +779,30 @@ app.get('/validation', function(req, res)
         	
         	});
 });
+
+/***************************************************************/
+/* Route to send the IoTP credentials to the tile again        */
+/* 									                           */
+/***************************************************************/
+app.get('*', function(req, res)
+{
+	console.log('About to store IoTP Credentials');
+    var url = ['https://iotforelectronicstile.mybluemix.net/credentials', currentOrgID, apiKey, authToken, iotpHttpHost, iotEAuthToken,iotEApiKey].join('/');
+	console.log('Credentials API URL:', url);
+	request
+  	.get(url, {timeout: 3000})
+  	.on('response', function(response){
+  		console.log('***Response received: ' + response.message);
+    	console.log('Response received.');
+  	})
+  	.on('error', function(error){
+    	if(error.code === 'ETIMEDOUT')
+      		console.log('Request timed out.');
+    	else
+      		console.log(error);
+  	});
+});
+
 // //var iotePass = ioteCredentials["password"];
 
 // //IoT Platform Device Types
