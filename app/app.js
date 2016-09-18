@@ -698,9 +698,10 @@ var options =
     				'Content-Type': 'application/json'
   		}
 	};
+
 function retryRequest(body, options)
 {
-	request(options, function (errorR, responseR, bodyR) {
+	request(options, function (error, response, body) {
 		if (!error) {
    			// Print out the response body
    			console.log('***Response Status Code --->', response.statusCode);
@@ -710,9 +711,9 @@ function retryRequest(body, options)
 				retryRequest();
 			}
 	    		}else{
-        			console.log("The request came back with an error: " + error);
-					console.log("Error code: " + error.statusCode);
-					console.log("Error message: " + error.message);
+       			console.log("The request came back with an error: " + error);
+				console.log("Error code: " + error.statusCode);
+				console.log("Error message: " + error.message);
         			return;
       			}
 	});
