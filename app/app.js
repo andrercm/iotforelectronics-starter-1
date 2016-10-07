@@ -785,7 +785,7 @@ app.get('/validation', function(req, res)
 /* Route to send the IoTP credentials to the tile again        */
 /* 									                           */
 /***************************************************************/
-app.get('*', function(req, res)
+/*app.get('*', function(req, res)
 {
 	console.log('About to store IoTP Credentials');
     var url = ['https://iotforelectronicstile.mybluemix.net/credentials', currentOrgID, apiKey, authToken, iotpHttpHost, iotEAuthToken,iotEApiKey].join('/');
@@ -802,7 +802,7 @@ app.get('*', function(req, res)
     	else
       		console.log(error);
   	});
-});
+});*/
 
 // //var iotePass = ioteCredentials["password"];
 
