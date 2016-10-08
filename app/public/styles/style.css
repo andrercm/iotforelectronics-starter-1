@@ -407,6 +407,29 @@ footer.main-section{
 	margin-bottom: 20px;
 }
 
+/* Form */
+#formButton{
+
+  text-decoration: none;
+  bottom: 0;
+  margin: 0;
+  position: fixed;
+  right: 1.5rem;
+  z-index: 10;
+  min-height: 20px;
+  box-sizing: border-box;
+  font-size: 16px;
+  line-height: 20px;
+  max-width: 100%;
+  min-width: 120px;
+  padding: 11px 18px;
+  background-color: #6bbaff;
+  border-color: #6bbaff;
+  color: #FFF;
+  border: 2px solid #6bbaff;
+  cursor: pointer;
+
+}
 /* Washer Single Page*/
 .washer-content{
 	padding: 10px 0px;
@@ -665,4 +688,250 @@ a.ibm-top-link:hover:before {
 }
 a.ibm-top-link:hover:after {
 	border-bottom-color: #000;
+}
+/***** Cotact Form ********/
+body #ibm-top{
+  padding: 0;
+}
+body .main-container h1, body .main-container h2, body .main-container h4{
+  font-family: "HelveticaNeue-Bold", "HelvBoldIBM",Helvetica, Arial, sans-serif;
+  font-weight: 300;
+}
+.main-container div, .main-container header, .main-container section, .main-container ul, .main-container li, .main-container form{
+  box-sizing: border-box;
+}
+body .main-container a{
+  color: #4178be;
+}
+body .main-container a:visited {
+    color: #745285;
+}
+body .main-container a:hover, body .main-container a:focus {
+    color: #05386b;
+}
+.main-container{
+  width: 100%;
+  height: 100%;
+  display: block;
+  margin-bottom: -10px;
+}
+.page-description{
+  background-image: url("../images/background_image.jpg"); /*form background image*/
+  background-size: cover;
+}
+.page-description header{
+  padding: 5px;
+  float: left;
+  width: 100%;
+  line-height: 0px;
+  background-color:rgba(0, 0, 0, 0.5);
+}
+.page-description header h2{
+  font-size: 16px;
+  color: #ffffff;
+  text-shadow: none;
+  line-height: 1.625rem;
+  padding: 0 0 5px;
+}
+.description-box p{
+  font-family:"HelvRomanIBM","HelveticaNeue-Roman","Helvetica Neue Roman",
+  "HelveticaNeue","Helvetica Neue",Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-size: 17px;
+  margin-bottom: 5px;
+}
+.description-box section{
+  box-shadow: 2px 3px 2px #888888;
+  padding: 10px;
+  margin: 10px 10px 0px 10px;
+  border: 1px solid #cccccc;
+  background: #FFF;
+}
+.description-box section .check-list{
+  list-style: none;
+  list-style-image: url('https://www-01.ibm.com/software/info/direct/imgs/check_transparent.gif');
+  padding: 0px 0px 0px 20px;
+  margin: 0px;
+  margin-bottom: 0px;
+}
+.description-box section .check-list li{
+  padding: 2px 0;
+}
+.page-form{
+  background-color: #f0f0f0;
+}
+#register-form{
+  padding: 10px;
+  width: 100%;
+  margin-top: 40px;
+}
+#register-form h2{
+  border-top: 2px solid #666;
+  padding-top: 2px;
+  padding-bottom: 0px;
+  margin-top: 10px;
+  font-size: inherit;
+}
+#register-form p{
+  margin: 0px;
+  padding: 0px;
+}
+#register-form input[type="text"],
+#register-form input[type="number"],
+#register-form textarea,
+#register-form select{
+  color: #373938;
+  height: 32px;
+  line-height: 16px;
+  width: 100%;
+  font-size: 16px;
+  padding: 0px 0px 0px 5px;
+  border: 1px solid #E5E5E5;
+  outline: 0;
+  -webkit-box-shadow: inset 1px 1px 2px rgba(238, 238, 238, 0.2);
+  box-shadow: inset 1px 1px 2px rgba(238, 238, 238, 0.2);
+  font-family:"HelvRomanIBM","HelveticaNeue-Roman","Helvetica Neue Roman",
+	"HelveticaNeue","Helvetica Neue",Helvetica, Arial, "Lucida Grande", sans-serif;
+}
+#register-form textarea{
+  padding: 8px 5px;
+}
+#register-form .form-fields{
+  list-style: none;
+  padding: 0px;
+  margin-top: 2px;
+}
+#register-form .form-fields .gray-text{
+  color: #373938;
+}
+#register-form .form-fields p,
+#register-form .form-fields span{
+  color: #000;
+}
+#register-form .form-fields li{
+  padding-top: 2px;
+  padding-right: 6px;
+  display: inline-block;
+  width: 100%;
+}
+#register-form .form-fields .textarea-box{
+  padding-right: 10px;
+}
+#register-form .form-fields li:last-child{
+  margin-top: 10px;
+}
+#register-form .form-fields .error-message{
+  padding: 2px 0;
+  padding-top: 7px;
+  line-height: 5px;
+}
+#register-form .form-fields .two-fields{
+  margin-bottom: -6px;
+}
+#register-form .form-fields .privacy-check{
+  margin-top: 0px;
+}
+#register-form .form-fields .error-inactive{
+  display: none;
+}
+#register-form .form-fields .error-active{
+  display: block;;
+  color: #EE2C2C;
+}
+#register-form .form-fields .error-hidden{
+  display: block;;
+  visibility: hidden;
+}
+#register-form .form-fields .full-width{
+  padding-right: 0px;
+}
+#register-form .form-fields .country-selection{
+  position: relative;
+}
+
+#register-form .right-field{
+  float: right;
+  width: 48%;
+}
+#register-form .left-field{
+  float: left;
+  width: 48%;
+}
+#register-form button{
+  padding: 5px 15px;
+  background: #6bbaff;
+  border: 0 none;
+  cursor: pointer;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  color: #fefefe;
+  width: 100%;
+  margin-bottom: 10px;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", "HelvLightIBM", Arial, sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  width: auto;
+  height: 50px;
+  white-space: nowrap;
+  margin-top: 5px;
+}
+#register-form button:hover {
+    background-color: #448fd0;
+}
+#arrow-box{
+  width: 26px;
+}
+#arrow-box img{
+  padding: 0px 0px 0px 20px;
+}
+.form-important{
+  color: #B8471B !important;
+}
+@media (min-width: 768px){
+  .page-description header h2{
+    font-size: 22px;
+  }
+}
+@media (min-width: 980px){
+  .main-container{
+    display: flex;
+  }
+  .page-description, .page-form{
+    /*flex: 1;*/
+    box-sizing: border-box;
+  }
+  .page-description{
+    width: 60%;
+  }
+  .page-form{
+    width: 40%;
+  }
+  .page-description header h2{
+    float: right;
+    margin: 7px;
+    width: 586px;
+    line-height: 22px;
+    padding-bottom: 2px;
+  }
+  .description-box section{
+    float: right;
+    width: 590px;
+    margin-left: 0px;
+    overflow: hidden;
+    display: block;
+  }
+  #register-form {
+    width: 440px;
+  }
+}
+@media (max-width: 980px){
+  .main-container, .page-description, .page-form{
+    height: auto !important;
+  }
+  .description-box{
+    padding-top: 5px;
+    padding-bottom: 10px;
+  }
+  .description-box section{
+    margin-top: 50px;
+  }
 }
