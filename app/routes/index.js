@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var appEnv = require("cfenv").getAppEnv();
+var request = require('request');
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -21,4 +22,27 @@ router.get('/', function(req, res) {
 	});
 });
 
+router.get('/contact', function(req, res) {
+  res.render('contactForm');
+});
+
+router.post('/contact', function(req, res){
+	request({
+   		url: 'https://simulationengine-uss-stg-iot4e.electronics.internetofthings.ibmcloud.com/contact',
+		json: req.body,
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+  		},
+	}, function(error, response, body){
+		if(error){
+    		res.status(500).send();
+		} else {
+    		res.status(200).send();
+	}});
+});
+
+router.get('/appEnv', function(req, res) {
+  res.json(appEnv);
+});
 module.exports = router;
