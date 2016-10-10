@@ -186,9 +186,8 @@ function sendFormData(arrInputValue){
    data: formObject,
    statusCode: {
     200: function(){
-      //window.opener.showMessage('success', SUCCESS);
-      //window.close();
-	  alert("Email sent !");
+      window.opener.showMessage('success', SUCCESS);
+      window.close();
     },
     500: function(data){
       window.opener.showMessage('error', ERROR);

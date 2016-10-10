@@ -225,6 +225,22 @@ $('#alertDeviceDeleted a').on('click', function(e){
   });
 });
 
+function showMessage(type, message){
+  var alertId = '';
+  if(type == 'success')
+    alertId = '#alertDeviceDeleted';
+  else if(type == 'error')
+    alrtId = '#alertError';
+
+  $(alertId + ' p').html(message);
+  $('.alert-messages, ' + alertId).fadeTo(500, 1);
+  setTimeout(function(){
+    $('.alert-messages, ' + alertId).fadeTo(500, 0, function(){
+      $(this).hide();
+    });
+  }, 3000);
+}
+
 $('#alertError a').on('click', function(e){
   e.preventDefault();
   $('.alert-messages, #alertError').fadeTo(500, 0, function(){
