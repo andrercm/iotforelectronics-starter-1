@@ -30,7 +30,7 @@ function simulationClient(config) {
 		this.loadConfiguration(config.simulationConfigFile, true, function(){
 			_this.restartSimulation();
 		});
-	this.ws = null;	
+	this.ws = null;
 };
 
 
@@ -38,11 +38,11 @@ function simulationClient(config) {
 util.inherits(simulationClient, EventEmitter);
 
 simulationClient.prototype.getDevicesSchemas = function(){
-	return this.simulationConfig.devicesSchemas;	
+	return this.simulationConfig.devicesSchemas;
 };
 
 simulationClient.prototype.getDevices = function(){
-	return this.simulationConfig.devices;	
+	return this.simulationConfig.devices;
 };
 
 simulationClient.prototype.loadConfiguration = function(simulationConfigFile, registerDevicetypes, done){
@@ -82,7 +82,7 @@ simulationClient.prototype.loadConfiguration = function(simulationConfigFile, re
 					return true;
 				console.error(error);
 				Q.reject(error);
-			}));				
+			}));
 		});
 		return Q.all(regDeviceTypeReqs).then(function(res){
 			return res;
@@ -106,7 +106,7 @@ simulationClient.prototype.startSimulation = function(){
 	var body = {simulationConfig: this.simulationConfig};
 
 	return callSimulationEngineAPI("POST", ["startSimulation"], body).then(function (resp){
-		return _this.createws(resp.wsurl);		
+		return _this.createws(resp.wsurl);
 	}).fail(function(err){
 		consloe.error(err.message);
 		throw new Error("Cannot start simulation " + err.message);
@@ -121,11 +121,11 @@ simulationClient.prototype.restartSimulation = function(){
 			_this.startSimulation().then(function(){
 				console.log("Simulation started")
 				deferred.resolve("started");
-			});		
+			});
 		},2000);
 	}).fail(function(err){
 		deferred.reject(err);
-	});	
+	});
 	return deferred.promise;
 };
 
@@ -158,7 +158,7 @@ simulationClient.prototype.terminateSimulation = function(deregisterDevices){
 	}).fail(function(err){
 		deferred.reject(err);
 	});
-	return deferred.promise;	
+	return deferred.promise;
 };
 
 simulationClient.prototype.createDevices = function(deviceType, numOfDevices, configs){
@@ -187,10 +187,10 @@ simulationClient.prototype.createDevices = function(deviceType, numOfDevices, co
 					hwVersion: "1.0.0"
 				}
 		};
-		bulkRegRequest.push(regReq);		
+		bulkRegRequest.push(regReq);
 	};
 	var _this = this;
-	
+
 	iotFClient.callApi('POST', 201, true, ['bulk', 'devices', 'add'], JSON.stringify(bulkRegRequest)).then(
 			function onSuccess (responses) {
 				var result = [];
@@ -205,11 +205,11 @@ simulationClient.prototype.createDevices = function(deviceType, numOfDevices, co
 								"org":iotFClient.org,
 								"password": response.authToken
 							}
-					};	
+					};
 
-					if(config.attributesInitialValues)			
+					if(config.attributesInitialValues)
 						_.each(config.attributesInitialValues, function(value, name){
-							device.lastRunAttributesValues.push({name: name, value: value});	
+							device.lastRunAttributesValues.push({name: name, value: value});
 						});
 					this.addDevice(device);
 					result.push(device);
@@ -219,22 +219,22 @@ simulationClient.prototype.createDevices = function(deviceType, numOfDevices, co
 				console.error(error);
 				deferred.reject(error);
 
-			});	
-	return deferred.promise;	
+			});
+	return deferred.promise;
 };
 
 simulationClient.prototype.getDeviceStatus= function(deviceID){
 	var deferred = Q.defer();
 	this.sendGetDeviceStatus(deviceID);
 	this.getCommandResponse('deviceStatus', deferred);
-	return deferred.promise;	
+	return deferred.promise;
 };
 
 simulationClient.prototype.getAllDevicesStatus= function(){
 	var deferred = Q.defer();
 	this.sendGetAllDevicesStatus();
 	this.getCommandResponse('devicesStatus', deferred);
-	return deferred.promise;	
+	return deferred.promise;
 };
 
 
@@ -275,7 +275,7 @@ simulationClient.prototype.addDevice = function(device){
 };
 
 simulationClient.prototype.deleteDevice = function(deviceID){
-	var devices 
+	var devices
 	for(var i = 0; i < this.simulationConfig.devices.length; i++){
 		if(this.simulationConfig.devices[i].deviceID == deviceID){
 			this.simulationConfig.devices.splice(i, 1);
@@ -290,7 +290,7 @@ simulationClient.prototype.deleteDevice = function(deviceID){
 };
 
 /*
- * Set attributes value 
+ * Set attributes value
  */
 simulationClient.prototype.setAttributeValue = function(deviceID, attributeName, attributeValue){
 	var command = {cmdType: 'setAttribute', deviceID: deviceID, attributeName: attributeName, attributeValue: attributeValue};
@@ -307,7 +307,7 @@ simulationClient.prototype.updateSerialNumber = function(deviceID, serialNumber)
 };
 
 /*
- * Devices status - connection status & attributes values 
+ * Devices status - connection status & attributes values
  */
 simulationClient.prototype.sendGetAllDevicesStatus = function(){
 	var command = {cmdType: 'allDevicesStatus'};
@@ -320,7 +320,7 @@ simulationClient.prototype.sendGetDeviceStatus = function(deviceID){
 };
 
 /*
- * Architecture devices commands  
+ * Architecture devices commands
  */
 simulationClient.prototype.addArchitectureDevice = function(archDevice){
 	var command = {cmdType: 'addArchDevice', archDevice: archDevice};
@@ -339,7 +339,7 @@ simulationClient.prototype.sendGetDevicesSchema = function(){
 
 /*
  *  * ******************************************* End Commands ***************************************
- * 
+ *
  * ******************************************* Events ***************************************
  * ******************************************************************************************
  * simulation terminated
@@ -350,7 +350,7 @@ simulationClient.prototype.onSimulationTerminated = function(){
 };
 
 /*
- * Connect \ Disconnect 
+ * Connect \ Disconnect
  */
 
 simulationClient.prototype.onDeviceConnected = function(deviceID){
@@ -412,7 +412,7 @@ simulationClient.prototype.onAllDevicesStatus = function(status){
 };
 
 /*
- * Attributes change 
+ * Attributes change
  */
 simulationClient.prototype.onAttributeValueChange = function(deviceID, attrNames2Values){
 	debug("Simulation event: onAttributeValueChange deviceID : " + deviceID + " attrNames2Values: " +JSON.stringify(attrNames2Values, null, 4));
@@ -420,20 +420,20 @@ simulationClient.prototype.onAttributeValueChange = function(deviceID, attrNames
 };
 
 /*
- * Architecture devices events 
+ * Architecture devices events
  */
 simulationClient.prototype.onDevicesSchema = function(schemas){
-	debug("Simulation event:  onArchitectureDevices: " + JSON.stringify(archDevices, null, 4));	
+	debug("Simulation event:  onArchitectureDevices: " + JSON.stringify(archDevices, null, 4));
 	this.emit("devicesSchema", schemas);
 };
 
 simulationClient.prototype.onDevicesSchemaUpdated = function(schema){
-	debug("Simulation event:  onArchitectureDeviceUpdated: " + JSON.stringify(archDevice, null, 4));	
+	debug("Simulation event:  onArchitectureDeviceUpdated: " + JSON.stringify(archDevice, null, 4));
 	this.emit("deviceSchemaUpdated", schema);
 };
 
 simulationClient.prototype.onNewDeviceSchema = function(schema){
-	debug("Simulation event:  onNewArchitectureDevice: " + JSON.stringify(archDevice, null, 4));	
+	debug("Simulation event:  onNewArchitectureDevice: " + JSON.stringify(archDevice, null, 4));
 	this.emit("newDeviceSchema", schema);
 };
 
@@ -460,7 +460,7 @@ simulationClient.prototype.onUserCodeRuntimeError = function(deviceID, hookName,
 //internals
 
 simulationClient.prototype.getCommandResponse= function(eventName, deferred){
-	var _this = this;	
+	var _this = this;
 	var responselistener = function(){
 		_this.removeListener(eventName, responselistener);
 		_this.removeListener('error', errorlistener);
@@ -480,7 +480,7 @@ simulationClient.prototype.getCommandResponse= function(eventName, deferred){
 	this.on(eventName, responselistener);
 	this.on('error', errorlistener);
 	this.on('connectionClose', errorlistener);
-	this.on('simulationTerminated', errorlistener);	
+	this.on('simulationTerminated', errorlistener);
 };
 
 simulationClient.prototype.createws = function(wsurl){
@@ -499,24 +499,24 @@ simulationClient.prototype.createws = function(wsurl){
 			deferred.resolve('connectted');
 			deferred = null;
 		}
-		console.log("********************** connection open *****************");		
+		console.log("********************** connection open *****************");
 		this.emit("connectionOpen");
 	}, this));
 	this.ws.on('close', _.bind(function(code, message) {
-		this.emit("connectionClose", code, message);		
+		this.emit("connectionClose", code, message);
 		console.log("********************** connection closed *****************");
 		if(this.reconnectOnClose)
 			this.createws(wsurl);
 	}, this));
 	this.ws.on('error', _.bind(function(error) {
-		this.emit("connectionError", error.code, error.message);	
+		this.emit("connectionError", error.code, error.message);
 		this.emit("error", {errType: "connectionError", code: error.code, message: error.message});
 		if(deferred){
 			deferred.reject(error);
 			deferred = null;
 		}
 	}, this));
-	this.ws.on('message', _.bind(this.onMessage, this));	
+	this.ws.on('message', _.bind(this.onMessage, this));
 	return deferred.promise;
 };
 
@@ -538,32 +538,32 @@ simulationClient.prototype.onMessage = function(msg){
 	}
 
 	switch (message.messageType) {
-	case "simulationTerminated":	
+	case "simulationTerminated":
 		this.onSimulationTerminated();
 		break;
-	case "deviceStatus":		
+	case "deviceStatus":
 		delete message.messageType;
 		this.onDeviceStatus(message);
 		break;
-	case "devicesStatus":	
+	case "devicesStatus":
 		delete message.messageType;
 		this.onAllDevicesStatus(message);
 		break;
-	case "deviceConnected":	
+	case "deviceConnected":
 		this.onDeviceConnected(message.deviceID);
 		break;
-	case "newDeviceCreated":	
+	case "newDeviceCreated":
 		this.onNewDeviceCreated(message.device);
 	case "deviceDeleted":
 		this.onDeviceDeleted(message.deviceID);
-		break;		
-	case "deviceAttributesChange":	
+		break;
+	case "deviceAttributesChange":
 		this.onAttributeValueChange(message.deviceID, message.changedAttributes);
-		break;		
-	case "deviceConnected":	
+		break;
+	case "deviceConnected":
 		this.onDeviceConnected(message.deviceID);
 		break;
-	case "deviceDisconnected":	
+	case "deviceDisconnected":
 		this.onDeviceDisconnected(message.deviceID);
 		break;
 	case "deviceDmAction":
@@ -578,21 +578,21 @@ simulationClient.prototype.onMessage = function(msg){
 	case "architectureDevices":
 		this.onDevicesSchema(message.archDevices);
 		break;
-	case "architectureDeviceUpdated":	
+	case "architectureDeviceUpdated":
 		this.onDevicesSchemaUpdated(message.archDevice);
 		break;
-	case "newArchitectureDevice":	
+	case "newArchitectureDevice":
 		this.onNewDeviceSchema(message.archDevice);
-		break;		
-	case "deviceConnectionError":	
+		break;
+	case "deviceConnectionError":
 		this.onDeviceConnectionError(message.deviceID, message.message ,message.stack);
 		break;
-	case "deviceBehaviorCodeError":	
+	case "deviceBehaviorCodeError":
 		this.onUserCodeError(message.deviceID, message.hookName, message.message ,message.stack);
 		break;
 	case "deviceBehaviorRuntimeError":
 		this.onUserCodeRuntimeError(message.deviceID, message.hookName, message.message ,message.stack);
-		break;		
+		break;
 	default:
 		break;
 	};
@@ -602,7 +602,7 @@ simulationClient.prototype.onMessage = function(msg){
 
 
 function callSimulationEngineAPI(method, paths, body){
-	var uri = "https://iot4esimulationengine.mybluemix.net/api";
+	var uri = "https://simulationengine-uss-iot4e.electronics.internetofthings.ibmcloud.com/api";
 	var apiKey = encryptor.decrypt('adb33b3b7e023efcb10ad68a8977d0c78d2ae6aa7e37d37331d56d33ccf67562b66fa079f14b21d49e56de4ea8924de7UcHcMC5d9fv2rkXJjka2cPR3+l8/5NPHBH8vOBoKDRX57AhzUCgFT5Dqmjmd6qhv');
 	var apiToken = encryptor.decrypt('55febf36e62bdb74bc4464e834c0c4fe10627dff7a5eb9911e0bfd122dab6bacf22fe75126aafaa36ec6130e0e39ab79veloJdh8Sp4SxPSa366uATBsM0lw8YOacPj92RKSbtpZqbEhcbI2H/UG3MJNHg2G');
 	if(paths){
@@ -616,11 +616,11 @@ function callSimulationEngineAPI(method, paths, body){
 
 
 
-function callRestApi(uri, apiKey, apiToken, method, body, expectedHttpCode, expectJsonContent){	
+function callRestApi(uri, apiKey, apiToken, method, body, expectedHttpCode, expectJsonContent){
 	expectedHttpCode = (expectedHttpCode) ? expectedHttpCode : 200;
 	expectJsonContent = (expectJsonContent) ? expectJsonContent : true;
 	if(!_.isArray(expectedHttpCode))
-		expectedHttpCode = [expectedHttpCode];	
+		expectedHttpCode = [expectedHttpCode];
 
 	var deferred = Q.defer();
 
@@ -636,7 +636,7 @@ function callRestApi(uri, apiKey, apiToken, method, body, expectedHttpCode, expe
 					sendImmediately: true
 				},
 				headers: {'Content-Type': 'application/json'}
-			},		
+			},
 			function (error, response, body) {
 				if(error){
 					deferred.reject(error);
@@ -680,9 +680,9 @@ function getIotfAppClient(){
 			"auth-key" : iotFcreds.apiKey,
 			"auth-token" : iotFcreds.apiToken
 	};
-	
+
 	iotfAppClient = new iotfAppClientCtor(config);
-	return iotfAppClient;	
+	return iotfAppClient;
 };
 
 function generateMacAddress(){
@@ -697,9 +697,9 @@ function generateMacAddress(){
 	Math.floor(Math.random() * 16).toString(16) +
 	Math.floor(Math.random() * 16).toString(16) +
 	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16);		
-	var macStr = mac[0].toUpperCase() + mac[1].toUpperCase() + mac[2].toUpperCase() + mac[3].toUpperCase() + 
-	mac[4].toUpperCase() + mac[5].toUpperCase() + mac[6].toUpperCase() + mac[7].toUpperCase() + 
+	Math.floor(Math.random() * 16).toString(16);
+	var macStr = mac[0].toUpperCase() + mac[1].toUpperCase() + mac[2].toUpperCase() + mac[3].toUpperCase() +
+	mac[4].toUpperCase() + mac[5].toUpperCase() + mac[6].toUpperCase() + mac[7].toUpperCase() +
 	mac[8].toUpperCase() + mac[9].toUpperCase() + mac[10].toUpperCase() + mac[11].toUpperCase();
 	return macStr;
 };
@@ -716,8 +716,8 @@ if(VCAP_SERVICES["user-provided"]){
 	for (var i = 0; i < VCAP_SERVICES["user-provided"].length; i++) {
 		if(VCAP_SERVICES["user-provided"][i].name == 'DevicesSimulation'){
 			simulationCreds = VCAP_SERVICES["user-provided"][i].credentials;
-			break;			
-		}		
+			break;
+		}
 	}
 }
 if(!simulationCreds)
