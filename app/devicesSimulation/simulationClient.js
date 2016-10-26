@@ -101,6 +101,20 @@ simulationClient.prototype.saveSimulationConfig = function(){
 	});
 };
 
+simulationClient.prototype.getStatus = function(){
+	var deferred = Q.defer();
+
+	callSimulationEngineAPI("GET", ["simulationStatus", appEnv.app.application_id]).then(function (resp){
+		deferred.resolve(resp);
+	}).fail(function(err){
+		consloe.error(err.message);
+		throw new Error("Cannot get simulation status " + err.message);
+		deferred.reject(err);
+	});
+
+	return deferred.promise;
+};
+
 simulationClient.prototype.startSimulation = function(){
 	var _this = this;
 	var body = {simulationConfig: this.simulationConfig};

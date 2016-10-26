@@ -6,13 +6,34 @@ $(document).ready(function(){
   $('#addNewDeviceButton').prop('disabled', false);
   $('#addNewDeviceButton img').attr("src","../images/PlusWasher_en.svg");
 
+  function getSimulationStatus(){
+    $.ajax({
+      url: '/simulatorStatus',
+      type: 'GET',
+      success: function(status){
+        if(status.running){
+          getDevices();
+        } else if(status.state && status.state == "pending"){
+          setTimeout(function(){
+            getSimulationStatus();
+          }, 3000);
+        } else {
+          restartSimulator();
+        }
+      },
+      error: function(e){
+        console.log(e.responseText);
+      }
+    });
+  }
+
   function restartSimulator(){
     $.ajax({
       url: '/restartSimulator',
       type: 'GET',
       success: function(){
         setTimeout(function(){
-          getDevices();
+          getSimulationStatus();
         }, 3000);
       },
       error: function(e){
@@ -94,7 +115,7 @@ $(document).ready(function(){
      });
   }
 
-  restartSimulator();
+  getSimulationStatus();
   validateAppExperienceWasherMessage();
 
   $(document).on('click', '#addNewDeviceButton', function(e){

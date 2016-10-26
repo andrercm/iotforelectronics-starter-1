@@ -16,4 +16,10 @@ simulatorRouter.get('/restartSimulator', function(req, res) {
 	res.json("Simulation client is restarting.");
 });
 
+simulatorRouter.get('/simulatorStatus', function(req, res) {
+	simulationClient.getStatus().then(function (status){
+		res.json(status);
+	});
+});
+
 module.exports = simulatorRouter;
