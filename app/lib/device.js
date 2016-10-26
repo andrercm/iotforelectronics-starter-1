@@ -37,10 +37,6 @@ var setAttributeIsValid = function(deviceID, attribute, value, data){
 	if(attribute == "program" && status == "Working"){
 		return false;
 	}
-	
-	if(attribute == "currentCycle" && status == "Working"){
-		return false;
-	}
 
 	return true;
 	
