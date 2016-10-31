@@ -12,8 +12,9 @@ process.env.KEY = 'IoT for Electronics - Simulation Engine API key';
 var express = require('express');
 var cfenv = require('cfenv');
 var log4js = require('log4js');
-
+var async = require ('async');
 var app = express();
+var basicAuth = require('basic-auth');
 
 //set the app object to export so it can be required
 module.exports = app;
@@ -160,7 +161,26 @@ passport.use(new MCABackendStrategy());
 app.use(passport.initialize());
 
 const https = require('https');
-
+var authenticate = function(req,res,next)
+{
+		function unauthorized(res)
+		{
+			console.log('inside unauthorized function');
+			res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
+			return res.status(401).end();
+		};
+		var user = basicAuth(req);
+		if (!user || !user.name || !user.pass || user.name != iotEApiKey || user.pass != iotEAuthToken)
+		{
+			console.log('inside !user if block - unauthorized')
+    		return unauthorized(res);
+  		}
+  		else
+  		{
+  			console.log("API validated.");
+  	  		return next();
+  		}
+}
 
 
 /***************************************************************/
@@ -236,6 +256,7 @@ createUser = function (username)
         		userDoc = {};
         		userDoc.orgID = currentOrgID;
         		userDoc.userID = username;
+        		userDoc.userDetail = {};
 			request({
    				url: 'https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/users',
 				json: userDoc,
@@ -261,23 +282,72 @@ createUser = function (username)
         });
 }
 
-
-/***************************************************************/
-/* Route to get 1 user document from Cloudant (1)              */
-/*					  		   	*/
-/* Input: url params that contains the userID 			 */
-/* Returns: 200 for found user, 404 for user not found         */
-/***************************************************************/
-app.get('/users/:userID', passport.authenticate('mca-backend-strategy', {session: false }), function(req, res)
+/*******************************************/
+/* Version 1 POST /users                   */
+/*******************************************/
+app.post('/v001/users', authenticate, function(req, res)
 {
-	//make sure userID on params matches userID coming in thru MCA
-	if (req.params.userID != req.user.id)
-	{
-		res.status(500).send("User ID on request does not match MCA authenticated user.")
-	}
+	var bodyIn = JSON.parse(JSON.stringify(req.body));
+	delete bodyIn.version;
+		request({
+		url: 'https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/users',
+		json: bodyIn,
+		method: 'POST',
+		headers: {
+    				'Content-Type': 'application/json',
+    				'tenantID':iotETenant,
+    				'orgID':currentOrgID
+  		},
+  		auth: {user:iotEApiKey, pass:iotEAuthToken}
+		}, function(error, response, body){
+			if(error) {
+				console.log('ERROR: ' + error);
+				console.log('BODY: ' + error);
+				res.status(response.statusCode).send(response);
+			} else {
+				console.log(response.statusCode, body);
+				res.status(response.statusCode).send(response);
+			}
+		});
+});
+
+/*******************************************/
+/* Version 1 POST /appliances              */
+/*******************************************/
+app.post('/v001/appliances', authenticate, function (req, res)
+{
+	var bodyIn = JSON.parse(JSON.stringify(req.body));
+	delete bodyIn.version;
+	request({
+		url: 'https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/appliances',
+		json: bodyIn,
+		method: 'POST',
+		headers: {
+    				'Content-Type': 'application/json',
+    				'tenantID':iotETenant,
+    				'orgID':currentOrgID
+  		},
+  		auth: {user:iotEApiKey, pass:iotEAuthToken}
+		}, function(error, response, body){
+			if(error) {
+				console.log('ERROR: ' + error);
+				console.log('BODY: ' + error);
+				res.status(response.statusCode).send(response);
+			} else {
+				console.log(response.statusCode, body);
+				res.status(response.statusCode).send(response);
+			}
+		});
+});
+
+/*******************************************/
+/* Version 1 GET /users/:userID            */
+/*******************************************/
+app.get('/v001/users/:userID', authenticate, function (req, res)
+{
 	var options =
 	{
-		url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/users/'+ req.user.id),
+		url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/users/'+ req.params.userID),
 		method: 'GET',
 		headers: {
     				'Content-Type': 'application/json',
@@ -299,6 +369,177 @@ app.get('/users/:userID', passport.authenticate('mca-backend-strategy', {session
         	}
 
         	});
+});
+
+/*******************************************/
+/* Version 1 GET /appliances/:userID       */
+/*******************************************/
+app.get('/v001/appliances/:userID', authenticate, function (req, res)
+{
+	var options =
+	{
+		url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/appliances/'+ req.params.userID),
+		method: 'GET',
+		headers: {
+    				'Content-Type': 'application/json',
+    				'tenantID':iotETenant,
+    				'orgID':currentOrgID
+  		},
+  		auth: {user:iotEApiKey, pass:iotEAuthToken}
+	};
+	request(options, function (error, response, body) {
+	    if (!error) {
+        	// Print out the response body
+        	console.log("body: " + body);
+        	console.log("response: " + response);
+        	res.status(response.statusCode).send(body);
+	    }else{
+        	console.log("The request came back with an error: " + error);
+        	//for now I'm giving this a 500 so that postman won't be left hanging.
+        	res.status(response.statusCode).send(response);
+        	return;
+        	}
+
+        	});
+});
+
+/**************************************************/
+/* Version 1 GET /appliances/:userID/:applianceID */
+/* Takes "version" as a header, ex:               */
+/*   "version":"v001"                             */
+/**************************************************/
+app.get('/v001/appliances/:userID/:applianceID', authenticate, function (req, res)
+{
+	var options =
+	{
+		url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/appliances/'+ req.params.userID + '/' + req.params.applianceID),
+		method: 'GET',
+		headers: {'
+    				'Content-Type': 'application/json',
+    				'tenantID':iotETenant,
+    				'orgID':currentOrgID
+  		},
+  		auth: {user:iotEApiKey, pass:iotEAuthToken}
+	};
+	request(options, function (error, response, body) {
+	    if (!error) {
+        	// Print out the response body
+        	console.log(body);
+        	res.status(response.statusCode).json(body);
+	    }else{
+        	console.log("The request came back with an error: " + error);
+        	//for now I'm giving this a 500 so that postman won't be left hanging.
+        	res.status(response.statusCode).send(response);
+        	return;
+        	}
+
+        	});
+});
+
+/*****************************************************/
+/* Version 1 DELETE /appliances/:userID/:applianceID */
+/* Takes "version" as a header, ex:                  */
+/*   "version":"v001"                                */
+/*****************************************************/
+app.del("/v001/appliances/:userID/:applianceID", authenticate, function (req, res)
+{
+		request({
+		url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/appliances/'+ req.params.userID + '/' + req.params.applianceID),
+		method: 'DELETE',
+		headers: {
+    				'Content-Type': 'application/json',
+    				'tenantID':iotETenant,
+    				'orgID':currentOrgID
+  		},
+  		auth: {user:iotEApiKey, pass:iotEAuthToken}
+		}, function(error, response, body){
+			if(error) {
+				console.log('ERROR: ' + error);
+				console.log('BODY: ' + error);
+				res.status(response.statusCode).send(response);
+			} else {
+				console.log(response.statusCode, body);
+				res.status(response.statusCode).send(response);
+			}
+		});
+});
+
+/*****************************************************/
+/* Version 1 DELETE /appliances/:userID/:applianceID */
+/* Takes "version" as a header, ex:                  */
+/*   "version":"v001"                                */
+/*****************************************************/
+app.delete("/v001/user/:userID", authenticate, function (req, res)
+{
+	var options =
+	{
+		url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/user/'+ req.params.userID),
+		method: 'DELETE',
+		headers: {
+    				'Content-Type': 'application/json',
+    				'tenantID':iotETenant,
+    				'orgID':currentOrgID
+  		},
+  		auth: {user:iotEApiKey, pass:iotEAuthToken}
+	};
+	request(options, function (error, response, body) {
+	    if (!error) {
+        	// Print out the response body
+        	console.log(body);
+        	res.status(response.statusCode).send(response);
+	    }else{
+        	console.log("The request came back with an error: " + error);
+        	//for now I'm giving this a 500 so that postman won't be left hanging.
+        	res.status(response.statusCode).send(response);
+        	return;
+        	}
+
+        	});
+});
+
+
+/***************************************************************/
+/* Route to get 1 user document from Cloudant (1)              */
+/*					  		   	*/
+/* Input: url params that contains the userID 			 */
+/* Returns: 200 for found user, 404 for user not found         */
+/***************************************************************/
+app.get('/users/:userID', passport.authenticate('mca-backend-strategy', {session: false }), function(req, res)
+{
+	//make sure userID on params matches userID coming in thru MCA
+	if (req.params.userID != req.user.id)
+	{
+		res.status(500).send("User ID on request does not match MCA authenticated user.")
+	}
+	var version;
+	if (!req.get('version') || req.get('version') == null || req.get('version') == undefined)
+	{
+		version = 'v001'
+	}
+	else
+	{
+		version = req.get('version');
+	}
+	console.log('url: ' +  'https://'+ application.application_uris[0] + '/' + version + '/users/' + req.user.id);
+
+	var options =
+	{
+		url: ('https://'+ application.application_uris[0] + '/' + version + '/users/' + req.user.id),
+		method: 'GET',
+  		auth: {user:iotEApiKey, pass:iotEAuthToken}
+	};
+	request(options, function (error, response, body) {
+	    if (!error && response.statusCode == 200) {
+        	// Print out the response body
+        	console.log(body);
+        	res.status(response.statusCode).send(response);
+	    }else{
+        	console.log("The request came back with an error: " + error);
+        	//for now I'm giving this a 500 so that postman won't be left hanging.
+        	res.status(response.statusCode).send(response);
+        	return;
+        	}
+        });
 });
 
 
@@ -323,15 +564,21 @@ app.post("/users", passport.authenticate('mca-backend-strategy', {session: false
 		//see if logic ^ works first before finishing this
 		console.log("doc userID and mca userID do not match")
 	}
+	//redirect
+   	var version;
+   	if (!formData.hasOwnProperty('version') || formData.version == null || formData.version == undefined)
+   	{
+   		version = "v001";
+   	}
+   	else
+   	{
+   		version = formData.version;
+   	}
+   	console.log('url: ' +  'https://'+ application.application_uris[0] + '/' + version + '/users');
 	request({
-   		url: 'https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/users',
+   		url: 'https://'+ application.application_uris[0] + '/' + version + '/users',
 		json: formData,
 		method: 'POST',
-		headers: {
-    				'Content-Type': 'application/json',
-    				'tenantID':iotETenant,
-    				'orgID':currentOrgID
-  		},
   		auth: {user:iotEApiKey, pass:iotEAuthToken}
 
     	}, function(error, response, body){
@@ -354,25 +601,31 @@ app.post("/users", passport.authenticate('mca-backend-strategy', {session: false
 /***************************************************************/
 app.post('/appliances', passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)
 {
+	//grab the body to pass on
 	var bodyIn = JSON.parse(JSON.stringify(req.body));
-   	bodyIn.userID = req.user.id;
-   	bodyIn.orgID = currentOrgID;
-
 	//verify that userID coming in MCA matches doc userID
 	if (bodyIn.userID != req.user.id)
 	{
-		res.status(500).send("User ID in request does not match MCA authenticated user.")
-		//might need a return here, needs test
+		res.status(500).send("User ID in request does not match MCA authenticated user.");
 	}
+   	bodyIn.userID = req.user.id;
+   	bodyIn.orgID = currentOrgID;
+
+   	//redirect
+	var version;
+	if (!req.get('version') || req.get('version') == null || req.get('version') == undefined)
+	{
+		version = 'v001'
+	}
+	else
+	{
+		version = req.get('version');
+	}
+   	console.log('url: ' +  'https://'+ application.application_uris[0] + '/' + version + '/appliances');
 	request({
-		url: 'https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/appliances',
+		url: 'https://'+ application.application_uris[0] + '/' + version + '/appliances',
 		json: bodyIn,
 		method: 'POST',
-		headers: {
-    				'Content-Type': 'application/json',
-    				'tenantID':iotETenant,
-    				'orgID':currentOrgID
-  		},
   		auth: {user:iotEApiKey, pass:iotEAuthToken}
 		}, function(error, response, body){
 			if(error) {
@@ -399,16 +652,21 @@ app.get('/user/:userID', passport.authenticate('mca-backend-strategy', {session:
 		res.status(500).send("User ID on request does not match MCA authenticated user.")
 		//might need a return here, needs test
 	}
+	var version;
+	if (!req.get('version') || req.get('version') == null || req.get('version') == undefined)
+	{
+		version = 'v001'
+	}
+	else
+	{
+		version = req.get('version');
+	}
+	console.log('url: ' +  'https://'+ application.application_uris[0] + '/' + version + '/user/' + req.user.id);
 
 	var options =
 	{
-		url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/user/'+ req.params.userID),
+		url: ('https://'+ application.application_uris[0] + '/' + version + '/user/' + req.user.id),
 		method: 'GET',
-		headers: {
-    				'Content-Type': 'application/json',
-    				'tenantID':iotETenant,
-    				'orgID':currentOrgID
-  		},
   		auth: {user:iotEApiKey, pass:iotEAuthToken}
 	};
 	request(options, function (error, response, body) {
@@ -437,18 +695,24 @@ app.get('/appliances/:userID', passport.authenticate('mca-backend-strategy', {se
 	//make sure userID on params matches userID coming in thru MCA
 	if (req.params.userID != req.user.id)
 	{
-		res.status(500).send("User ID on request does not match MCA authenticated user.")
+		res.status(500).send("User ID on request does not match MCA authenticated user.");
 		//might need a return here, needs test
 	}
+	var version;
+	if (!req.get('version') || req.get('version') == null || req.get('version') == undefined)
+	{
+		version = 'v001'
+	}
+	else
+	{
+		version = req.get('version');
+	}
+	console.log('url: ' +  'https://'+ application.application_uris[0] + '/' + version + '/appliances/' + req.user.id);
+
 	var options =
 	{
-		url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/appliances/'+ req.user.id),
+		url: ('https://'+ application.application_uris[0] + '/' + version + '/appliances/' + req.user.id),
 		method: 'GET',
-		headers: {
-    				'Content-Type': 'application/json',
-    				'tenantID':iotETenant,
-    				'orgID':currentOrgID
-  		},
   		auth: {user:iotEApiKey, pass:iotEAuthToken}
 	};
 	request(options, function (error, response, body) {
@@ -481,15 +745,20 @@ app.get("/appliances/:userID/:applianceID", passport.authenticate('mca-backend-s
 		res.status(500).send("User ID on request does not match MCA authenticated user.")
 		//might need a return here, needs test
 	}
+	var version;
+	if (!req.get('version') || req.get('version') == null || req.get('version') == undefined)
+	{
+		version = 'v001'
+	}
+	else
+	{
+		version = req.get('version');
+	}
+	console.log('url: ' +  'https://'+ application.application_uris[0] + '/' + version + '/appliances/' + req.user.id + '/' + req.params.applianceID);
 	var options =
 	{
-		url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/appliances/'+ req.user.id + '/' + req.body.applianceID),
+		url: ('https://'+ application.application_uris[0] + '/' + version + '/appliances/' + req.user.id + '/' + req.params.applianceID),
 		method: 'GET',
-		headers: {
-    				'Content-Type': 'application/json',
-    				'tenantID':iotETenant,
-    				'orgID':currentOrgID
-  		},
   		auth: {user:iotEApiKey, pass:iotEAuthToken}
 	};
 	request(options, function (error, response, body) {
@@ -503,18 +772,16 @@ app.get("/appliances/:userID/:applianceID", passport.authenticate('mca-backend-s
         	res.status(response.statusCode).send(response);
         	return;
         	}
-
-        	});
+    });
 });
+
 
 /***************************************************************/
 /* Route to delete appliance records                           */
-/*    Internal API											   */
+/*    Internal API					       */
 /***************************************************************/
-app['delete']("/appliances/:userID/:applianceID", passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)
+app.del("/appliances/:userID/:applianceID", passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)
 {
-	//DOING THIS DELETE HOW WE DO POSTS ABOVE
-	//will need to test to see which works (or which works better)
 
 	//verify that userID coming in MCA matches doc userID
 	if (req.params.userID != req.user.id)
@@ -522,14 +789,19 @@ app['delete']("/appliances/:userID/:applianceID", passport.authenticate('mca-bac
 		res.status(500).send("User ID in request does not match MCA authenticated user.")
 		//might need a return here, needs test
 	}
+	var version;
+	if (!req.get('version') || req.get('version') == null || req.get('version') == undefined)
+	{
+		version = 'v001'
+	}
+	else
+	{
+		version = req.get('version');
+	}
+	console.log('url: ' +  'https://'+ application.application_uris[0] + '/' + version + '/appliances/' + req.user.id + '/' + req.params.applianceID);
 	request({
-		url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/appliances/'+ req.params.userID + '/' + req.params.applianceID),
+		url: ('https://'+ application.application_uris[0] + '/' + version + '/appliances/' + req.user.id + '/' + req.params.applianceID),
 		method: 'DELETE',
-		headers: {
-    				'Content-Type': 'application/json',
-    				'tenantID':iotETenant,
-    				'orgID':currentOrgID
-  		},
   		auth: {user:iotEApiKey, pass:iotEAuthToken}
 		}, function(error, response, body){
 			if(error) {
@@ -550,24 +822,28 @@ app['delete']("/appliances/:userID/:applianceID", passport.authenticate('mca-bac
 /* Need to delete the appliance documents as well from our db  							   */
 /* If we created them on the platform, delete from platform (NOT for experimental)         */
 /*******************************************************************************************/
-app['delete']("/user/:userID", passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)
+app.delete("/user/:userID", passport.authenticate('mca-backend-strategy', {session: false }), function (req, res)
 {
-	//DOING THIS DELETE HOW WE DO GETS ABOVE
 	//make sure userID on params matches userID coming in thru MCA
 	if (req.params.userID != req.user.id)
 	{
 		res.status(500).send("User ID on request does not match MCA authenticated user.")
 		//might need a return here, needs test
 	}
+	var version;
+	if (!req.get('version') || req.get('version') == null || req.get('version') == undefined)
+	{
+		version = 'v001'
+	}
+	else
+	{
+		version = req.get('version');
+	}
+	console.log('url: ' +  'https://'+ application.application_uris[0] + '/' + version + '/user/' + req.user.id);
 	var options =
 	{
-		url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/user/'+ req.user.id),
+		url: ('https://'+ application.application_uris[0] + '/' + version + '/user/' + req.user.id),
 		method: 'DELETE',
-		headers: {
-    				'Content-Type': 'application/json',
-    				'tenantID':iotETenant,
-    				'orgID':currentOrgID
-  		},
   		auth: {user:iotEApiKey, pass:iotEAuthToken}
 	};
 	request(options, function (error, response, body) {
@@ -584,6 +860,7 @@ app['delete']("/user/:userID", passport.authenticate('mca-backend-strategy', {se
 
         	});
 });
+
 
 //get IoT-Foundation credentials
 
@@ -631,7 +908,7 @@ app.post('/apps/:tenantId/:realmName/handleChallengeAnswer', jsonParser, functio
 
     logger.debug("handleChallengeAnswer", tenantId, realmName, challengeAnswer);
 
-    var username = req.body.challengeAnswer["username"];
+    var username = req.body.challengeAnswer["username"].replace(/\s+/g, '');
     var password = req.body.challengeAnswer["password"];
 
     var responseJson = { status: "failure" };
