@@ -414,7 +414,7 @@ app.get('/v001/appliances/:userID/:applianceID', authenticate, function (req, re
 	{
 		url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/appliances/'+ req.params.userID + '/' + req.params.applianceID),
 		method: 'GET',
-		headers: {'
+		headers: {
     				'Content-Type': 'application/json',
     				'tenantID':iotETenant,
     				'orgID':currentOrgID
