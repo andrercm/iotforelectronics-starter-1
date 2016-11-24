@@ -122,10 +122,11 @@
               obj['waterPressure'] = text;
               break;
             }
-            var data = JSON.parse(JSON.stringify(obj));
+            var data = JSON.stringify(obj);
             $.ajax({
               url: '/washingMachine/<%= deviceId %>/setAttributes',
               type: 'PUT',
+              contentType: 'application/json',
               data: data,
               success: function() {
                 $('.washer-content .washer-text p strong').eq(0).text("<%= __('appliance_page.failure') %>");
@@ -145,16 +146,21 @@
           $('.problem-machine-icons button').removeClass('active');
           $('.problem-machine-icons p').addClass('enabled');
 
-          $.ajax({
-            url: '/washingMachine/<%= deviceId %>/setAttributes',
-            type: 'PUT',
-            data: {
+          var obj = {
               status: "Ready",
               currentCycle: "Stopped",
               failureType: "",
               vibration: 80,
               waterPressure: 70
-            }
+            };
+
+          var data = JSON.stringify(obj);
+
+          $.ajax({
+            url: '/washingMachine/<%= deviceId %>/setAttributes',
+            type: 'PUT',
+            contentType: 'application/json',
+            data: data
           });
         });
 
