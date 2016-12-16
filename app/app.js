@@ -1195,6 +1195,7 @@ app.get('/validation', function(req, res)
 
 
 console.log('IoT4E Credentials: ' + iotETenant);
+console.log("Application URL: " + application.application_uris[0]);
 /********************************************************************** **/
 /*End of Solution Integrator Code                                        */
 /********************************************************************** **/
