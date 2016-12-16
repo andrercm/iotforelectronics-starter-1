@@ -156,10 +156,10 @@ var currentOrgID = iotfCredentials["org"];
 
 //SETUP Starter App Region
 var region = 'us-south';
-if(application.search('.eu-gb.') > -1)
-{
-	region = 'eu-gb';
-}
+//if(application.search('.eu-gb.') > -1)
+//{
+//	region = 'eu-gb';
+//}
 	
 	
 /***************************************************************/
