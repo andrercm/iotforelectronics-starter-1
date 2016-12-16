@@ -154,6 +154,14 @@ var services = JSON.parse(process.env.VCAP_SERVICES)
 var application = JSON.parse(process.env.VCAP_APPLICATION)
 var currentOrgID = iotfCredentials["org"];
 
+//SETUP Starter App Region
+var region = 'us-south';
+if(application.search('.eu-gb.') > -1)
+{
+	region = 'eu-gb';
+}
+	
+	
 /***************************************************************/
 /* Set up express server & passport                            */
 /***************************************************************/
@@ -1195,7 +1203,8 @@ app.get('/validation', function(req, res)
 
 
 console.log('IoT4E Credentials: ' + iotETenant);
-console.log("Application URL: " + application.application_uris[0]);
+console.log('Application URL: ' + application.application_uris[0]);
+console.log('Application Region: ' + region);
 /********************************************************************** **/
 /*End of Solution Integrator Code                                        */
 /********************************************************************** **/
