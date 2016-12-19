@@ -155,10 +155,10 @@ var application = JSON.parse(process.env.VCAP_APPLICATION)
 var currentOrgID = iotfCredentials["org"];
 
 //SETUP Starter App Region
-var region = "us-south";
+var regionURL = "https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/";
 if(application.application_uris[0].indexOf(".eu-gb.") > -1)
 {
-	region = "eu-gb";
+	regionURL = "https://iotforelectronicstile.eu-gb.mybluemix.net/v001/";
 }
 	
 	
@@ -1204,7 +1204,7 @@ app.get('/validation', function(req, res)
 
 console.log('IoT4E Credentials: ' + iotETenant);
 console.log('Application URL: ' + application.application_uris[0]);
-console.log('Application Region: ' + region);
+console.log('Application Region URL: ' + regionURL);
 /********************************************************************** **/
 /*End of Solution Integrator Code                                        */
 /********************************************************************** **/
