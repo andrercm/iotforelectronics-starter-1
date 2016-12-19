@@ -156,10 +156,10 @@ var currentOrgID = iotfCredentials["org"];
 
 //SETUP Starter App Region
 var regionURL = "https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/";
-if(application.application_uris[0].indexOf(".eu-gb.") > -1)
-{
-	regionURL = "https://iotforelectronicstile.eu-gb.mybluemix.net/v001/";
-}
+//if(application.application_uris[0].indexOf(".eu-gb.") > -1)
+//{
+//	regionURL = "https://iotforelectronicstile.eu-gb.mybluemix.net/v001/";
+//}
 	
 	
 /***************************************************************/
@@ -210,7 +210,7 @@ app.put('/users', passport.authenticate('mca-backend-strategy', {session: false 
 		console.log("doc userID and mca userID do not match")
 	}
 	request({
-   		url: 'https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/users',
+   		url: (regionURL + 'users'),//'https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/users',
 		json: userDocIn,
 		method: 'PUT',
 		headers: {
@@ -242,7 +242,7 @@ createUser = function (username)
 	//first see if the user exists
 	var options =
 	{
-		url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/users/'+ username),
+		url: (regionURL + 'users/' + username),
 		method: 'GET',
 		headers: {
     				'Content-Type': 'application/json',
@@ -266,7 +266,7 @@ createUser = function (username)
         		userDoc.userID = username;
         		userDoc.userDetail = {};
 			request({
-   				url: 'https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/users',
+   				url: (regionURL + 'users'),
 				json: userDoc,
 				method: 'POST',
 				headers: {
@@ -298,7 +298,7 @@ app.post('/v001/users', authenticate, function(req, res)
 	var bodyIn = JSON.parse(JSON.stringify(req.body));
 	delete bodyIn.version;
 		request({
-		url: 'https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/users',
+		url: (regionURL + 'users'),
 		json: bodyIn,
 		method: 'POST',
 		headers: {
@@ -327,7 +327,7 @@ app.post('/v001/appliances', authenticate, function (req, res)
 	var bodyIn = JSON.parse(JSON.stringify(req.body));
 	delete bodyIn.version;
 	request({
-		url: 'https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/appliances',
+		url: (regionURL + 'appliances'),
 		json: bodyIn,
 		method: 'POST',
 		headers: {
@@ -355,7 +355,7 @@ app.get('/v001/users/:userID', authenticate, function (req, res)
 {
 	var options =
 	{
-		url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/users/'+ req.params.userID),
+		url: (regionURL + 'users/'+ req.params.userID),
 		method: 'GET',
 		headers: {
     				'Content-Type': 'application/json',
@@ -386,7 +386,7 @@ app.get('/v001/appliances/:userID', authenticate, function (req, res)
 {
 	var options =
 	{
-		url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/appliances/'+ req.params.userID),
+		url: (regionURL + 'appliances/'+ req.params.userID),
 		method: 'GET',
 		headers: {
     				'Content-Type': 'application/json',
@@ -420,7 +420,7 @@ app.get('/v001/appliances/:userID/:applianceID', authenticate, function (req, re
 {
 	var options =
 	{
-		url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/appliances/'+ req.params.userID + '/' + req.params.applianceID),
+		url: (regionURL + 'appliances/'+ req.params.userID + '/' + req.params.applianceID),
 		method: 'GET',
 		headers: {
     				'Content-Type': 'application/json',
@@ -452,7 +452,7 @@ app.get('/v001/appliances/:userID/:applianceID', authenticate, function (req, re
 app.del("/v001/appliances/:userID/:applianceID", authenticate, function (req, res)
 {
 		request({
-		url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/appliances/'+ req.params.userID + '/' + req.params.applianceID),
+		url: (regionURL + 'appliances/'+ req.params.userID + '/' + req.params.applianceID),
 		method: 'DELETE',
 		headers: {
     				'Content-Type': 'application/json',
@@ -481,7 +481,7 @@ app.delete("/v001/user/:userID", authenticate, function (req, res)
 {
 	var options =
 	{
-		url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/user/'+ req.params.userID),
+		url: (regionURL + 'user/'+ req.params.userID),
 		method: 'DELETE',
 		headers: {
     				'Content-Type': 'application/json',
