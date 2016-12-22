@@ -156,10 +156,10 @@ var currentOrgID = iotfCredentials["org"];
 
 //SETUP Starter App Region
 var regionURL = "https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/v001/";
-//if(application.application_uris[0].indexOf(".eu-gb.") > -1)
-//{
-//	regionURL = "https://iotforelectronicstile.eu-gb.mybluemix.net/v001/";
-//}
+if(application.application_uris[0].indexOf(".eu-gb.") > -1)
+{
+	regionURL = "https://iotforelectronicstile.eu-gb.mybluemix.net/v001/";
+}
 	
 	
 /***************************************************************/
@@ -976,7 +976,8 @@ var body = {
 	   };
 var options =
 	{
-		url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/deletedDocs'),
+		//url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/deletedDocs'),
+		url: (regionURL + 'deletedDocs'),
 		json: body,
 		method: 'POST',
 		headers: {
@@ -1046,7 +1047,8 @@ app.get('/validation', function(req, res)
 {
 	var options =
 	{
-		url: 'https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/validation/' + iotETenant + '/' +  iotEAuthToken + '/' + iotEApiKey,
+		//url: 'https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/validation/' + iotETenant + '/' +  iotEAuthToken + '/' + iotEApiKey,
+		url: (regionURL + 'validation/' + iotETenant + '/' +  iotEAuthToken + '/' + iotEApiKey),
 		auth: iotEAuthToken + ':' + iotEApiKey,
 		method: 'GET',
 		headers: {
