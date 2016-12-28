@@ -156,10 +156,10 @@ var currentOrgID = iotfCredentials["org"];
 
 //SETUP Starter App Region
 var regionURL = "https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/";
-//if(application.application_uris[0].indexOf(".eu-gb.") > -1)
-//{
-//	regionURL = "https://iotforelectronicstile.eu-gb.mybluemix.net/";
-//}
+if(application.application_uris[0].indexOf(".eu-gb.") > -1)
+{
+	regionURL = "https://iotforelectronicstile.eu-gb.mybluemix.net/";
+}
 	
 	
 /***************************************************************/
