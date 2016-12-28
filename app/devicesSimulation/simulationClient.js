@@ -12,6 +12,15 @@ var appEnv = require("cfenv").getAppEnv();
 var Cloudant = require('cloudant');
 var encryptor = require('simple-encryptor')(process.env.KEY);
 
+var application = JSON.parse(process.env.VCAP_APPLICATION);
+var region = 'US';
+
+if(application.application_uris[0].indexOf(".eu-gb.") > -1){
+	region = 'UK';
+} else if(application.application_uris[0].indexOf(".au-syd.") > -1){
+	region = 'AU';
+}
+
 function simulationClient(config) {
 	if (!(this instanceof simulationClient)) {
 		return new simulationClient(config);
@@ -616,7 +625,15 @@ simulationClient.prototype.onMessage = function(msg){
 
 
 function callSimulationEngineAPI(method, paths, body){
+
 	var uri = "https://simulationengine-uss-iot4e.electronics.internetofthings.ibmcloud.com/api";
+
+	switch(region){
+		case 'UK':
+			uri = "https://iot4esimulationengine.eu-gb.mybluemix.net/api";
+			break;
+	}
+
 	var apiKey = encryptor.decrypt('adb33b3b7e023efcb10ad68a8977d0c78d2ae6aa7e37d37331d56d33ccf67562b66fa079f14b21d49e56de4ea8924de7UcHcMC5d9fv2rkXJjka2cPR3+l8/5NPHBH8vOBoKDRX57AhzUCgFT5Dqmjmd6qhv');
 	var apiToken = encryptor.decrypt('55febf36e62bdb74bc4464e834c0c4fe10627dff7a5eb9911e0bfd122dab6bacf22fe75126aafaa36ec6130e0e39ab79veloJdh8Sp4SxPSa366uATBsM0lw8YOacPj92RKSbtpZqbEhcbI2H/UG3MJNHg2G');
 	if(paths){
