@@ -1379,19 +1379,22 @@ var body = {
 	   };
 var options =
 	{
-		url: (regionURL + '/deletedDocs'),
+		//url: ('https://registration-uss-iot4e.electronics.internetofthings.ibmcloud.com/deletedDocs'),
+		url: (regionURL + 'deletedDocs'),
 		json: body,
 		method: 'POST',
 		headers: {
     				'Content-Type': 'application/json'
   		}
 	};
+
 function retryRequest(body, options)
 {
 	request(options, function (error, response, body) {
 		if (!error) {
    			// Print out the response body
    			console.log('***Response Status Code --->', response.statusCode);
+			console.log('***Response received: ' + response.message);
 			if (response.statusCode === 404)
 			{
 				retryRequest();
@@ -1404,17 +1407,22 @@ function retryRequest(body, options)
       			}
 	});
 };
-
 console.log('Body Values being sent in: ' + JSON.parse(JSON.stringify(body)));
 request(options, function (error, response, body) {
     if (!error) {
        	// Print out the response body
        	console.log('***Response Status Code --->', response.statusCode);
-		if (response.statusCode === 404)
-		{
-			retryRequest();
-			}
-	}
+	console.log('***Response received: ' + response.message);
+	if (response.statusCode === 404)
+	{
+		retryRequest();
+        }else{
+        	console.log("The request came back with an error: " + error);
+			console.log("Error code: " + error.statusCode);
+			console.log("Error message: " + error.message);
+        	return;
+        }
+}
 });
 
 /*console.log('About to store IoTP Credentials');
