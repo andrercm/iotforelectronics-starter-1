@@ -8,10 +8,6 @@
         {
             "name": "iotf-service",
             "plan": "iotf-service-free"
-        },
-        {
-            "name": "AdvancedMobileAccess",
-            "plan": "Gold"
         }
     ],
     "defaultMemory": 512,
