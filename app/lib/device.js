@@ -106,7 +106,7 @@ device.getPlatformQRstring = function(req, res){
 	var token = VCAP_SERVICES['iotf-service'][0]['credentials'].apiToken;
 	var name = VCAP_SERVICES['iotf-service'][0].name;
 	var mqtt_host = VCAP_SERVICES['iotf-service'][0]['credentials'].mqtt_host;
-	var registration_api_version = "v001";
+	var registration_api_version = "v002";
 
 	var text = ['1', org, route, guid, key, token, name, mqtt_host, registration_api_version].join(',');
 
