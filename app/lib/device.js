@@ -280,19 +280,30 @@ device.renderUI = function(req, res){
 
 	simulationClient.getDeviceStatus(req.params.deviceID).then(function(data){
 		var status = 'appliance_page.' + data.attributes.status.toLowerCase();
-		var acousticError = req.query.acousticError;
 
-		checkStatusAcoustic(function(response) {
-			return res.render(response, {
-				deviceId:          data.deviceID,
-				deviceStatus:      res.__(status),
-				vibration:         data.attributes.vibration,
-				waterPressure:     data.attributes.waterPressure,
-				serialNumber:      data.attributes.serialNumber,
-				make:              data.attributes.make,
-				model:             data.attributes.model
-			});
-	  },acousticError);
+		return res.render('device', {
+			deviceId:          data.deviceID,
+			deviceStatus:      res.__(status),
+			vibration:         data.attributes.vibration,
+			waterPressure:     data.attributes.waterPressure,
+			serialNumber:      data.attributes.serialNumber,
+			make:              data.attributes.make,
+			model:             data.attributes.model
+		});
+
+		// var acousticError = req.query.acousticError;
+
+		// checkStatusAcoustic(function(response) {
+		// 	return res.render(response, {
+		// 		deviceId:          data.deviceID,
+		// 		deviceStatus:      res.__(status),
+		// 		vibration:         data.attributes.vibration,
+		// 		waterPressure:     data.attributes.waterPressure,
+		// 		serialNumber:      data.attributes.serialNumber,
+		// 		make:              data.attributes.make,
+		// 		model:             data.attributes.model
+		// 	});
+	 //  },acousticError);
 	});
 
 }
