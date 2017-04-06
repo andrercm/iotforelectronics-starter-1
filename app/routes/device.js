@@ -93,6 +93,11 @@ deviceRouter.put('/washingMachine/:deviceID/startWashing', device.startWashing);
 deviceRouter.put('/washingMachine/:deviceID/stopWashing', device.stopWashing);
 
 /**
+* Start the washing cycle with audio for the given device
+*/
+deviceRouter.put('/washingMachine/:deviceID/startWashingWithAudio', device.startWashingWithAudio);
+
+/**
  * Change the value of a specific attribute for a specific device
  * @Param: attribute - the name of the attribute to change (program, doorOpen, currentCycle, etc)
  * @Param: value - the value to be set

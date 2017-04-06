@@ -278,6 +278,12 @@ simulationClient.prototype.getAllDevicesStatus= function(){
  * get acoustic service status
 */
 
+/*
+ * ******************************************* Acoustic Service *****************************
+ * ******************************************************************************************
+ * get acoustic service status
+*/
+
 simulationClient.prototype.getAcousticStatus = function(){
 	var deferred = Q.defer();
 	callSimulationEngineAPI("GET", ["acoustic", "getStatus"]).then(function (resp){

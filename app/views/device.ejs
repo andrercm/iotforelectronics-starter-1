@@ -52,7 +52,6 @@
               </div>
               <div class="washer-content">
                 <div class="washer-text">
-                  <h3 class="washer-title"><span><%= deviceId %></span></h3>
                   <ul class="text-list"><li><%= __('appliance_page.device_id') %> </li><li><%= deviceId %></li></ul>
                   <ul class="text-list"><li><%= __('appliance_page.serial_number') %> </li><li><%= serialNumber %></li></ul>
                   <ul class="text-list"><li><%= __('appliance_page.make_model') %> </li><li><%= make %> <%= model %></li></ul>
@@ -219,6 +218,7 @@
         if (id === "<%= deviceId %>" && length > 1) {
           if(device.status && device.status == 'Failure'){
             if(!($('#actionWasher').prop('disabled'))) $('#actionWasher').prop('disabled', true);
+            if($('#resetMachines').prop('disabled')) $('#resetMachines').prop('disabled', false);
             $('.washer-content .washer-text ul li strong').eq(0).text("<%= __('appliance_page.failure') %>");
             $('.washer-content .washer-text ul li img').eq(0).attr('src', '/images/advise-icon.svg');
             if(device.failureType && device.failureType == 'Board failure'){
@@ -235,6 +235,7 @@
             }
           } else {
             if($('#actionWasher').prop('disabled')) $('#actionWasher').prop('disabled', false);
+            if($('#resetMachines').prop('disabled')) $('#resetMachines').prop('disabled', false);
             if(device.status === 'Working'){
               $('#actionWasher').text("<%= __('appliance_page.stop') %>");
               switch(device.currentCycle){

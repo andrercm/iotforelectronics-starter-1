@@ -144,6 +144,7 @@ device.startWashingWithAudio = function(req, res) {
                 return res.status(400).json(err)
         });
 }
+
 device.getAllDevicesStatus = function(req, res){
 	simulationClient.getAllDevicesStatus().then(function(data){
 		res.json(data);

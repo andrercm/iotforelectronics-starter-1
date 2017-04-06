@@ -5,8 +5,8 @@
 *
 * (C) Copyright IBM Corp. 2016  All Rights Reserved.
 *
-* The source code for this program is not published or otherwise  
-* divested of its trade secrets, irrespective of what has been 
+* The source code for this program is not published or otherwise
+* divested of its trade secrets, irrespective of what has been
 * deposited with the U.S. Copyright Office.
 ********************************************************* {COPYRIGHT-END} **/
 
@@ -48,7 +48,7 @@ button, a{
 .content div.explain p, .content div.explain a, .washer-list,
 .install-info h3, .footer-links .link, .problem-machine p,
 .washer-details .washer-content .washer-text p, .washer-app-info p,
-.washer-details .washer-content .text-list li{
+.washer-details .washer-content .text-list li, #time span{
 	font-family:"HelvRomanIBM","HelveticaNeue-Roman","Helvetica Neue Roman",
 	"HelveticaNeue","Helvetica Neue",Helvetica, Arial, "Lucida Grande", sans-serif;
 }
@@ -442,6 +442,7 @@ footer.main-section{
   cursor: pointer;
 
 }
+
 /* Washer Single Page*/
 .washer-content{
 	padding: 10px 0px;
@@ -451,6 +452,9 @@ footer.main-section{
 }
 .washer-title span {
 	position: relative;
+}
+#currentOperation{
+    color:red;
 }
 .washer-details{
 	display: flex;
@@ -464,7 +468,7 @@ footer.main-section{
 }
 .washer-details .washer-content .washer-text{
   display: inline-block;
-  margin-top: -25px;
+  margin-top: 5px;
 	text-align: left;
 	width: 100%;
 }
@@ -519,18 +523,28 @@ footer.main-section{
 /*For Safari 9+*/
 @supports (overflow:-webkit-marquee)
    and (justify-content:inherit) {
-     .washer-app-info > div {padding-left: 90px;} 
-     .washer-app-info > div > img { margin-left: -10px;}  
+     .washer-app-info > div {padding-left: 90px;}
+     .washer-app-info > div > img { margin-left: -10px;}
+}
+
+#noiseOptions{
+	display: none;
 }
 
 .problem-machine{
 	text-align: left;
 	padding: 0px 25px;
 }
+
 .problem-machine-icons img{
 	width: 40px;
 	height: 40px;
 }
+
+.problem-machine-icons{
+  width: 97%;
+}
+
 .problem-machine .problem-machine-icons button{
 	border: none;
 	display: inline-block;
@@ -575,9 +589,9 @@ footer.main-section{
 	display: block;
 	background: #FFF;
 	margin: 7px 0px;
-	padding: 8px;
-	width: 140px;
-	height: 40px;
+    padding: 5px;
+    width: 185px;
+    height: 40px;
 	border: 1px solid #000;
 	outline: 0 !important;
 }
@@ -594,7 +608,7 @@ footer.main-section{
     width: 66px;
     height: 30px;
     border: 1px solid #000;
-    outline: 0 !important;    
+    outline: 0 !important;
 }
 
 .problem-machine .problem-machine-buttons button:hover{
@@ -701,6 +715,7 @@ a.ibm-top-link:hover:before {
 a.ibm-top-link:hover:after {
 	border-bottom-color: #000;
 }
+
 /***** Cotact Form ********/
 body #ibm-top{
   padding: 0;
@@ -946,4 +961,220 @@ body .main-container a:hover, body .main-container a:focus {
   .description-box section{
     margin-top: 50px;
   }
+}
+
+/***acoustic server page **/
+
+#sound{
+  width: 150%;
+}
+#sound li:first-child{
+  width: 33%;
+}
+#sound li:last-child{
+  width: 45%;
+}
+
+/** basic align **/
+#audioplayer {
+    width: 267px;
+    height: 23px;
+    margin: auto auto auto auto;
+    border: 1px solid;
+    padding-left: 10px;
+}
+
+#pButton {
+    height:20px;
+    width: 20px;
+    border: none;
+    background-size: 50% 50%;
+    background-repeat: no-repeat;
+    background-position: center;
+    float:left;
+    outline:none;
+}
+
+#aButton {
+    height:20px;
+    width: 20px;
+    border: none;
+    background-size: 50% 50%;
+    background-repeat: no-repeat;
+    background-position: center;
+    float:left;
+    outline:none;
+}
+
+.play {
+    background: url('../images/play.png');
+}
+
+.pause {
+    background: url('../images/pause.png');
+}
+
+.audio-on {
+    background: url('../images/audio-on.png');
+}
+
+.audio-off {
+    background: url('../images/audio-off.png');
+}
+
+.audio-failure {
+	white-space: nowrap;
+	/*color: red;*/
+}
+
+.waveform-container {
+	position: relative;
+	width: 250px;
+	height: 100px;
+	margin-left: 25px;
+	margin-right: 25px;
+}
+
+.waveform-overlay {
+	display: block;
+	background-color: white;
+	opacity: 0.5;
+	width: 100%;
+	height: 100%;
+	right: 0;
+	position: absolute;
+	transition-property: width;
+	-webkit-transition-property: width;
+    transition-timing-function: linear;
+    -webkit-transition-timing-function: linear;
+}
+
+
+progress::-webkit-progress-value { background: #6bbaff; }
+progress::-moz-progress-bar { background-color: #6bbaff; }
+
+#progress {
+    border: none;
+    width: 100px;
+    height: 6px;
+    margin-top: 7px;
+    float: left;
+    background: rgba(0,0,0,.5);
+}
+
+#audioTime {
+    float: left;
+    font-family: "HelvRomanIBM","HelveticaNeue-Roman","Helvetica Neue Roman", "HelveticaNeue","Helvetica Neue",Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-size: 11px;
+    padding-left: 5px;
+    padding-top: 3px;
+}
+
+#volume {
+    display: inline;
+}
+
+#soundwave {
+	position: absolute;
+	margin-left: 20px;
+	margin-top: -1px;
+	-moz-transform: scaleX(-1);
+	-o-transform: scaleX(-1);
+	-webkit-transform: scaleX(-1);
+	transform: scaleX(-1);
+	filter: FlipH;
+	-ms-filter: "FlipH";
+}
+
+input[type=range]{
+  -webkit-appearance: none;
+  margin: 0px 0;
+  width: 56px;
+  height: 20px;
+}
+
+input[type=range]:focus {
+  outline: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 3px;
+  cursor: pointer;
+  animate: 0.2s;
+  box-shadow: 0px 0px 0px #000000;
+  background: rgba(0,0,0,.3);
+  border-radius: 0px;
+  border: 0px solid #000000;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  box-shadow: 0px 0px 0px #000000;
+  border: 1px solid #D6D6D6;
+  height: 9px;
+  width: 9px;
+  border-radius: 10px;
+  background: #FFFFFF;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -2.5px;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+  background: rgba(0,0,0,.3);
+}
+input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 2px;
+  cursor: pointer;
+  animate: 0.2s;
+  box-shadow: 0px 0px 0px #000000;
+  background: rgba(0,0,0,.3);
+  border-radius: 0px;
+  border: 0px solid #000000;
+  padding-bottom: 1px;
+}
+input[type=range]::-moz-range-thumb {
+  box-shadow: 0px 0px 0px #000000;
+  border: 1px solid #D6D6D6;
+  height: 7px;
+  width: 7px;
+  border-radius: 10px;
+  background: #FFFFFF;
+  cursor: pointer;
+}
+input[type=range]::-ms-track {
+  width: 100%;
+  height: 3px;
+  cursor: pointer;
+  animate: 0.2s;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+input[type=range]::-ms-fill-lower {
+  background: #EDEDED;
+  border: 0px solid #000000;
+  border-radius: 0px;
+  box-shadow: 0px 0px 0px #000000;
+}
+input[type=range]::-ms-fill-upper {
+  background: #EDEDED;
+  border: 0px solid #000000;
+  border-radius: 0px;
+  box-shadow: 0px 0px 0px #000000;
+}
+input[type=range]::-ms-thumb {
+  box-shadow: 0px 0px 0px #000000;
+  border: 1px solid #D6D6D6;
+  height: 9px;
+  width: 9px;
+  border-radius: 10px;
+  background: #FFFFFF;
+  cursor: pointer;
+}
+input[type=range]:focus::-ms-fill-lower {
+  background: #EDEDED;
+}
+input[type=range]:focus::-ms-fill-upper {
+  background: #EDEDED;
 }
