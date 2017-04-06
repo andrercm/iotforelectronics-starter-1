@@ -235,7 +235,6 @@
             }
           } else {
             if($('#actionWasher').prop('disabled')) $('#actionWasher').prop('disabled', false);
-            if($('#resetMachines').prop('disabled')) $('#resetMachines').prop('disabled', false);
             if(device.status === 'Working'){
               $('#actionWasher').text("<%= __('appliance_page.stop') %>");
               switch(device.currentCycle){
