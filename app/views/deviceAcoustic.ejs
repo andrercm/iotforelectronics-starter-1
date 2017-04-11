@@ -24,17 +24,7 @@
     <script src="/jquery/jquery.min.js"></script>
     <script src="/bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/javascripts/waveform.js"></script>
-    <!--
-      commmented out for now, this is the dojo code for acoustic diagnosis panel startup
-    <script type="text/javascript">
-     require(["dojo/parser", "dojo/domReady!", "dijit/registry", "dojox/form/Uploader", "analytics/WMEvents", "analytics/WMAnalyticsController", "analytics/WMParts"], function(parser, domReady, registry, Uploader, WMEvents, WMAnalyticsController, WMParts){
-       parser.parse();
-       var controller = new WMAnalyticsController();
-       var monitorobj = registry.byId("service_provider_monitoring_obj");
-       monitorobj.sayHello();
-     });
-   </script>
- -->
+
 	<!--script type="text/javascript"> digitalData = {page: {pageInfo: {pageID: "IOTELECTRONICS"}}} </script-->
   </head>
   <body>
@@ -43,9 +33,6 @@
       <div class="container">
         <h2><%= __('appliance_page.heading') %></h2>
         <section class="col-xs-12 col-md-10 content washer-content">
-          <div>
-              <div id="service_provider_monitoring_obj" data-dojo-type="analytics.WMParts"></div>
-          </div>
           <div class="col-xs-12 col-sm-4 problem-machine">
             <h3><%= __('appliance_page.problem_heading') %></h3>
             <p><%= __('appliance_page.problem_text') %></p>
@@ -53,7 +40,7 @@
               <p class="enabled" data-text="Board failure"><img src="/images/Board_failure_en.svg"/><button><%= __('appliance_page.board_failure') %></button></p>
               <p data-text="Strong vibration"><img src="/images/Vibration_en.svg"/><button><%= __('appliance_page.strong_vibration') %></button></p>
               <p class="enabled" data-text="Water leak"><img src="/images/waterdrop.svg"/><button/><%= __('appliance_page.water_leak') %></button></p>
-              <p class="enabled" data-text="Noise"><img src="/images/noise-icon.svg"/><button/><%= __('appliance_page.noise') %></button></p>
+              <p data-text="Noise"><img src="/images/noise-icon.svg"/><button/><%= __('appliance_page.noise') %></button></p>
             </div>
             <div class="problem-machine-buttons">
               <button id="resetMachines" disabled><%= __('appliance_page.fix_machine') %></button>
@@ -89,8 +76,20 @@
                   <ul class="text-list"><li><%= __('appliance_page.water_pressure') %> </li><li><strong><%= waterPressure %> <%= __('appliance_page.water_pressure_unit') %></strong><img src="../images/Checkmark.svg"></li></ul>
                 </li></ul>
                 <ul class="text-list"><li><%= __('appliance_page.sound_analysis') %></li><li><strong><%= __('appliance_page.normal') %></strong><img src="/images/blank.png"></li></ul>
-                <ul class="text-list audio-failure" id="sound"><li></li><li><strong></strong><img src="/images/blank.png"></li></ul>
+                <ul class="text-list"><li></li><li><strong id="textCause"></strong><img  id="infoIcon" src="/images/blank.png"></li></ul>
                 </div>
+              </div>
+            </div>
+            <div id="decisionTreeModal" class="modalDecisionTree">
+              <!-- modal -->
+
+              <!-- clos button -->
+              <span class="close" onclick="document.getElementById('decisionTreeModal').style.display='none'">&times;</span>
+
+              <!-- Modal Content (The Image) -->
+              <div>
+                <h1 class="diagramTitle"><%= __('appliance_page.diagnosis_diagram') %></h1>
+                <img class="modal-image" id="decisionTreeImage">
               </div>
             </div>
             <div class="washer-app-info">
@@ -208,6 +207,7 @@
         switch(label){
           case "<%= __('appliance_page.start') %>":
             $('.problem-machine-icons p').eq(1).addClass("enabled");
+            $('.problem-machine-icons p').eq(3).addClass("enabled");
             $('#actionWasher').text("<%= __('appliance_page.stop') %>");
             $("#audio").attr('src','/sounds/' + audios[index]);
             $('#audio')[0].play();
@@ -216,6 +216,7 @@
             break;
           case "<%= __('appliance_page.stop') %>":
              $('.problem-machine-icons p').eq(1).removeClass("enabled");
+             $('.problem-machine-icons p').eq(3).removeClass("enabled");
              $('#actionWasher').text("<%= __('appliance_page.start') %>");
              stopAudio();
              updateStatus('Stopped');
@@ -291,12 +292,13 @@
         $('.problem-machine-icons p').removeClass('active');
         $('.problem-machine-icons p').addClass('enabled');
         $('.problem-machine-icons p').eq(1).removeClass('enabled');
+        $('.problem-machine-icons p').eq(3).removeClass("enabled");
         $('.washer-content .washer-text ul li img').eq(3).attr('src', '/images/blank.png');
-        $('.washer-content .washer-text ul li img').eq(3).css("height", "");
         $('.washer-content .washer-text ul li img').eq(4).attr('src', '/images/blank.png');
-        $('.washer-content .washer-text ul li img').eq(4).css("height", "");
-        $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.normal') %>");
         $('.washer-content .washer-text ul li strong').eq(4).text("");
+        $('.washer-content .washer-text ul li strong').eq(3).css("color", "black");
+        $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.normal') %>");
+
         $('#audio')[0].currentTime = 0;
         $('#progress').attr("step", 1);
         if(xhr) xhr.abort();
@@ -338,6 +340,16 @@
         $("#btnConfirm").off("click");
         $("#btnCancel").off("click");
       });
+
+      $("#infoIcon").click(function(e){
+        e.preventDefault();
+        $("#decisionTreeModal").css("display", "block");
+      });
+
+      $('.close').click(function(e){
+        e.preventDefault();
+        $("#decisionTreeModal").css("display", "none");
+      })
     });
 
     function updateStatus(status){
@@ -388,20 +400,17 @@
     function updateStatusAnomaly(status){
       switch(status){
         case "Washing_Anomaly":
-          // $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.failure') %>");
-          $('.washer-content .washer-text ul li strong').eq(4).text("<%= __('appliance_page.washing_anomaly') %>");
+          $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.washing_anomaly') %>");
           var data = {status: "Failure", failureType: "Washing Anomaly", currentCycle: "Stopped"};
           updatePlatformStatus(data);
           break;
         case "Soaking_Anomaly":
-          // $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.failure') %>");
-          $('.washer-content .washer-text ul li strong').eq(4).text("<%= __('appliance_page.soaking_anomaly') %>");
+          $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.soaking_anomaly') %>");
           var data = {status: "Failure", failureType: "Soaking Anomaly", currentCycle: "Stopped"};
           updatePlatformStatus(data);
           break;
         case "Low_Speed_Spin":
-          // $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.failure') %>");
-          $('.washer-content .washer-text ul li strong').eq(4).text("<%= __('appliance_page.low_speed_spin') %>");
+          $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.low_speed_spin') %>");
           var data = {status: "Failure", failureType: "Low Speed Spin", currentCycle: "Stopped"};
           updatePlatformStatus(data);
           break;
@@ -433,7 +442,6 @@
         data:{"audio": filename},
         success: function(data){
           console.log("success on function")
-          // $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.diagnosed') %>");
           diagnosedText();
         },
         error: function(xhr, status, error){
@@ -450,10 +458,7 @@
       $('#audio')[0].pause();
       $('.washer-content .washer-text ul li img').eq(3).attr('src', '/images/blank.png');
       $('.washer-content .washer-text ul li img').eq(3).css("height", "");
-      $('.washer-content .washer-text ul li img').eq(4).attr('src', '/images/blank.png');
-      $('.washer-content .washer-text ul li img').eq(4).css("height", "");
       $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.normal') %>");
-      $('.washer-content .washer-text ul li strong').eq(4).text("");
       $('#soundwave').attr('src', '../images/soundwave1.gif');
       playing = false;
       $('#audio')[0].currentTime = 0;
@@ -476,12 +481,11 @@
         playing = true;
       } else {
         updateStatus('Ready');
-        $('.washer-content .washer-text ul li strong').eq(4).text("");
-        $('.washer-content .washer-text ul li img').eq(4).attr('src', '/images/blank.png');
         $('.washer-content .washer-text ul li img').eq(3).attr('src', '/images/blank.png');
         $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.normal') %>");
         $('#actionWasher').text("<%= __('appliance_page.start') %>");
         $('.problem-machine-icons p').eq(1).removeClass("enabled");
+        $('.problem-machine-icons p').eq(3).removeClass("enabled");
         index = 0;
         playing = false;
         resetProgress();
@@ -506,73 +510,69 @@
     }
 
     function diagnosedText(){
-      $('.washer-content .washer-text ul li img').eq(3).attr('src', '/images/blank.png');
+      $('.washer-content .washer-text ul li img').eq(3).attr('src', "");
       $('.washer-content .washer-text ul li img').eq(3).css("height", "");
       if(!failureAudio){
-        $('.washer-content .washer-text ul li img').eq(4).attr('src', '/images/Checkmark.svg');
-        $('.washer-content .washer-text ul li strong').eq(4).css("color", "black");
+        $('.washer-content .washer-text ul li img').eq(3).attr('src', '/images/Checkmark.svg');
+        $('.washer-content .washer-text ul li strong').eq(3).css("color", "black");
         switch (index) {
           case 0:
-            $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.diagnosed') %>");
-            $('.washer-content .washer-text ul li strong').eq(4).text("<%= __('appliance_page.filling') %> <%= __('appliance_page.sound') %> <%= __('appliance_page.normal') %>");
+            $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.filling') %> <%= __('appliance_page.sound') %> <%= __('appliance_page.normal') %>");
             break;
           case 1:
-            $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.diagnosed') %> ");
-            $('.washer-content .washer-text ul li strong').eq(4).text("<%= __('appliance_page.washing') %> <%= __('appliance_page.sound') %> <%= __('appliance_page.normal') %>");
+            $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.washing') %> <%= __('appliance_page.sound') %> <%= __('appliance_page.normal') %>");
             break;
           case 2:
-            $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.diagnosed') %> ");
-            $('.washer-content .washer-text ul li strong').eq(4).text("<%= __('appliance_page.soaking') %> <%= __('appliance_page.sound') %> <%= __('appliance_page.normal') %>");
+            $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.soaking') %> <%= __('appliance_page.sound') %> <%= __('appliance_page.normal') %>");
             break;
           case 3:
-            $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.diagnosed') %>");
-            $('.washer-content .washer-text ul li strong').eq(4).text("<%= __('appliance_page.spinning') %> <%= __('appliance_page.sound') %> <%= __('appliance_page.normal') %>");
+            $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.spinning') %> <%= __('appliance_page.sound') %> <%= __('appliance_page.normal') %>");
             break;
           case 4:
-            $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.diagnosed') %>");
-            $('.washer-content .washer-text ul li strong').eq(4).text("<%= __('appliance_page.draining') %> <%= __('appliance_page.sound') %> <%= __('appliance_page.normal') %>");
+            $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.draining') %> <%= __('appliance_page.sound') %> <%= __('appliance_page.normal') %>");
             break;
         }
       } else{
-        $('.washer-content .washer-text ul li img').eq(4).attr('src', '/images/advise-icon.svg');
-        $('.washer-content .washer-text ul li strong').eq(4).css("color", "red");
+        $('.washer-content .washer-text ul li img').eq(3).attr('src', '/images/advise-icon.svg');
+        $('.washer-content .washer-text ul li img').eq(3).css("height", "");
+        $('.washer-content .washer-text ul li strong').eq(3).css("color", "red");
+        $('.washer-content .washer-text ul li img').eq(4).attr('src', '/images/get-information_32.svg');
         switch (oldIndex) {
           case 0:
             updateStatusAnomaly("Low_Speed_Spin");
-            $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.failure') %>");
-            // $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.diagnosed') %> <%= __('appliance_page.filling') %> <%= __('appliance_page.failure') %>");
+            $('.washer-content .washer-text ul li strong').eq(4).text("<%= __('appliance_page.low_speed_spin_message') %>");
+            $("#decisionTreeImage").attr('src', '/images/decisiontree_lowspeed.svg');
             break;
           case 1:
             updateStatusAnomaly("Washing_Anomaly");
-            $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.failure') %>");
-            // $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.diagnosed') %> <%= __('appliance_page.washing') %> <%= __('appliance_page.failure') %>");
+            $('.washer-content .washer-text ul li strong').eq(4).text("<%= __('appliance_page.rinsing_anamaly_message') %>");
+            $("#decisionTreeImage").attr('src', '/images/decisiontree_scratch.svg');
             break;
           case 2:
             updateStatusAnomaly("Soaking_Anomaly");
-            $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.failure') %>");
-            // $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.diagnosed') %> <%= __('appliance_page.soaking') %> <%= __('appliance_page.failure') %>");
+            $('.washer-content .washer-text ul li strong').eq(4).text("<%= __('appliance_page.rinsing_anamaly_message') %>");
+            $("#decisionTreeImage").attr('src', '/images/decisiontree_scratch.svg');
             break;
           case 3:
             updateStatusAnomaly("Washing_Anomaly");
-            $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.failure') %>");
-            // $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.diagnosed') %> <%= __('appliance_page.spinning') %> <%= __('appliance_page.failure') %>");
+            $('.washer-content .washer-text ul li strong').eq(4).text("<%= __('appliance_page.rinsing_anamaly_message') %>");
+            $("#decisionTreeImage").attr('src', '/images/decisiontree_scratch.svg');
             break;
           case 4:
             updateStatusAnomaly("Soaking_Anomaly");
-            $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.failure') %>");
-            // $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.diagnosed') %> <%= __('appliance_page.draining') %> <%= __('appliance_page.failure') %>");
+            $('.washer-content .washer-text ul li strong').eq(4).text("<%= __('appliance_page.rinsing_anamaly_message') %>");
+            $("#decisionTreeImage").attr('src', '/images/decisiontree_scratch.svg');
             break;
         }
       }
     }
 
     function diagnosingText(){
+      $('.washer-content .washer-text ul li img').eq(3).attr('src', '');
       $('.washer-content .washer-text ul li strong').eq(4).text("");
       $('.washer-content .washer-text ul li img').eq(4).attr('src', '/images/blank.png');
-      $('.washer-content .washer-text ul li img').eq(3).attr('src', '/images/blank.png');
-      $('.washer-content .washer-text ul li img').eq(3).attr('src', '/images/Avatar-Black.svg');
+      $('.washer-content .washer-text ul li img').eq(3).attr('src', '/images/watson-small.svg');
       $('.washer-content .washer-text ul li img').eq(3).css("height", "25px");
-      console.log("FAILURE AUDIO? ->> " + failureAudio)
       $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.diagnosing') %>");
       if(!failureAudio){
         switch (index) {
