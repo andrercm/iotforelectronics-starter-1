@@ -26,9 +26,9 @@
 		"learn_more": "Learn More",
 		"consumer_app_subtitle": "Exploring the Consumer Experience",
 		"consumer_app_p1": "The mobile app lets a consumer control and monitor a new washer using a mobile device. ",
-		"consumer_app_p2": "Download the mobile app to an iOS phone to experience how consumers can send commands to their own washers via the platform.  ",
+		"consumer_app_p2": "Download the mobile app to a mobile phone to experience how consumers can send commands to their own washers via the platform.  ",
 		"consumer_app_p3": "You can use the simulated washer view to mimic failure events on the washer and then see the results in the consumer's mobile app.",
-	    "consumer_app_p4": "Appliance companies can offer these types of apps and services to attract and retain customers. They can also use the collected data to improve features of their products and offer new services.",
+	  "consumer_app_p4": "Appliance companies can offer these types of apps and services to attract and retain customers. They can also use the collected data to improve features of their products and offer new services.",
 		"add_washer_heading": "Next, choose or add new simulated washer",
 		"add_washer_message1": "You can add up to five washers.",
 		"add_washer_message2": "You have reached the limit of 5 washers.",
@@ -36,10 +36,10 @@
 		"select_washer": "Select a washer to control its simulated data. A new window will open.",
 		"no_washers_added": "No washers have been added.",
 		"must_add_washer": "You must add a washer before continuing with the mobile app experience.",
-		"mobile_app_heading": "Get started with the mobile app on an iOS phone",
+		"mobile_app_heading": "Get started with the mobile app on a mobile phone",
 		"mobile_app_subheading": "Quick instructions",
 		"download_app": "Download the app",
-		"download_app_p1": "Download and install the app to your iOS phone from the Apple App Store (search for \"ibm iot\") ",
+		"download_app_p1": "Download and install the app from the Apple App Store (iOS phones) or the Google Play store (Android phones). Search for \"ibm iot\" to find the app.",
 		"connect_app": "Connect the app",
 		"connect_app_p1": "Start the app on your phone.",
 		"connect_app_p2": "Scan the connection QR code below when prompted to connect to the IoT for Electronics environment",
@@ -53,7 +53,8 @@
 		"manage_devices": "Now you can manage your appliances and other devices from the platform >",
 		"device_deleted": "Success! Device {0} was successfully deleted.",
 		"timeout_list": "The request to list the devices has timed out, the simulation will restart. Please, refresh the page and try again.",
-		"timeout_create": "The request to create a device has timed out, the simulation will restart. Please, refresh the page and try again."
+		"timeout_create": "The request to create a device has timed out, the simulation will restart. Please, refresh the page and try again.",
+		"contact_electronics":"Contact IoT for Electronics"
 	},
 	"appliance_page": {
 		"page_title": "IoT for Electronics",
@@ -101,7 +102,11 @@
 		"noise": "Noise",
 		"washing_anomaly": "Washing Anomaly",
 		"soaking_anomaly": "Soaking Anomaly",
-		"low_speed_spin": "Low Speed Spin"
+		"low_speed_spin": "Low Speed Spin",
+		"low_speed_spin_message":"Load too large?",
+		"rinsing_anamaly_message":"Foreign object in basket?",
+		"diagnosis_diagram":"Diagnosis Diagram"
+
 	},
 	"contact_form" :{
 		"page_title": "IoT for Electronics",
