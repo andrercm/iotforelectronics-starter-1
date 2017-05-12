@@ -8,10 +8,6 @@
         {
             "name": "iotf-service",
             "plan": "iotf-service-free"
-        },
-        {
-            "name": "AppID",
-            "plan": "Graduated tier"
         }		
     ],
     "defaultMemory": 512,
