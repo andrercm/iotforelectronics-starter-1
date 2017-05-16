@@ -8,7 +8,11 @@
         {
             "name": "iotf-service",
             "plan": "iotf-service-free"
-        }		
+        },
+        {
+            "name": "AdvancedMobileAccess",
+            "plan": "Graduated tier"
+        }
     ],
     "defaultMemory": 512,
     "startCommand": "node app.js",
