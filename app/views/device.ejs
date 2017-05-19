@@ -36,7 +36,7 @@
             <p><%= __('appliance_page.problem_text') %></p>
             <div class="problem-machine-icons">
               <p class="enabled" data-text="Board failure"><img src="/images/Board_failure_en.svg"><button><%= __('appliance_page.board_failure') %></button></p>
-              <p class="enabled" data-text="Strong vibration"><img src="/images/Vibration_en.svg"/><button><%= __('appliance_page.strong_vibration') %></button></p>
+              <p data-text="Strong vibration"><img src="/images/Vibration_en.svg"/><button><%= __('appliance_page.strong_vibration') %></button></p>
               <p class="enabled" data-text="Water leak"><img src="/images/waterdrop.svg"/><button><%= __('appliance_page.water_leak') %></button></p>
             </div>
             <div class="problem-machine-buttons">
@@ -237,6 +237,7 @@
             if($('#actionWasher').prop('disabled')) $('#actionWasher').prop('disabled', false);
             if(device.status === 'Working'){
               $('#actionWasher').text("<%= __('appliance_page.stop') %>");
+              $('.problem-machine-icons p').eq(1).addClass("enabled");
               switch(device.currentCycle){
                 case 'Filling':      $('.washer-content .washer-text ul li strong').eq(0).text("<%= __('appliance_page.filling') %>"); break;
                 case 'Washing':      $('.washer-content .washer-text ul li strong').eq(0).text("<%= __('appliance_page.washing') %>"); break;
@@ -247,6 +248,7 @@
               }
             } else {
               $('#actionWasher').text("<%= __('appliance_page.start') %>");
+              $('.problem-machine-icons p').eq(1).removeClass("enabled");
               switch(device.status){
                 case 'Ready':        $('.washer-content .washer-text ul li strong').eq(0).text("<%= __('appliance_page.ready') %>"); break;
                 case 'Stopped':      $('.washer-content .washer-text ul li strong').eq(0).text("<%= __('appliance_page.stopped') %>"); break;
