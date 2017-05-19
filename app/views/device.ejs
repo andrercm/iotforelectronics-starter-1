@@ -215,7 +215,7 @@
         var device = JSON.parse(message).d;
         for(var k in device) if(device.hasOwnProperty(k)) length++;
 
-        if (id === "<%= deviceId %>" && length > 1) {
+        if (id === "<%= deviceId %>" && length > 2) {
           if(device.status && device.status == 'Failure'){
             if(!($('#actionWasher').prop('disabled'))) $('#actionWasher').prop('disabled', true);
             if($('#resetMachines').prop('disabled')) $('#resetMachines').prop('disabled', false);
