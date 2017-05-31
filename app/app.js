@@ -5,15 +5,14 @@
 *
 * (C) Copyright IBM Corp. 2016  All Rights Reserved.
 *
-* The source code for this program is not published or otherwise  
-* divested of its trade secrets, irrespective of what has been 
+* The source code for this program is not published or otherwise
+* divested of its trade secrets, irrespective of what has been
 * deposited with the U.S. Copyright Office.
 ********************************************************* {COPYRIGHT-END} **/
 
 VCAP_SERVICES = {};
 if(process.env.VCAP_SERVICES)
 	VCAP_SERVICES = JSON.parse(process.env.VCAP_SERVICES);
-
 var iotf_host = VCAP_SERVICES["iotf-service"][0]["credentials"].http_host;
 
 if(iotf_host.search('.staging.internetofthings.ibmcloud.com') > -1)
@@ -143,7 +142,7 @@ var iotfCredentials = VCAP_SERVICES["iotf-service"][0]["credentials"];
 if(!VCAP_SERVICES || !VCAP_SERVICES["ibm-iot-for-electronics"])
 	throw "Cannot get IoT4E credentials"
 var iotECredentials = VCAP_SERVICES["ibm-iot-for-electronics"][0]["credentials"];
-
+var registrationURL = iotECredentials.registrationUrl.substring('http://'.length)
 //IoT Platform Credentials
 var name = iotfCredentials["org"];
 var orgId = iotfCredentials["org"];
@@ -180,7 +179,7 @@ const APIStrategy = require("bluemix-appid").APIStrategy;
 // App ID service instance. In this case App ID configuration will be obtained
 // using VCAP_SERVICES environment variable.
 passport.use(new APIStrategy());
-app.use(passport.initialize()); 
+app.use(passport.initialize());
 
 const https = require('https');
 var authenticate = function(req,res,next)
@@ -220,22 +219,26 @@ app.put('/users', passport.authenticate(APIStrategy.STRATEGY_NAME, {session: fal
 	//appIdAuthContext.accessTokenPayload; // Decoded access_token JSON
 	//appIdAuthContext.identityToken; // Raw identity_token
 	//appIdAuthContext.identityTokenPayload; // Decoded identity_token JSON
-	
+
 	//var formData = req.body;
 	var userDocIn = JSON.parse(JSON.stringify(req.body));
 	userDocIn.orgID = currentOrgID;
 
 	//verify that userID coming in AppID matches doc userID
-	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash. 
-	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue 
+	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash.
+	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue
 	if (userDocIn.userID != req.user.id)
 	{
 		res.status(500).send("User ID in request does not match MCA authenticated user.")
 		console.log("doc userID and mca userID do not match")
 	}
 	*/
+
+	var version = "v001";
+
 	request({
-   		url: 'https://iotforelectronicstile.mybluemix.net/v001/users',
+   	// 	url: 'https://iotforelectronicstile.mybluemix.net/v001/users',
+		url: ( 'https://'+ registrationURL + version + '/users'),
 		json: userDocIn,
 		method: 'PUT',
 		headers: {
@@ -265,10 +268,12 @@ app.put('/users', passport.authenticate(APIStrategy.STRATEGY_NAME, {session: fal
 createUser = function (username)
 {
 	console.log("inside createUser function");
+	var version = "v001";
 	//first see if the user exists
 	var options =
 	{
-		url: ('https://iotforelectronicstile.mybluemix.net/v001/users/'+ username),
+		// url: ('https://iotforelectronicstile.mybluemix.net/v001/users/'+ username),
+		url: ('https://'+ registrationURL + version + '/users/'+username),
 		method: 'GET',
 		headers: {
     				'Content-Type': 'application/json',
@@ -290,12 +295,13 @@ createUser = function (username)
         		userDoc = {};
         		userDoc.orgID = currentOrgID;
         		userDoc.userID = username;
-        		
+
 				if (validateEmail(username)) { userDoc.userDetail = { "email":username}; }
 				else { userDoc.userDetail = {}; }
-				
+
 			request({
-   				url: 'https://iotforelectronicstile.mybluemix.net/v001/users',
+   			// 	url: 'https://iotforelectronicstile.mybluemix.net/v001/users',
+				url: ( 'https://'+ registrationURL + version + '/users'),
 				json: userDoc,
 				method: 'POST',
 				headers: {
@@ -339,8 +345,11 @@ app.post('/v001/users', authenticate, function(req, res)
 {
 	var bodyIn = JSON.parse(JSON.stringify(req.body));
 	delete bodyIn.version;
+	var version = "v001";
+
 		request({
-		url: 'https://iotforelectronicstile.mybluemix.net/v001/users',
+		// url: 'https://iotforelectronicstile.mybluemix.net/v001/users',
+		url: ( 'https://'+ registrationURL + version + '/users'),
 		json: bodyIn,
 		method: 'POST',
 		headers: {
@@ -373,8 +382,8 @@ app.post("/users", passport.authenticate(APIStrategy.STRATEGY_NAME, {session: fa
 	formData.orgID = currentOrgID;
 
 	//verify that userID coming in MCA matches doc userID
-	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash. 
-	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue 
+	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash.
+	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue
 	if (formData.userID != req.user.id)
 	{
 		res.status(500).send("User ID in request does not match MCA authenticated user.")
@@ -423,8 +432,10 @@ app.post('/v001/appliances', authenticate, function (req, res)
 {
 	var bodyIn = JSON.parse(JSON.stringify(req.body));
 	delete bodyIn.version;
+	var version = "v001";
 	request({
-		url: 'https://iotforelectronicstile.mybluemix.net/v001/appliances',
+		// url: 'https://iotforelectronicstile.mybluemix.net/v001/appliances',
+		url: ('https://'+ registrationURL + version + '/appliances'),
 		json: bodyIn,
 		method: 'POST',
 		headers: {
@@ -454,16 +465,16 @@ app.post('/appliances', passport.authenticate(APIStrategy.STRATEGY_NAME, {sessio
 {
 	//grab the body to pass on
 	var bodyIn = JSON.parse(JSON.stringify(req.body));
-	
+
 	//verify that userID coming in MCA matches doc userID
-	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash. 
-	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue 
+	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash.
+	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue
 	if (bodyIn.userID != req.user.id)
 	{
 		res.status(500).send("User ID in request does not match MCA authenticated user.");
 	}
 	*/
-   	var userID = bodyIn.userID;   
+   	var userID = bodyIn.userID;
    	bodyIn.orgID = currentOrgID;
 
    	//redirect
@@ -504,9 +515,12 @@ app.post('/appliances', passport.authenticate(APIStrategy.STRATEGY_NAME, {sessio
 /*******************************************/
 app.get('/v001/users/:userID', authenticate, function (req, res)
 {
+	var version = "v001";
+
 	var options =
 	{
-		url: ('https://iotforelectronicstile.mybluemix.net/v001/users/'+ req.params.userID),
+		// url: ('https://iotforelectronicstile.mybluemix.net/v001/users/'+ req.params.userID),
+		url: ('https://'+ registrationURL + version + '/users/' + req.params.userID),
 		method: 'GET',
 		headers: {
     				'Content-Type': 'application/json',
@@ -539,8 +553,8 @@ app.get('/v001/users/:userID', authenticate, function (req, res)
 app.get('/users/:userID', passport.authenticate(APIStrategy.STRATEGY_NAME, {session: false}), function(req, res)
 {
 	//make sure userID on params matches userID coming in thru MCA
-	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash. 
-	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue 
+	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash.
+	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue
 	if (req.params.userID != req.user.id)
 	{
 		res.status(500).send("User ID on request does not match MCA authenticated user.")
@@ -584,9 +598,12 @@ app.get('/users/:userID', passport.authenticate(APIStrategy.STRATEGY_NAME, {sess
 /*******************************************/
 app.get('/v001/user/:userID', authenticate, function (req, res)
 {
+	var version = "v001";
+
 	var options =
 	{
-		url: ('https://iotforelectronicstile.mybluemix.net/v001/user/'+ req.params.userID),
+		// url: ('https://iotforelectronicstile.mybluemix.net/v001/user/'+ req.params.userID),
+		url: ('https://'+ registrationURL + version + '/user/' + req.params.userID),
 		method: 'GET',
 		headers: {
     				'Content-Type': 'application/json',
@@ -613,7 +630,7 @@ app.get('/v001/user/:userID', authenticate, function (req, res)
 /***************************************************************/
 /* Route to show one user doc using Cloudant Query             */
 /* Takes a userID in the url params                            */
-/***************************************************************/ 
+/***************************************************************/
 app.get('/user/:userID', passport.authenticate(APIStrategy.STRATEGY_NAME, {session: false}), function(req, res)
 {
 	if (req.query['createUser'] && req.query['createUser'].toLowerCase() =='true')
@@ -623,10 +640,10 @@ app.get('/user/:userID', passport.authenticate(APIStrategy.STRATEGY_NAME, {sessi
 		res.status(200).send("called the function to check the user ID");
 		return;
 	}
-	
+
 	//make sure userID on params matches userID coming in thru MCA
-	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash. 
-	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue 
+	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash.
+	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue
 	if (req.params.userID != req.user.id)
 	{
 		res.status(500).send("User ID on request does not match MCA authenticated user.")
@@ -672,9 +689,12 @@ app.get('/user/:userID', passport.authenticate(APIStrategy.STRATEGY_NAME, {sessi
 /*******************************************/
 app.get('/v001/appliances/:userID', authenticate, function (req, res)
 {
+	var version = "v001";
+
 	var options =
 	{
-		url: ('https://iotforelectronicstile.mybluemix.net/v001/appliances/'+ req.params.userID),
+		// url: ('https://iotforelectronicstile.mybluemix.net/v001/appliances/'+ req.params.userID),
+		url: ('https://'+ registrationURL + version + '/appliances/' + req.params.userID),
 		method: 'GET',
 		headers: {
     				'Content-Type': 'application/json',
@@ -704,12 +724,12 @@ app.get('/v001/appliances/:userID', authenticate, function (req, res)
 /*       													   */
 /* Input: Query string with userID and optional applianceID    */
 /***************************************************************/
- 
+
 app.get('/appliances/:userID', passport.authenticate(APIStrategy.STRATEGY_NAME, {session: false}), function(req, res)
 {
 	//make sure userID on params matches userID coming in thru MCA
-	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash. 
-	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue 
+	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash.
+	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue
 	if (req.params.userID != req.user.id)
 	{
 		res.status(500).send("User ID on request does not match MCA authenticated user.");
@@ -758,9 +778,12 @@ app.get('/appliances/:userID', passport.authenticate(APIStrategy.STRATEGY_NAME, 
 /**************************************************/
 app.get('/v001/appliances/:userID/:applianceID', authenticate, function (req, res)
 {
+	var version = "v001";
+
 	var options =
 	{
-		url: ('https://iotforelectronicstile.mybluemix.net/v001/appliances/'+ req.params.userID + '/' + req.params.applianceID),
+		// url: ('https://iotforelectronicstile.mybluemix.net/v001/appliances/'+ req.params.userID + '/' + req.params.applianceID),
+		url: ('https://'+ registrationURLl + version + '/appliances/' + req.params.userID + '/' + req.params.applianceID),
 		method: 'GET',
 		headers: {
     				'Content-Type': 'application/json',
@@ -789,12 +812,12 @@ app.get('/v001/appliances/:userID/:applianceID', authenticate, function (req, re
 /*       													   				*/
 /* Input: Query string with userID and optional applianceID    				*/
 /****************************************************************************/
- 
+
 app.get("/appliances/:userID/:applianceID", passport.authenticate(APIStrategy.STRATEGY_NAME, {session: false}), function(req, res)
 {
 	//make sure userID on params matches userID coming in thru MCA
-	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash. 
-	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue 
+	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash.
+	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue
 	if (req.params.userID != req.user.id)
 	{
 		res.status(500).send("User ID on request does not match MCA authenticated user.")
@@ -840,8 +863,11 @@ app.get("/appliances/:userID/:applianceID", passport.authenticate(APIStrategy.ST
 /*****************************************************/
 app.del("/v001/appliances/:userID/:applianceID", authenticate, function (req, res)
 {
+	var version = "v001";
+
 		request({
-		url: ('https://iotforelectronicstile.mybluemix.net/v001/appliances/'+ req.params.userID + '/' + req.params.applianceID),
+		// url: ('https://iotforelectronicstile.mybluemix.net/v001/appliances/'+ req.params.userID + '/' + req.params.applianceID),
+		url: ('https://'+ registrationURL + version + '/appliances/' + req.params.userID + '/' + req.params.applianceID),
 		method: 'DELETE',
 		headers: {
     				'Content-Type': 'application/json',
@@ -865,13 +891,13 @@ app.del("/v001/appliances/:userID/:applianceID", authenticate, function (req, re
 /* Route to delete appliance records                           */
 /*    Internal API					       */
 /***************************************************************/
- 
+
 app.del("/appliances/:userID/:applianceID", passport.authenticate(APIStrategy.STRATEGY_NAME, {session: false}), function(req, res)
 {
 
 	//verify that userID coming in MCA matches doc userID
-	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash. 
-	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue 
+	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash.
+	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue
 	if (req.params.userID != req.user.id)
 	{
 		res.status(500).send("User ID in request does not match MCA authenticated user.")
@@ -912,9 +938,12 @@ app.del("/appliances/:userID/:applianceID", passport.authenticate(APIStrategy.ST
 /*****************************************************/
 app.delete("/v001/user/:userID", authenticate, function (req, res)
 {
+	var version = "v001";
+
 	var options =
 	{
-		url: ('https://iotforelectronicstile.mybluemix.net/v001/user/'+ req.params.userID),
+		// url: ('https://iotforelectronicstile.mybluemix.net/v001/user/'+ req.params.userID),
+		url: ('https://'+ registrationURL + version + '/user/' + req.params.userID),
 		method: 'DELETE',
 		headers: {
     				'Content-Type': 'application/json',
@@ -942,12 +971,12 @@ app.delete("/v001/user/:userID", authenticate, function (req, res)
 /* Route to delete user documents.                              						   */
 /* Need to delete the appliance documents as well from our db  							   */
 /* If we created them on the platform, delete from platform (NOT for experimental)         */
-/*******************************************************************************************/ 
+/*******************************************************************************************/
 app.delete("/user/:userID", passport.authenticate(APIStrategy.STRATEGY_NAME, {session: false}), function(req, res)
 {
 	//make sure userID on params matches userID coming in thru MCA
-	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash. 
-	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue 
+	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash.
+	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue
 	if (req.params.userID != req.user.id)
 	{
 		res.status(500).send("User ID on request does not match MCA authenticated user.")
@@ -995,9 +1024,12 @@ app.delete("/user/:userID", passport.authenticate(APIStrategy.STRATEGY_NAME, {se
 /*======================================================*/
 app.get('/v001/ca/appliance/user/:userID/events', authenticate, function (req, res)
 {
+	var version = "v001";
+
 	var options =
 	{
-		url: ('https://iotforelectronicstile.mybluemix.net/v001/ca/appliance/user/'+req.params.userID+'/events'),
+		// url: ('https://iotforelectronicstile.mybluemix.net/v001/ca/appliance/user/'+req.params.userID+'/events'),
+		url: ('https://'+ registrationURL + version + '/ca/appliance/user/' + req.params.userID + '/events'),
 		method: 'GET',
 		headers: {
     				'Content-Type': 'application/json',
@@ -1026,12 +1058,12 @@ app.get('/v001/ca/appliance/user/:userID/events', authenticate, function (req, r
 /*       													   */
 /* Input: Query string with userID and optional applianceID    */
 /***************************************************************/
- 
+
 app.get('/ca/appliance/user/:userID/events', passport.authenticate(APIStrategy.STRATEGY_NAME, {session: false}), function(req, res)
 {
 	//make sure userID on params matches userID coming in thru MCA
-	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash. 
-	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue 
+	/* AppID's anonomous login doesn't have user id, either at this monent (2017-04-03) set user id leads to mobile app crash.
+	Thus disable this validation till either AppId support cusotm login or fix setting uerid issue
 	if (req.params.userID != req.user.id)
 	{
 		res.status(500).send("User ID on request does not match MCA authenticated user.");
@@ -1183,7 +1215,8 @@ var body = {
 	   };
 var options =
 	{
-		url: ('https://iotforelectronicstile.mybluemix.net/deletedDocs'),
+		// url: ('https://iotforelectronicstile.mybluemix.net/deletedDocs'),
+		url: ('https://'+ registrationURL + '/deletedDocs'),
 		json: body,
 		method: 'POST',
 		headers: {
@@ -1246,7 +1279,8 @@ app.get('/validation', function(req, res)
 {
 	var options =
 	{
-		url: 'https://iotforelectronicstile.mybluemix.net/validation/' + iotETenant + '/' +  iotEAuthToken + '/' + iotEApiKey,
+		// url: 'https://iotforelectronicstile.mybluemix.net/validation/' + iotETenant + '/' +  iotEAuthToken + '/' + iotEApiKey,
+		url: ('https://'+ registrationURL + '/validation/' + iotETenant + '/' + iotEAuthToken + '/' + iotEApiKey),
 		auth: iotEAuthToken + ':' + iotEApiKey,
 		method: 'GET',
 		headers: {
