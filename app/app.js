@@ -1216,7 +1216,7 @@ var body = {
 var options =
 	{
 		// url: ('https://iotforelectronicstile.mybluemix.net/deletedDocs'),
-		url: ('https://'+ registrationURL + '/deletedDocs'),
+		url: ('https://'+ registrationURL + 'deletedDocs'),
 		json: body,
 		method: 'POST',
 		headers: {
@@ -1227,9 +1227,9 @@ function retryRequest(body, options)
 {
 	request(options, function (error, response, body) {
 		if (!error) {
-   			// Print out the response body
-   			console.log('***Response Status Code --->', response.statusCode);
-			if (response.statusCode === 404)
+ 			// Print out the response body
+ 			console.log('***Response Status Code --->', response.statusCode);
+			if (response.statusCode === 404 || response.statusCode === 308)
 			{
 				retryRequest();
 			}
@@ -1242,16 +1242,17 @@ function retryRequest(body, options)
 	});
 };
 
-console.log('Body Values being sent in: ' + JSON.parse(JSON.stringify(body)));
+console.log('Body Values being sent in: ' + JSON.stringify(body));
 request(options, function (error, response, body) {
     if (!error) {
        	// Print out the response body
        	console.log('***Response Status Code --->', response.statusCode);
-		if (response.statusCode === 404)
-		{
-			retryRequest();
+				if (response.statusCode === 404 || response.statusCode === 308)
+				{
+					console.log("will retry request")
+					retryRequest();
+				}
 			}
-	}
 });
 
 /*console.log('About to store IoTP Credentials');
@@ -1280,7 +1281,7 @@ app.get('/validation', function(req, res)
 	var options =
 	{
 		// url: 'https://iotforelectronicstile.mybluemix.net/validation/' + iotETenant + '/' +  iotEAuthToken + '/' + iotEApiKey,
-		url: ('https://'+ registrationURL + '/validation/' + iotETenant + '/' + iotEAuthToken + '/' + iotEApiKey),
+		url: ('https://'+ registrationURL + 'validation/' + iotETenant + '/' + iotEAuthToken + '/' + iotEApiKey),
 		auth: iotEAuthToken + ':' + iotEApiKey,
 		method: 'GET',
 		headers: {
