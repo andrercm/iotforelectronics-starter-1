@@ -14,6 +14,12 @@ var cfenv = require('cfenv');
 var queue = require('seq-queue').createQueue(30000);
 var request = require('request');
 
+var appIdCredentials = {};
+if(VCAP_SERVICES.hasOwnProperty('AppID')){
+	appIdCredentials = VCAP_SERVICES['AppID'][0]['credentials'];
+} else if(VCAP_SERVICES.hasOwnProperty('AdvancedMobileAccess')){
+	appIdCredentials = VCAP_SERVICES['AdvancedMobileAccess'][0]['credentials'];
+}
 
 var device = module.exports;
 
@@ -79,7 +85,7 @@ device.QRcreds = function(req, res){
 	var appEnv = cfenv.getAppEnv();
 	var org = VCAP_SERVICES['iotf-service'][0]['credentials'].org;
 	var route = appEnv.url;
-	var tenantId = VCAP_SERVICES['AdvancedMobileAccess'][0]['credentials'].tenantId;
+	var tenantId = appIdCredentials.tenantId;
 	var key = VCAP_SERVICES['iotf-service'][0]['credentials'].apiKey;
 	var token = VCAP_SERVICES['iotf-service'][0]['credentials'].apiToken;
 	var name = VCAP_SERVICES['iotf-service'][0].name;
@@ -101,7 +107,7 @@ device.getPlatformQRstring = function(req, res){
 	var appEnv = cfenv.getAppEnv();
 	var org = VCAP_SERVICES['iotf-service'][0]['credentials'].org;
 	var route = appEnv.url;
-	var tenantId = VCAP_SERVICES['AdvancedMobileAccess'][0]['credentials'].tenantId;
+	var tenantId = appIdCredentials.tenantId;
 	var key = VCAP_SERVICES['iotf-service'][0]['credentials'].apiKey;
 	var token = VCAP_SERVICES['iotf-service'][0]['credentials'].apiToken;
 	var name = VCAP_SERVICES['iotf-service'][0].name;
