@@ -285,7 +285,13 @@ device.del = function(req, res){
 device.renderUI = function(req, res){
 
 	simulationClient.getDeviceStatus(req.params.deviceID).then(function(data){
-		var status = 'appliance_page.' + data.attributes.status.toLowerCase();
+		var current = data.attributes.status;
+		var status = 'appliance_page.' + data.attributes.currentCycle.toLowerCase();
+
+		if(["Ready", "Failure", "Stopped"].indexOf(current) > -1){
+			status = 'appliance_page.' + current.toLowerCase();
+		}
+
 		var acousticError = req.query.acousticError;
 
 		checkStatusAcoustic(function(response) {
