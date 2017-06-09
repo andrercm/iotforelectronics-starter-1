@@ -142,7 +142,8 @@ var iotfCredentials = VCAP_SERVICES["iotf-service"][0]["credentials"];
 if(!VCAP_SERVICES || !VCAP_SERVICES["ibm-iot-for-electronics"])
 	throw "Cannot get IoT4E credentials"
 var iotECredentials = VCAP_SERVICES["ibm-iot-for-electronics"][0]["credentials"];
-var registrationURL = iotECredentials.registrationUrl.substring('http://'.length)
+var registrationURL = iotECredentials.registrationUrl.substring('http://'.length);
+var iotEForRTI = VCAP_SERVICES["ibmiotforelectronics"][0];
 //IoT Platform Credentials
 var name = iotfCredentials["org"];
 var orgId = iotfCredentials["org"];
@@ -1254,6 +1255,226 @@ request(options, function (error, response, body) {
 				}
 			}
 });
+
+/*********** CALLS TO CREATE SCHEMA/ACTION/RULE into RTI ******/
+
+const manageSchemaBody = {
+	"name":"washingMachine",
+	"deviceType":"washingMachine",
+	"format":"JSON",
+	"items":[
+		{
+			"id":1,"type":"struct",
+			"description":"d",
+			"name":"d",
+			"metaui":"{\"unit\":null,\"precision\":null}",
+			"composite":false,
+			"formula":null,
+			"edgeOnly":false,
+			"subItems":[
+				{
+					"id":2,"type":"string",
+					"description":"name",
+					"name":"name",
+					"metaui":"{\"unit\":null,\"precision\":null}",
+					"composite":false,
+					"formula":null,
+					"edgeOnly":false
+
+				},{
+					"id":3,"type":"string",
+					"description":"status",
+					"name":"status",
+					"metaui":"{\"unit\":null,\"precision\":null}",
+					"composite":false,
+					"formula":null,
+					"edgeOnly":false
+
+				},{
+					"id":4,"type":"string",
+					"description":"failureType",
+					"name":"failureType",
+					"metaui":"{\"unit\":null,\"precision\":null}",
+					"composite":false,
+					"formula":null,
+					"edgeOnly":false
+
+				},{
+					"id":5,"type":"string",
+					"description":"program",
+					"name":"program",
+					"metaui":"{\"unit\":null,\"precision\":null}",
+					"composite":false,
+					"formula":null,
+					"edgeOnly":false
+
+				},{
+					"id":6,"type":"string",
+					"description":"currentCycle",
+					"name":"currentCycle",
+					"metaui":"{\"unit\":null,\"precision\":null}",
+					"composite":false,
+					"formula":null,
+					"edgeOnly":false
+
+				},{
+					"id":7,"type":"string",
+					"description":"vibration",
+					"name":"vibration",
+					"metaui":"{\"unit\":null,\"precision\":null}",
+					"composite":false,
+					"formula":null,
+					"edgeOnly":false
+
+				},{
+					"id":8,"type":"string",
+					"description":"waterPressure",
+					"name":"waterPressure",
+					"metaui":"{\"unit\":null,\"precision\":null}",
+					"composite":false,
+					"formula":null,
+					"edgeOnly":false
+
+				},{
+					"id":9,"type":"string",
+					"description":"serialNumber",
+					"name":"serialNumber",
+					"metaui":"{\"unit\":null,\"precision\":null}",
+					"composite":false,
+					"formula":null,
+					"edgeOnly":false
+
+				},{
+					"id":10,"type":"string",
+					"description":"make",
+					"name":"make",
+					"metaui":"{\"unit\":null,\"precision\":null}",
+					"composite":false,
+					"formula":null,
+					"edgeOnly":false
+
+				},{
+					"id":11,"type":"string",
+					"description":"model",
+					"name":"model",
+					"metaui":"{\"unit\":null,\"precision\":null}",
+					"composite":false,
+					"formula":null,
+					"edgeOnly":false
+				}]
+		}]
+ }
+
+request({ // check rti mode
+	url: "https://" + iotpHttpHost+'/api/v0002',
+	auth: {username:iotfCredentials.apiKey, password:iotfCredentials.apiToken},
+	method: 'GET'
+ }, function (error, response, body) {
+   if(error) {
+       console.log('ERROR: ' + error);
+       console.log("Error when try to call get api");
+   }else{ // request success
+     var body2 = JSON.parse(body)
+     console.log(body2.config.analytics.mode)
+     var rtiMode = body2.config.analytics.mode === "internal"? "rti2" : "rti"
+
+     request({
+         url: "https://" + iotpHttpHost+'/api/v0002/'+rtiMode+'/message/schema',
+         auth: {username:iotfCredentials.apiKey, password:iotfCredentials.apiToken},
+         method: 'POST',
+         headers: {
+             'Content-Type': 'application/json'
+         },
+         json: manageSchemaBody
+     }, function (error, response, body) {
+       if(error) {
+           console.log('ERROR: ' + error);
+           console.log("Error when try to call rti manage schema");
+       }else{ // request success
+           const infoForAction = {
+               idSchema: body.id,
+               schemaName:body.name
+           }
+
+					 var iotLabel = iotEForRTI.label.length + 1 // get the name of the service
+
+					 var lengthString = iotEForRTI.name.length - iotLabel;  // the length of the boiler+iot4e - the name of the iot4e service
+					 var boilerName = iotEForRTI.name.substring(0, lengthString); // get the string from 0 - boiler name
+
+           const actionBody = {
+               "name":"Trigger IoT4E Notification",
+               "description":"This action triggers the IoT for Electronics Node-RED notification flow.",
+               "type":"node-red",
+               "fields":{
+                   "url": iotECredentials.registrationUrl.includes("stage1") ? "https://"+boilerName + ".stage1.mybluemix.net/api/rti-alert" : "https://"+boilerName + ".mybluemix.net/api/rti-alert",
+                   "method":"POST",
+                   "username":"",
+                   "password":"",
+                   "contentType":"application/json",
+                   "body":"{\"timestamp\":\"{{timestamp}}\",\"orgId\":\"{{orgId}}\",\"deviceId\":\"{{deviceId}}\",\"ruleName\":\"{{ruleName}}\",\"ruleDescription\":\"{{ruleDescription}}\",\"ruleCondition\":\"{{ruleCondition}}\",\"message\":\"{{message}}\",\"ruleId\":\"{{ruleId}}\"}"
+               }
+           }
+
+
+           request({
+               url: "https://" + iotpHttpHost+'/api/v0002/'+rtiMode+'/action',
+               auth: {username:iotfCredentials.apiKey, password:iotfCredentials.apiToken},
+               method: 'POST',
+               headers: {
+                   'Content-Type': 'application/json'
+               },
+               json: actionBody
+           }, function (error, response, body) {
+               if(error) {
+                 console.log('ERROR: ' + error);
+                 console.log("Error when try to call rti action");
+               }else{ // request success
+                 infoForAction.idAction = body.id
+
+                 const ruleBody = {
+                     "name":"IoT for Electronics notification rule",
+                     "disabled":false,
+                     "transforms":[{
+								        "duration": null,
+								        "name": "iot4eNotificationRule",
+								        "type": "DeliverOnChange",
+								        "parameters": "Rule, becomes, true, 0"
+								      }],
+                     "condition":"washingMachine.d.status==\"Failure\" OR washingMachine.d.currentCycle==\"End\"",
+                     "actions":[infoForAction.idAction],
+                     "description":"This is rule is triggered by failures or cycle completion.",
+                     "severity":1,
+                     "messageSchemas":[infoForAction.idSchema]
+
+                 }
+                 request({
+                     url: "https://" + iotpHttpHost+'/api/v0002/'+rtiMode+'/rule',
+                     auth: {username:iotfCredentials.apiKey, password:iotfCredentials.apiToken},
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/json'
+                     },
+                     json: ruleBody
+                 }, function (error, response, body) {
+                     if(error) {
+                         console.log('ERROR: ' + error);
+                         console.log("Error when try to call rule");
+                     }else{ // request success
+                         console.log("success")
+
+                     }// else
+             }); // forth request /rule
+					 }// else
+				 }); // thrid request /action
+			 }// else
+		 });// second request /message/schema
+	 }// else
+ }); // api/v0002 request
+
+
+
+/********** END OF RTI CALLS ********/
+
 
 /*console.log('About to store IoTP Credentials');
 var url = 'https://iotforelectronicstile.mybluemix.net/credentials' + '/' +  currentOrgID + '/' +  apiKey + '/' +  authToken + '/' +  iotpHttpHost + '/' +  iotEAuthToken + '/' + iotEApiKey;

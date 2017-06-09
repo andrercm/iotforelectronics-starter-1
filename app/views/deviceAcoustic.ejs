@@ -394,6 +394,11 @@
             var data = {status: "Stopped", currentCycle: "Stopped"};
             updatePlatformStatus(data);
             break;
+          case "End":
+            var data = {status: "Working", currentCycle: "End"};
+            updatePlatformStatus(data);
+            setTimeout(function(){updateStatus('Ready');},3000);
+            break;            
         }
     }
 
@@ -480,7 +485,7 @@
         $("#audio")[0].play();
         playing = true;
       } else {
-        updateStatus('Ready');
+        updateStatus('End');
         $('.washer-content .washer-text ul li img').eq(3).attr('src', '/images/blank.png');
         $('.washer-content .washer-text ul li strong').eq(3).text("<%= __('appliance_page.normal') %>");
         $('#actionWasher').text("<%= __('appliance_page.start') %>");
@@ -670,6 +675,7 @@
                 switch(device.status){
                   case 'Ready':        $('.washer-content .washer-text ul li strong').eq(0).text("<%= __('appliance_page.ready') %>"); break;
                   case 'Stopped':      $('.washer-content .washer-text ul li strong').eq(0).text("<%= __('appliance_page.stopped') %>"); break;
+                  case 'End':          $('.washer-content .washer-text ul li strong').eq(0).text("<%= __('appliance_page.end') %>"); break;
                 }
               }
             }

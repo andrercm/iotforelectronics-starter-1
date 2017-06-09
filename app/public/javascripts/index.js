@@ -200,6 +200,32 @@ $(document).ready(function(){
       installationSection.addClass('hidden');
     }
   }
+  // explore more modal iotp
+  $("#openIotPModal").click(function(e){
+    e.preventDefault();
+    $("#exploreMoreIoTP").css("display", "block");
+  });
+
+  // explore more modal node-red
+  $("#openNoderedModal").click(function(e){
+    e.preventDefault();
+    $("#exploreMoreNodeRed").css("display", "block");
+  });
+
+  $('.closeModal').click(function(e){
+    e.preventDefault();
+    $("#exploreMoreIoTP").css("display", "none");
+    $("#exploreMoreNodeRed").css("display", "none");
+  })
+
+  $('#nodeRedLink').click(function(e){
+    var windowUrl = window.location.href;
+    console.log("URL --> "+ windowUrl);
+    window.open(
+      './red',
+      '_blank'
+    );
+  })  
 });
 
 function validateNoWasherMessage(){
