@@ -1396,17 +1396,23 @@ request({ // check rti mode
                schemaName:body.name
            }
 
-					 var iotLabel = iotEForRTI.label.length + 1 // get the name of the service
+		   var iotLabel = iotEForRTI.label.length + 1 // get the name of the service
+   		   var lengthString = iotEForRTI.name.length - iotLabel;  // the length of the boiler+iot4e - the name of the iot4e service
+		   var boilerName = iotEForRTI.name.substring(0, lengthString); // get the string from 0 - boiler name
 
-					 var lengthString = iotEForRTI.name.length - iotLabel;  // the length of the boiler+iot4e - the name of the iot4e service
-					 var boilerName = iotEForRTI.name.substring(0, lengthString); // get the string from 0 - boiler name
+		   var defineBoiler;
+		   if(iotECredentials.registrationUrl.includes("stage1")){
+			   defineBoiler = 'stage1'
+		   }else if (iotECredentials.registrationUrl.includes("eu-gb")){
+			   defineBoiler = 'eu-gb'
+		   }
 
            const actionBody = {
                "name":"Trigger IoT4E Notification",
                "description":"This action triggers the IoT for Electronics Node-RED notification flow.",
                "type":"node-red",
                "fields":{
-                   "url": iotECredentials.registrationUrl.includes("stage1") ? "https://"+boilerName + ".stage1.mybluemix.net/api/rti-alert" : "https://"+boilerName + ".mybluemix.net/api/rti-alert",
+                   "url": defineBoiler !== undefined ? "https://"+boilerName + "."+ defineBoiler +".mybluemix.net/api/rti-alert" : "https://"+boilerName + ".mybluemix.net/api/rti-alert",				   
                    "method":"POST",
                    "username":"",
                    "password":"",
@@ -1682,7 +1688,9 @@ var settings = {
     httpAdminRoot:"/red",
     httpNodeRoot: "/api",
     flowFile: path.join(__dirname, 'flows/notificationFlow.json'),
-    functionGlobalContext: { }    // enables global context
+    functionGlobalContext: {
+		process: process // get vcaps
+	 }    // enables global context
 };
 
 // Init RED
