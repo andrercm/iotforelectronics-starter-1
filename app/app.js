@@ -147,11 +147,12 @@ var apiURI = 'https://' + iotfCredentials["http_host"] + ':443/api/v0002';
 var iotpHttpHost = iotfCredentials["http_host"];
 
 //Get IoT for Electronics credentials
-if(!VCAP_SERVICES || !VCAP_SERVICES["ibmiotforelectronics"])
+if(!VCAP_SERVICES || !VCAP_SERVICES["ibm-iot-for-electronics"])
 	throw "Cannot get IoT4E credentials"
-var iotECredentials = VCAP_SERVICES["ibmiotforelectronics"][0]["credentials"];
+var iotECredentials = VCAP_SERVICES["ibm-iot-for-electronics"][0]["credentials"];
 var registrationURL = iotECredentials.registrationUrl.substring('https://'.length);
-var iotEForRTI = VCAP_SERVICES["ibmiotforelectronics"][0];
+var iotEForRTI = VCAP_SERVICES["ibm-iot-for-electronics"][0];
+
 //IoT for Electronics Credentials
 var iotETenant = iotECredentials["tenantID"];
 var iotEAuthToken = iotECredentials["authToken"];
@@ -180,7 +181,7 @@ var authenticate = function(req,res,next)
 		res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
 		return res.status(401).end();
 	};
-	
+
 	var user = basicAuth(req);
 	if (!user || !user.name || !user.pass || user.name != iotEApiKey || user.pass != iotEAuthToken)
 	{
@@ -243,7 +244,7 @@ createUser = function (username)
 	var version = "v001";
 
 	console.log("AT THE CREATE USER function --->" +  iotECredentials.registrationUrl + version + '/users/'+username)
-	
+
 	//check if the user exists
 	var options =
 	{
@@ -476,7 +477,7 @@ app.get('/users/:userID', passport.authenticate(APIStrategy.STRATEGY_NAME, {sess
 {
 	var userID = req.params.userID;
 	var version = "v001";
-	
+
 	var options =
 	{
 		url: ('https://'+ application.application_uris[0] + '/' + version + '/users/' + userID),
@@ -545,7 +546,7 @@ app.get('/user/:userID', passport.authenticate(APIStrategy.STRATEGY_NAME, {sessi
 
 	var userID = req.params.userID;
 	var version = "v001";
-	
+
 	var options =
 	{
 		url: ('https://'+ application.application_uris[0] + '/' + version + '/user/' + userID),
@@ -606,10 +607,10 @@ app.get('/v001/appliances/:userID', authenticate, function (req, res)
 
 app.get('/appliances/:userID', passport.authenticate(APIStrategy.STRATEGY_NAME, {session: false}), function(req, res)
 {
-	
+
 	var userID = req.params.userID;
 	var version = "v001";
-	
+
 	var options =
 	{
 		url: ('https://'+ application.application_uris[0] + '/' + version + '/appliances/' + userID),
