@@ -50,7 +50,16 @@
 		"scan_p2": "Vous serez invité à scanner un code Quick Response différent pour enregistrer un lave-linge dans votre application mobile sur la plateforme. Vous devrez ensuite accéder à la section d'ajout de lave-linge de cet écran et cliquer sur le lave-linge utilisé. La fenêtre qui s'ouvre affiche le code Quick Response du lave-linge.",
 		"back_to_top": "Haut de la page",
 		"explore_more": "EN SAVOIR PLUS",
-		"manage_devices": "A présent, vous pouvez gérer vos appareils et autres périphériques depuis la plateforme >",
+		"manage_devices": "Gérez vos périphériques sur IoT Platform",
+		"iotp_description_part1":"Utilisez le tableau de bord Watson IoT Platform pour afficher et gérer vos périphériques et informations utilisateur. Pour afficher votre tableau de bord IoT Platform, sélectionnez",
+		"iotp_description_part2":"depuis votre tableau de bord Bluemis, puis cliquez sur",
+		"iot_platform":"IoT Platform",
+		"iot_launch":"Lancer.",
+		"docs":"Docs",
+		"bluemix_dashboard":"Tableau de bord Bluemix",
+		"devices_node_red":"Contrôlez vos périphériques à l'aide de Node-RED",
+		"node_red_description":"Créez vos propres flux Node-RED personnalisés ou utilisez les modèles IoT for Electronics pour envoyer des notifications, valider les enregistrements d'appareils, envoyer des commandes à vos appareils, et bien plus.",
+		"node_red_sample":"Modèles Node-RED IoT4E",
 		"device_deleted": "Opération réussie ! Le périphérique {0} a été supprimé.",
 		"timeout_list": "La demande pour répertorier les périphériques a dépassé le délai d'attente. La simulation va redémarrer. Actualisez la page et réessayez.",
 		"timeout_create": "La demande de création de périphérique a dépassé le délai d'attente. La simulation va redémarrer. Actualisez la page et réessayez.",
@@ -80,7 +89,7 @@
 		"water_pressure_unit": "psi",
 		"appliance_code": "Code de l'appareil",
 		"qr_text": "Lorsque vous essayez l'application de consommateur, vous pouvez scanner le code Quick Response pour afficher le statut de ce lave-linge et d'autres événements sur votre téléphone.",
-		"delete_prompt": "Cette action ne peut pas être annulée. Voulez-vous continuer ?",
+		"delete_prompt": "Cette action ne peut pas être annulée. Voulez-vous continuer ?",
 		"cancel": "Annuler",
 		"delete": "Supprimer",
 		"failure": "Echec",
@@ -123,7 +132,7 @@
 		"field_required": "Cette zone est obligatoire.",
 		"country_region": "Pays ou région",
 		"select_one": "Effectuez une sélection",
-		"first_name": "Prénom ",
+		"first_name": "Prénom",
 		"last_name": "Nom",
 		"email": "Adresse électronique professionnelle",
 		"valid_email": "Merci d'entrer une adresse électronique valide",
@@ -138,4 +147,3 @@
 		"error": "Une erreur s'est produite lors de l'envoi de votre message."
 	}
 }
-

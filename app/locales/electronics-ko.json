@@ -50,7 +50,16 @@
 		"scan_p2": "모바일 앱에서 세탁기를 플랫폼에 등록하기 위해 다른 QR 코드를 스캔하도록 요청됩니다. 그러면 이 화면의 세탁기 추가 섹션으로 이동하여 사용 중인 세탁기를 클릭하십시오. 창이 열리고 세탁기에 대한 QR 코드가 표시됩니다. ",
 		"back_to_top": "맨 위로 돌아가기",
 		"explore_more": "자세히 살펴보기",
-		"manage_devices": "이제 플랫폼에서 어플라이언스와 기타 디바이스를 관리할 수 있습니다. >",
+		"manage_devices": "IoT 플랫폼에서 디바이스 관리",
+		"iotp_description_part1":"Watson IoT 플랫폼 대시보드를 사용해 디바이스와 사용자 정보를 보고 관리할 수 있습니다. IoT 플랫폼 대시보드를 보려면",
+		"iotp_description_part2":"Bluemix 대시보드에서 선택한 후 다음을 클릭하십시오.",
+		"iot_platform":"IoT Platform",
+		"iot_launch":"시작",
+		"docs":"문서",
+		"bluemix_dashboard":"Bluemix 대시보드",
+		"devices_node_red":"Node-RED를 사용하여 디바이스 제어",
+		"node_red_description":"사용자 고유의 사용자 정의 Node-RED 플로우를 작성하거나 IoT for Electronics 샘플을 사용해 알림 전송, 어플라이언스 등록의 유효성 검증, 어플라이언스에 명령 전송 등을 수행할 수 있습니다.",
+		"node_red_sample":"IoT4E Node-RED 샘플",
 		"device_deleted": "축하합니다! {0} 디바이스가 삭제되었습니다. ",
 		"timeout_list": "디바이스 목록화 요청의 제한시간이 초과되어 시뮬레이션을 다시 시작합니다. 페이지를 새로 고치고 다시 시도하십시오.",
 		"timeout_create": "디바이스 작성 요청의 제한시간이 초과되어 시뮬레이션을 다시 시작합니다. 페이지를 새로 고치고 다시 시도하십시오.",
@@ -138,4 +147,3 @@
 		"error": "메시지를 보내는 중에 오류가 발생했습니다."
 	}
 }
-

@@ -50,7 +50,16 @@
 		"scan_p2": "如果要在该平台的移动应用上注册洗衣机，您需要扫描另一个 QR 代码。然后，您将转至该屏幕上的“添加洗衣机”部分，并单击要使用的洗衣机。此时会打开一个窗口，其中显示该洗衣机的 QR 代码。",
 		"back_to_top": "返回到顶部",
 		"explore_more": "浏览更多内容",
-		"manage_devices": "您现在可以从该平台上管理自己的家电和其他设备 >",
+		"manage_devices": "在 IoT Platform 上管理您的设备",
+		"iotp_description_part1":"使用 Watson IoT Platform 仪表板来查看和管理您的设备和用户信息。要查看 IoT Platform 仪表板，请从 ",
+		"iotp_description_part2":"Bluemix 仪表板中进行选择，然后单击",
+		"iot_platform":"IoT Platform",
+		"iot_launch":"启动。",
+		"docs":"文档",
+		"bluemix_dashboard":"Bluemix 仪表板",
+		"devices_node_red":"使用 Node-RED 控制您的设备",
+		"node_red_description":"创建您自己的定制 Node-RED 流程，或者使用 IoT for Electronics 样本来发送通知、验证设备注册、向设备发送命令等。",
+		"node_red_sample":"IoT4E Node-RED 样本",
 		"device_deleted": "成功！已成功删除设备 {0}。",
 		"timeout_list": "请求列出设备已超时，将重新启动模拟。请刷新页面并重试。",
 		"timeout_create": "请求创建设备已超时，将重新启动模拟。请刷新页面并重试。",
@@ -138,4 +147,3 @@
 		"error": "尝试发送您的消息时发生错误。"
 	}
 }
-

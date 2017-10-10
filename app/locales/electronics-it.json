@@ -25,7 +25,7 @@
 		"simulate_appliance_p2": "Utilizzare l'app basata su web in questa offerta dello starter per monitorare la trasmissione diretta dei dati dai propri elettrodomestici. Gli elettrodomestici sono connessi automaticamente a IBM Watson IoT Platform.  Sulla piattaforma, è possibile visualizzare i propri elettrodomestici ed i dati e messaggi da essi inviati.",
 		"learn_more": "Ulteriori informazioni",
 		"consumer_app_subtitle": "Esplorazione dell'esperienza del consumatore",
-		"consumer_app_p1": "L'app mobile consente al consumatore di controllare e monitorare una nuova lavatrice utilizzando un dispositivo mobile.",
+		"consumer_app_p1": "L'app mobile consente al consumatore di controllare e monitorare una nuova lavatrice utilizzando un dispositivo mobile. ",
 		"consumer_app_p2": "Scaricare l'app mobile su un telefono cellulare per verificare in che modo i consumatori possono inviare comandi alle proprie lavatrici attraverso la piattaforma.  ",
 		"consumer_app_p3": "È possibile utilizzare la lavatrice simulata per riprodurre eventi di malfunzionamento della lavatrice e verificare i risultati sull'app mobile del consumatore.",
 	  "consumer_app_p4": "I produttori dell'elettrodomestico possono offrire questi tipi di app e servizi per attirare e mantenere i clienti. Possono anche utilizzare i dati raccolti per migliorare le funzioni dei loro prodotti e offrire nuovi servizi.",
@@ -50,7 +50,16 @@
 		"scan_p2": "Verrà richiesto di eseguire la scansione di un differente codice QR per registrare una lavatrice sull'app mobile con la piattaforma. Poi l'utente dovrà passare alla sezione Aggiungi lavatrice su questo schermo e fare clic sulla lavatrice utilizzata. La finestra che si apre visualizza il codice QR per la lavatrice.",
 		"back_to_top": "Ritornare all'inizio",
 		"explore_more": "ESPLORA ALTRO",
-		"manage_devices": "Ora è possibile gestire i propri elettrodomestici ed altri dispositivi dalla piattaforma >",
+		"manage_devices": "Gestisci i dispositivi su IoT Platform",
+		"iotp_description_part1":"Utilizzare il dashboard Watson IoT Platform per visualizzare e gestire le informazioni relative ai dispositivi ed agli utenti. Per visualizzare il dashboard IoT Platform, selezionare",
+		"iotp_description_part2":"dal dashboard Bluemix, quindi fare clic su",
+		"iot_platform":"IoT Platform",
+		"iot_launch":"Avvia.",
+		"docs":"Doc",
+		"bluemix_dashboard":"Dashboard Bluemix",
+		"devices_node_red":"Controllare i dispositivi utilizzando Node-RED",
+		"node_red_description":"Creare i flussi Node-RED oppure utilizzare gli esempi IoT for Electronics per inviare notifiche, convalidare la registrazione dell'elettrodomestico, inviare comandi all'elettrodomestico ed altro.",
+		"node_red_sample":"Esempi IoT4E Node-RED",
 		"device_deleted": "Esito positivo. Il dispositivo {0} è stato eliminato correttamente.",
 		"timeout_list": "La richiesta di elencare i dispositivi è scaduta, la simulazione verrà riavviata. Aggiornare la pagina e riprovare.",
 		"timeout_create": "La richiesta di creare un dispositivo è scaduta, la simulazione verrà riavviata. Aggiornare la pagina e riprovare.",
@@ -138,4 +147,3 @@
 		"error": "Si è verificato un errore durante il tentativo di inviare il messaggio."
 	}
 }
-

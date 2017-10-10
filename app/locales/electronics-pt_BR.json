@@ -39,7 +39,7 @@
 		"mobile_app_heading": "Introdução do aplicativo móvel em um telefone celular",
 		"mobile_app_subheading": "Instruções rápidas",
 		"download_app": "Faça download do app",
-		"download_app_p1": "Faça download e instale o aplicativo na Apple App Store (telefones iOS) ou na Google Play store (telefones Android).  Procure \"ibm iot\" para localizar o aplicativo.",
+		"download_app_p1": "Faça download e instale o aplicativo na Apple App Store (telefones iOS) ou na Google Play store (telefones Android). Procure \"ibm iot\" para localizar o aplicativo.",
 		"connect_app": "Conecte o app",
 		"connect_app_p1": "Inicie o app em seu telefone.",
 		"connect_app_p2": "Verifique o código QR de conexão abaixo quando solicitado a conectar ao ambiente do IoT for Electronics",
@@ -50,11 +50,20 @@
 		"scan_p2": "Será solicitado que você verifique um código QR diferente para registrar uma lavadora em seu app móvel com a plataforma. Em seguida, vá para a seção Incluir lavadora nessa tela e clique na lavadora que está sendo usada. A janela que é aberta exibe o código QR para a lavadora.",
 		"back_to_top": "Voltar ao topo",
 		"explore_more": "EXPLORAR MAIS",
-		"manage_devices": "Agora, é possível gerenciar seus appliances e outros dispositivos da plataforma >",
+		"manage_devices": "Gerenciar seus dispositivos no IoT Platform",
+		"iotp_description_part1":"Use o painel do Watson IoT Platform para visualizar e gerenciar suas informações sobre o usuário e o dispositivo. Para visualizar o painel do IoT Platform, selecione",
+		"iotp_description_part2":"do seu painel do Bluemix e, em seguida, clique em",
+		"iot_platform":"IoT Platform",
+		"iot_launch":"Iniciar.",
+		"docs":"Documentos",
+		"bluemix_dashboard":"Painel do Bluemix",
+		"devices_node_red":"Controle seus dispositivos usando Node-RED",
+		"node_red_description":"Crie seus próprios fluxos do Node-RED customizados ou use as amostras do IoT for Electronics para enviar notificações, validar registro de dispositivo, enviar comandos aos seus dispositivos e mais.",
+		"node_red_sample":"Amostras do IoT4E Node-RED",
 		"device_deleted": "Sucesso! O dispositivo {0} foi excluído com êxito.",
 		"timeout_list": "A solicitação para listar os dispositivos atingiu o tempo limite, a simulação será reiniciada. Reinicie a página e tente novamente.",
 		"timeout_create": "A solicitação para criar um dispositivo atingiu o tempo limite, a simulação será reiniciada. Reinicie a página e tente novamente.",
-		"contact_electronics":"Contato da IoT para Eletrônicos "
+		"contact_electronics":"Contato da IoT para Eletrônicos"
 	},
 	"appliance_page": {
 		"page_title": "IoT for Electronics",
@@ -138,4 +147,3 @@
 		"error": "Ocorreu um erro ao tentar enviar sua mensagem."
 	}
 }
-

@@ -50,7 +50,16 @@
 		"scan_p2": "系統將要求您掃描其他 QR 碼，向平台登錄行動式應用程式上的洗衣機。隨後，將移至此畫面上的「新增洗衣機」區段，然後按一下所使用的洗衣機。開啟的視窗會顯示洗衣機的 QR 碼。",
 		"back_to_top": "回到頂端",
 		"explore_more": "進一步探索",
-		"manage_devices": "現在，可以從平台管理家用電器及其他裝置 >",
+		"manage_devices": "在 IoT Platform 上管理裝置",
+		"iotp_description_part1":"使用 Watson IoT Platform 儀表板來檢視及管理裝置與使用者資訊。若要檢視 IoT Platform 儀表板，請從 Bluemix 儀表板中選取",
+		"iotp_description_part2":"，然後按一下",
+		"iot_platform":"IoT Platform",
+		"iot_launch":"「啟動」。",
+		"docs":"Docs",
+		"bluemix_dashboard":"Bluemix 儀表板",
+		"devices_node_red":"使用 Node-RED 來控制裝置",
+		"node_red_description":"建立您自己的自訂 Node-RED 流程，或使用 IoT for Electronics 範例來傳送通知、驗證家用電器登錄、將指令傳送至家用電器等。",
+		"node_red_sample":"IoT4E Node-RED 範例",
 		"device_deleted": "成功！裝置 {0} 已順利地刪除。",
 		"timeout_list": "要求列出裝置時發生逾時，將重新啟動模擬作業。請重新整理頁面，然後再試一次。",
 		"timeout_create": "要求建立裝置時發生逾時，將重新啟動模擬作業。請重新整理頁面，然後再試一次。",
@@ -138,4 +147,3 @@
 		"error": "嘗試傳送訊息時發生錯誤。"
 	}
 }
-

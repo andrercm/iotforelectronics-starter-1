@@ -50,7 +50,16 @@
 		"scan_p2": "Se le solicitará que explore un código QR (Respuesta rápida) diferente para registrar una lavadora en la app para móvil en la plataforma. A continuación, irá a la sección Añadir lavadora en esta pantalla y pulsará la lavadora que se está utilizando. La ventana que se abre muestra el código QR (Respuesta rápida) para la lavadora.",
 		"back_to_top": "Volver al principio",
 		"explore_more": "EXPLORAR MÁS",
-		"manage_devices": "Ahora puede gestionar sus aparatos y otros dispositivos desde la plataforma >",
+		"manage_devices": "Gestionar sus dispositivos en IoT Platform",
+		"iotp_description_part1":"Utilice el panel de control de Watson IoT Platform para ver y gestionar la información de usuarios y el dispositivo. Para ver el panel de control de IoT Platform, seleccione",
+		"iotp_description_part2":"en el panel de control de Bluemix y pulse ",
+		"iot_platform":"IoT Platform",
+		"iot_launch":"Iniciar.",
+		"docs":"Docs",
+		"bluemix_dashboard":"Panel de control de Bluemix",
+		"devices_node_red":"Controlar sus dispositivos utilizando Node-RED",
+		"node_red_description":"Cree sus propios nodos personalizados Node-RED o utilice los ejemplos de IoT for Electronics para enviar notificaciones, validar el registro de dispositivo, enviar mandatos a los dispositivos, etc. ",
+		"node_red_sample":"Ejemplos de IoT4E Node-RED",
 		"device_deleted": "Satisfactorio. El dispositivo {0} se ha suprimido correctamente.",
 		"timeout_list": "La solicitud para listar los dispositivos ha caducado, la simulación se reiniciará. Renueve la página e inténtelo de nuevo.",
 		"timeout_create": "La solicitud para crear un dispositivo ha caducado, la simulación se reiniciará. Renueve la página e inténtelo de nuevo.",
@@ -138,4 +147,3 @@
 		"error": "Se ha producido un error al intentar enviar el mensaje. "
 	}
 }
-
